@@ -1,0 +1,115 @@
+\begin{table}[H]
+\centering
+\small
+\caption{Customer outcomes on the conservative-feasible subset; the clock approximation is restricted further when needed. Counts make this additional conditioning explicit.}
+\label{tab:customers}
+\begin{tabular}{lrll}
+\toprule
+Configuration & $k$ & On time (\%) & Expected late\\
+\midrule
+Nominal & 46 & 83.6 [82.5, 84.6] & 10.00 [7.95, 12.20]\\
+Conservative speed & 46 & 93.9 [93.4, 94.4] & 3.47 [2.84, 4.14]\\
+Slack-aware & 46 & 90.9 [90.0, 91.7] & 5.46 [4.38, 6.65]\\
+Fleet-matched & 46 & 83.0 [81.9, 84.0] & 10.47 [8.29, 12.87]\\
+Original procedure & 46 & 96.6 [95.1, 97.9] & 2.20 [1.26, 3.31]\\
+Screened conservative & 46 & 97.1 [96.3, 97.8] & 2.20 [1.47, 2.99]\\
+Capped procedure & 46 & 97.7 [96.4, 98.9] & 0.91 [0.56, 1.32]\\
+Clock approximation & 44 & 88.0 [87.2, 88.7] & 6.73 [5.39, 8.23]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Absolute planned resource means on the same subset as Table~\ref{tab:customers}: distance in km, scheduled duration in minutes, and vehicles. These are not optimality claims.}
+\label{tab:fullcost}
+\begin{tabular}{lrlll}
+\toprule
+Configuration & $k$ & Distance & Duration & Fleet\\
+\midrule
+Nominal & 46 & 1180.7 [989.9, 1381.0] & 2906.5 [2379.9, 3481.3] & 7.67 [6.46, 8.98]\\
+Conservative speed & 46 & 1216.2 [1021.5, 1422.0] & 3352.5 [2738.5, 4011.0] & 8.30 [6.93, 9.76]\\
+Slack-aware & 46 & 1196.3 [1003.0, 1404.0] & 2902.0 [2380.3, 3466.2] & 7.46 [6.22, 8.78]\\
+Fleet-matched & 46 & 1174.2 [989.2, 1372.8] & 2833.6 [2330.6, 3382.6] & 7.46 [6.22, 8.76]\\
+Original procedure & 46 & 1247.9 [1049.3, 1453.0] & 3171.2 [2620.9, 3777.3] & 8.17 [6.89, 9.57]\\
+Screened conservative & 46 & 1252.8 [1056.4, 1461.2] & 3494.5 [2874.0, 4161.0] & 8.76 [7.35, 10.28]\\
+Capped procedure & 46 & 1283.5 [1076.5, 1506.8] & 3317.3 [2709.4, 3964.1] & 8.52 [7.13, 10.04]\\
+Clock approximation & 44 & 1137.2 [955.5, 1330.9] & 2868.3 [2335.0, 3456.8] & 7.64 [6.32, 9.11]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Service-threshold sensitivity on the common 46; columns use the same plans and fresh primary bank. At $n=20/50/100/200$, allowed-late counts are $2/5/10/20$ at $\kappa=.90$, $1/2/5/10$ at $.95$, $0/1/2/4$ at $.98$, and zero at 1.00.}
+\label{tab:kappa}
+\begin{tabular}{rlllll}
+\toprule
+$\kappa$ & N & C & S & P & SC\\
+\midrule
+0.90 & 38.8 [36.5, 41.2] & 80.6 [78.8, 82.4] & 68.8 [65.9, 71.7] & 89.2 [84.2, 93.7] & 91.2 [88.5, 93.8]\\
+0.95 & 21.9 [20.3, 23.5] & 65.6 [63.1, 68.0] & 52.8 [49.9, 55.8] & 83.1 [76.3, 89.4] & 82.8 [77.9, 87.6]\\
+0.98 & 11.2 [10.3, 12.2] & 48.2 [45.6, 50.8] & 36.4 [33.8, 39.0] & 75.9 [68.2, 83.3] & 73.2 [67.1, 79.3]\\
+1.00 & 6.4 [5.4, 7.4] & 34.4 [31.8, 37.0] & 26.1 [23.8, 28.5] & 68.2 [59.6, 76.2] & 62.4 [53.8, 70.9]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Instance-level failure audit}\label{sec:failure-audit}
+
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Every original screening failure. Best buffer and lower confidence bound (LCB) refer to a returned candidate; first no-plan is an observed solver outcome; first proof is the earliest grid point with a reachability certificate. Unresolved indicates at least one no-plan result without that certificate. A dash means no certificate through 60 minutes.}
+\label{tab:failure}
+\begin{tabular}{rrrrrrc}
+\toprule
+$n$ & Seed & Best $\beta$ & LCB (\%) & No-plan $\beta$ & Proof $\beta$ & Unresolved\\
+\midrule
+20 & 7200 & 45 & 90.7 & 50 & -- & Yes\\
+20 & 7201 & 35 & 93.5 & 40 & -- & Yes\\
+20 & 7210 & 35 & 90.8 & 45 & -- & Yes\\
+20 & 7212 & 5 & 37.9 & 10 & -- & Yes\\
+20 & 7216 & 55 & 90.7 & 60 & 60 & No\\
+20 & 7218 & 10 & 65.9 & 15 & 50 & Yes\\
+50 & 7501 & 25 & 87.5 & 30 & 35 & Yes\\
+50 & 7503 & 10 & 64.1 & 15 & 15 & No\\
+50 & 7504 & 35 & 91.3 & 40 & 40 & No\\
+50 & 7506 & 0 & 44.7 & 5 & 5 & No\\
+50 & 7508 & 35 & 85.9 & 40 & 40 & No\\
+50 & 7511 & 35 & 88.5 & 40 & 50 & Yes\\
+50 & 7513 & 40 & 93.6 & 45 & 60 & Yes\\
+100 & 8003 & 20 & 85.3 & 25 & 25 & No\\
+100 & 8004 & 15 & 81.5 & 20 & 20 & No\\
+100 & 8007 & 5 & 73.6 & 15 & 15 & No\\
+100 & 8008 & 25 & 91.7 & 35 & 35 & No\\
+200 & 9004 & 10 & 71.2 & 15 & 15 & No\\
+200 & 9005 & 20 & 88.9 & 25 & 25 & No\\
+200 & 9006 & 25 & 94.9 & 40 & 40 & No\\
+200 & 9007 & 20 & 86.4 & 25 & 25 & No\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\small
+\caption{Retained equal-budget deterministic-core benchmark: OR-Tools excess distance relative to PyVRP/HGS (\%). Counts are valid one-second/five-second pairs. There was one missing pair at the one-second budget.}
+\label{tab:hgs}
+\begin{tabular}{rrll}
+\toprule
+$n$ & Valid pairs (1s/5s) & One second & Five seconds\\
+\midrule
+20 & 19/20 & 1.0 [0.3, 1.8] & 0.0 [0.0, 0.0]\\
+50 & 15/15 & 4.8 [3.3, 6.2] & 3.0 [1.9, 4.2]\\
+100 & 10/10 & 8.5 [5.9, 11.1] & 6.3 [4.7, 7.9]\\
+200 & 8/8 & 32.9 [29.4, 36.2] & 11.1 [9.3, 13.5]\\
+\bottomrule
+\end{tabular}
+\end{table}

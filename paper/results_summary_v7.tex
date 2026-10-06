@@ -1,0 +1,172 @@
+\subsection{Complete procedures on matched instances}
+
+Table~\ref{tab:matched} puts every original configuration on the same conservative-feasible subset. The paired contrasts are computed from individual instance differences. Their intervals therefore quantify the comparison directly; they are not obtained by subtracting endpoints of separate confidence intervals.
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Validated service-event probability (\%) on the same 46 instances: every entry in a row has the displayed denominator. Entries are mean [95\% instance-bootstrap interval]. N, C, S, F and P denote nominal, conservative-speed, slack-aware, fleet-matched and original procedure, respectively.}
+\label{tab:matched}
+\begin{tabular}{rrlllll}
+\toprule
+$n$ & $k$ & N & C & S & F & P\\
+\midrule
+20 & 18 & 21.5 [18.8, 24.4] & 64.2 [61.1, 67.4] & 53.3 [47.6, 59.4] & 21.7 [18.9, 24.8] & 85.7 [74.4, 95.0]\\
+50 & 13 & 17.7 [16.1, 19.6] & 59.0 [54.6, 63.1] & 45.8 [43.1, 48.4] & 16.9 [14.8, 18.9] & 76.8 [62.3, 89.7]\\
+100 & 8 & 25.4 [23.5, 27.1] & 71.6 [69.1, 74.0] & 55.3 [51.5, 59.3] & 26.2 [23.6, 29.0] & 87.6 [74.2, 97.5]\\
+200 & 7 & 26.7 [24.9, 28.8] & 74.6 [72.2, 77.0] & 61.7 [58.3, 66.8] & 27.7 [25.5, 30.6] & 82.9 [69.3, 94.3]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Paired probability differences (percentage points) on exactly the same subsets as Table~\ref{tab:matched}. SC denotes screened conservative-speed with its prespecified fallback.}
+\label{tab:paired}
+\begin{tabular}{rlll}
+\toprule
+$n$ & S minus C & P minus C & SC minus C\\
+\midrule
+20 & -11.0 [-16.1, -6.0] & 21.4 [9.6, 31.3] & 28.2 [21.4, 34.3]\\
+50 & -13.1 [-17.4, -8.9] & 17.9 [2.8, 32.0] & 11.8 [2.7, 22.2]\\
+100 & -16.2 [-20.6, -11.7] & 16.0 [4.8, 24.8] & 11.2 [2.8, 19.4]\\
+200 & -12.9 [-18.5, -5.7] & 8.3 [-5.1, 20.0] & 5.7 [0.0, 12.9]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+In the paired contrasts of Table~\ref{tab:paired}, the complete original procedure improves on conservative-speed planning by 8.3--21.4 percentage points across sizes. The unscreened slack-aware objective does not show this advantage. At $n=200$ the interval includes zero, so the positive mean at that size is not conclusive.
+
+\subsection{Resources on the common subset}
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Paired original-procedure changes relative to conservative speed on the common subset. Distance and duration are mean percentage changes; fleet is an absolute difference. Scheduled duration is each planner's own $F_3$. Simulated duration uses the same realized traffic model and planned departures for both configurations.}
+\label{tab:cost}
+\begin{tabular}{rllll}
+\toprule
+$n$ & Distance & Scheduled time & Simulated time & Fleet\\
+\midrule
+20 & 4.9 [2.4, 7.3] & 0.3 [-3.8, 4.8] & 8.5 [4.4, 12.9] & 0.22 [0.00, 0.44]\\
+50 & 2.3 [-0.6, 5.2] & -7.5 [-12.2, -2.7] & -2.0 [-7.0, 2.8] & -0.46 [-1.00, 0.00]\\
+100 & 2.0 [-1.3, 5.1] & -3.0 [-9.4, 2.5] & 2.2 [-4.3, 7.6] & 0.12 [-0.38, 0.62]\\
+200 & 2.4 [-1.4, 5.7] & -7.7 [-15.2, -1.0] & -2.8 [-10.6, 4.1] & -0.71 [-2.57, 1.00]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+Scheduled driver duration is not identical to realized labour time: the conservative planner budgets padded arc times, while the evaluator may traverse those arcs faster. Table~\ref{tab:cost} therefore includes both measures. Absolute distance premiums also carry solver-quality uncertainty: the five-second deterministic OR-Tools benchmark remains about 11\% longer than HGS at $n=200$.
+
+The matched data do not support uniform resource dominance: at $n=20$ the original procedure has slightly greater scheduled time and more vehicles; at $n=100$ it also uses slightly more vehicles. The simulated-time interval excludes zero only for the increase at $n=20$. The service gain is therefore a trade-off against some operating resources.
+
+\subsection{Screening a replaceable generator and capping contractions}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{All-instance procedure outcomes. Selected counts admission-bank lower bounds reaching 0.95; retained counts those selections whose fresh validation lower bound also reaches 0.95. Probability includes every fallback, as well as selected plans.}
+\label{tab:screen}
+\begin{tabular}{rllll}
+\toprule
+$n$ & Procedure & Selected & Retained & Probability (\%)\\
+\midrule
+20 & Original procedure & 14/20 & 14/14 & 81.6 [70.2, 91.9]\\
+20 & Screened conservative & 15/20 & 15/15 & 87.7 [79.0, 94.7]\\
+20 & Capped procedure & 14/20 & 14/14 & 81.6 [70.3, 92.0]\\
+50 & Original procedure & 8/15 & 8/8 & 72.7 [59.2, 86.4]\\
+50 & Screened conservative & 4/15 & 4/4 & 67.5 [58.2, 77.3]\\
+50 & Capped procedure & 10/15 & 10/10 & 80.1 [66.9, 90.8]\\
+100 & Original procedure & 6/10 & 5/6 & 81.3 [68.8, 93.3]\\
+100 & Screened conservative & 4/10 & 4/4 & 77.5 [67.2, 88.2]\\
+100 & Capped procedure & 10/10 & 9/10 & 97.5 [96.7, 98.2]\\
+200 & Original procedure & 4/8 & 3/4 & 80.6 [68.7, 92.3]\\
+200 & Screened conservative & 2/8 & 2/2 & 78.3 [71.0, 86.5]\\
+200 & Capped procedure & 8/8 & 7/8 & 97.6 [96.9, 98.2]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+In Table~\ref{tab:screen}, the screened conservative generator selects on 25/53 instances; 25 selections retain the target lower bound. Its all-instance paired difference from the original procedure is -0.3 [-5.5, 5.0] points. The capped variant selects on 42/53, with 40 retained; its corresponding difference is 7.7 [3.5, 12.5] points. Capping removes only an individual reachability obstruction; capacity, sequencing and finite-search limitations remain.
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Operational price of the capped variant relative to the original procedure on all 53 instances. Percentage changes are paired per instance; fleet changes are absolute. Capping can permit different route and resource choices, so its reliability gain is not attributed to schedule structure alone.}
+\label{tab:cap-cost}
+\begin{tabular}{rllll}
+\toprule
+$n$ & Distance & Scheduled time & Simulated time & Fleet\\
+\midrule
+20 & 0.0 [0.0, 0.0] & 0.0 [0.0, 0.0] & 0.0 [0.0, 0.0] & 0.00 [0.00, 0.00]\\
+50 & 2.2 [0.0, 5.4] & 4.6 [0.0, 11.4] & 4.5 [0.0, 11.3] & 0.33 [0.00, 0.87]\\
+100 & 4.9 [1.1, 8.9] & 6.8 [1.7, 12.1] & 6.6 [1.7, 11.8] & 0.30 [-0.20, 0.80]\\
+200 & 6.3 [1.6, 10.9] & 10.5 [3.1, 18.0] & 10.0 [2.9, 17.1] & 1.88 [0.50, 3.38]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+Pooled over all instances (Table~\ref{tab:cap-cost}), the capped variant costs 2.5\% more distance and 0.43 additional vehicles than the original procedure. At $n=200$, the additional fleet use is material and should not be obscured by the earlier fleet-matched ablation of the uncontracted objective.
+
+\subsection{Clock-aware approximation}
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Clock-aware approximation: identical matched subsets within each row, restricted to an exact deterministic schedule being found by the approximation. Probabilities and paired changes are percentages and percentage points, respectively. The two matrix solves share a five-second search allowance.}
+\label{tab:clock}
+\begin{tabular}{rrllll}
+\toprule
+$n$ & Found & Nominal & Clock-aware & Original P & Clock minus N\\
+\midrule
+20 & 19/20 & 21.2 [18.6, 24.0] & 39.5 [37.9, 41.3] & 84.1 [73.2, 93.6] & 18.4 [15.1, 21.4]\\
+50 & 14/15 & 17.5 [16.0, 19.3] & 36.5 [35.4, 37.7] & 74.8 [60.8, 87.1] & 19.0 [17.2, 20.9]\\
+100 & 10/10 & 25.4 [23.9, 26.8] & 44.5 [43.0, 46.0] & 81.3 [68.8, 93.2] & 19.1 [17.6, 20.8]\\
+200 & 6/8 & 26.6 [24.5, 28.9] & 43.7 [42.3, 45.3] & 81.7 [68.7, 93.6] & 17.2 [15.7, 18.7]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+The clock-aware rows test a practical departure-time approximation. Exact deterministic retiming verifies each reported route, so its success at $\sigma=0$ is an acceptance condition and says nothing about stochastic robustness. Conservative-speed planning likewise guarantees deterministic on-time service within the planned horizon by upper-bounding every arc time. Both 100\% rows hold by construction.
+
+In Table~\ref{tab:clock}, the approximation improves on nominal distance by 17.2--19.1 points on its feasible subsets, but remains below the original procedure. Its latest-feasible-departure rule and two-pass search are part of this result; the comparison does not establish what an optimal time-dependent planner could achieve.
+
+\subsection{Matched disturbance sensitivity}
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Fixed-plan sensitivity on the common 46 instances. Each cell uses 1,000 common scenarios from a bank separate from primary validation; plans are not re-screened or reoptimized for each parameter setting. C, P and SC are conservative speed, original procedure and screened conservative.}
+\label{tab:sensitivity}
+\begin{tabular}{rrllll}
+\toprule
+$\sigma$ & $\rho$ & C (\%) & P (\%) & SC (\%) & P minus C (points)\\
+\midrule
+0.10 & 0.0 & 91.8 [88.2, 95.0] & 88.8 [81.3, 95.3] & 97.1 [94.3, 99.2] & -3.1 [-10.7, 3.9]\\
+0.10 & 0.5 & 84.6 [81.5, 87.4] & 87.8 [81.5, 93.5] & 93.2 [90.1, 95.9] & 3.2 [-3.3, 9.3]\\
+0.10 & 0.9 & 81.2 [78.3, 84.0] & 87.6 [81.4, 93.3] & 91.5 [88.2, 94.5] & 6.4 [0.0, 12.5]\\
+0.20 & 0.0 & 69.8 [64.1, 75.5] & 81.0 [71.4, 89.7] & 86.7 [81.0, 92.0] & 11.2 [1.4, 20.6]\\
+0.20 & 0.5 & 65.6 [63.2, 67.9] & 82.8 [75.9, 89.2] & 82.9 [78.0, 87.5] & 17.2 [10.3, 23.7]\\
+0.20 & 0.9 & 67.2 [65.3, 68.9] & 82.5 [76.8, 87.9] & 82.1 [77.9, 86.2] & 15.4 [9.5, 20.9]\\
+0.30 & 0.0 & 41.7 [37.4, 46.0] & 72.1 [61.1, 82.4] & 69.4 [60.6, 77.8] & 30.5 [19.8, 40.5]\\
+0.30 & 0.5 & 54.4 [52.5, 56.3] & 74.0 [67.8, 79.8] & 72.1 [67.1, 77.0] & 19.6 [13.6, 25.3]\\
+0.30 & 0.9 & 60.6 [59.3, 61.9] & 75.6 [70.7, 80.1] & 74.4 [70.6, 78.2] & 15.0 [10.0, 19.6]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+The mechanism comparison of interest is the paired P-minus-C column of Table~\ref{tab:sensitivity}, which Fig.~\ref{fig:reliability} also plots across the disturbance grid. Changes in its sign or magnitude describe fixed-plan performance under each setting. On its own, this column cannot separate screening from the contracted candidate family, and the nine cells share instances and common random numbers.
+
+For independent disturbances, increasing $\sigma$ from 0.10 to 0.30 changes the paired contrast from -3.1 [-10.7, 3.9] to 30.5 [19.8, 40.5] points. This supports a growing advantage of the complete screened family in that regime. At $\rho=0.9$ the increase is not monotonic, so the data do not support a universal monotonic relationship between noise scale and screening value.
+
+\subsection{Diagnosis of screening failures}
+
+Of the 21 original screening failures, 17 reach a buffer with an explicit customer-reachability contradiction and 4 have no such certificate through 60 minutes. 8 instances also contain a no-plan outcome before any certificate. Those outcomes remain unresolved: failure of a necessary reachability test proves infeasibility, but passing it does not establish a feasible multi-customer routing. The per-instance audit appears in Appendix~\ref{sec:failure-audit}.
