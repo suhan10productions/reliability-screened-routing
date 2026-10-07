@@ -1,0 +1,28 @@
+\subsection{Solomon instances}\label{sec:solomon}
+
+The unchanged pipeline was run on eight 100-customer Solomon instances with the time-dependent profile and disturbance model of the study overlaid (Section~\ref{sec:confdesign}). Within its five-second budget, OR-Tools returned a nominal plan for five of the eight instances (Table~\ref{tab:solomon}). PyVRP/HGS finds a feasible plan for the other three, R101, R102 and RC105, within 40 seconds, so these outcomes are search limits of the generator and not infeasibility of the mapped instances. The failure policy records them as missing plans, and every dependent configuration is recorded as not attempted.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Solomon instances: validated service-event probability (\%). A dash marks a configuration with no plan. \emph{Plan} states whether OR-Tools returned a nominal plan; \emph{Admitted} states whether screening admitted a plan for the original procedure, which otherwise returns the slack-aware fallback.}
+\label{tab:solomon}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Instance & Plan & Nominal & Conservative & Slack-aware & Original & Capped & Admitted\\
+\midrule
+R101 & no & -- & -- & -- & -- & -- & no\\
+R102 & no & -- & -- & -- & -- & -- & no\\
+R103 & yes & 14.5 & -- & 45.1 & 45.1 & 45.1 & no\\
+R112 & yes & 29.4 & 78.0 & 53.7 & 99.4 & 99.4 & yes\\
+RC104 & yes & 22.8 & 82.0 & 68.9 & 97.7 & 97.7 & yes\\
+RC105 & no & -- & -- & -- & -- & -- & no\\
+RC106 & yes & 19.9 & 65.0 & 42.1 & 42.1 & 42.1 & no\\
+RC108 & yes & 28.3 & 80.7 & 51.5 & 98.8 & 98.8 & yes\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On the five instances with a plan, screening admitted a plan for three (R112, RC104 and RC108). Their validated service probability was 97.7 to 99.4\%, against 78.0 to 82.0\% for conservative speed and 22.8 to 29.4\% for nominal distance. On the other two, the procedure returned the slack-aware fallback: R103 (45.1\%; conservative speed returned no plan there, although HGS finds a feasible plan for its matrix) and RC106 (42.1\%), where it fell 22.9 points below conservative speed (65.0\%). Capping changed no result on any instance.
+
+The eight instances are all the R1 and RC1 files available in the source repository. They give no basis for an interval estimate, and no Solomon comparison was prespecified. The admitted plans reached 97.7 to 99.4\% and the fallback plans 42.1 to 45.1\%, a split similar to that on the synthetic instances. The generator, however, returned no plan on a substantial share of these harder instances.

@@ -69,7 +69,8 @@ def run_task(record: dict, name: str, seconds: float) -> dict:
         fallback = RoutingSolver(data, params, ranges).solve("weighted", seconds)
         if fallback is not None:
             break
-    plan = selected.plan if selected is not None else fallback
+    # screen_with_internal_buffers returns the selected Plan itself (or None).
+    plan = selected if selected is not None else fallback
     bank = ScenarioBank(5000, 400_000 + seed, params)
     result = {
         "weights_name": name, "weights": WEIGHTS[name], "instance_seed": seed,
@@ -126,10 +127,19 @@ def main():
     tasks = [(recs[s], w) for s in seeds for w in a.weights if recs[s]["reference_ranges"]]
     with ProcessPoolExecutor(max_workers=a.workers) as pool:
         futs = {pool.submit(run_task, r, w, a.seconds): (r["instance_seed"], w) for r, w in tasks}
+        failed = []
         for f in as_completed(futs):
-            r = f.result()
+            seed, name = futs[f]
+            try:
+                r = f.result()
+            except Exception as exc:  # reported at once, never silent; other tasks continue
+                failed.append((seed, name, f"{type(exc).__name__}: {exc}"))
+                print(f"ERROR {name} seed={seed}: {type(exc).__name__}: {exc}", flush=True)
+                continue
             print(f"{r['weights_name']:15s} seed={r['instance_seed']} selected={r['selected']} "
                   f"P={r['procedure_service']}", flush=True)
+    if failed:
+        print(f"{len(failed)} task(s) failed; fix the cause and rerun the same command to resume.")
 
 
 if __name__ == "__main__":

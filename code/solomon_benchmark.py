@@ -142,7 +142,10 @@ def main():
         futs = [pool.submit(run_one, n, a.seconds, a.anchor_seconds, a.screen_scenarios,
                             a.validation_scenarios) for n in a.instances]
         for f in as_completed(futs):
-            print("done:", f.result(), flush=True)
+            try:
+                print("done:", f.result(), flush=True)
+            except Exception as exc:  # reported at once, never silent
+                print(f"ERROR: {type(exc).__name__}: {exc}", flush=True)
 
 
 if __name__ == "__main__":

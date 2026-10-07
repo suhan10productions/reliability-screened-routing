@@ -19,6 +19,7 @@
 \providecommand{\bibcommenthead}{}
 
 \input{result_macros_v7.tex}
+\input{result_macros_v8.tex}
 
 \title{Reliability-Screened Routing Under Predictable and Stochastic Travel
 Variation: Matched Comparisons of Conservative Planning and Statistical
@@ -33,30 +34,30 @@ ORCID: \href{https://orcid.org/0009-0004-5079-7684}{0009-0004-5079-7684}}
 \maketitle
 
 \begin{abstract}
-Delivery routes planned on nominal travel times can satisfy every time window
-on paper yet fail under predictable congestion and random delay. This paper
+Routes planned on nominal travel times can meet every time window on
+paper and still fail under predictable congestion and random delay. This paper
 audits a two-layer procedure for the capacitated vehicle-routing problem with
 time windows. Replaceable OR-Tools generators propose plans, internal window
-contraction supplies candidate buffers without changing customer promises,
-and a plan is admitted only when a one-sided 95\% Wilson lower bound on the
+contraction supplies candidate buffers without changing customer promises, and
+a plan is admitted only when a one-sided 95\% Wilson lower bound on the
 probability that at least 95\% of customers are served on time reaches 0.95.
-Selected plans are then assessed once on untouched scenarios. On 53 seeded
-synthetic instances with 20--200 customers, three findings emerge. First, on
-the 46 instances where both exist, the screened procedure exceeds uniformly
-conservative travel-time padding by \ProcConsRange{} percentage points, and for
-independent disturbances the gap rises from $\SweepLowIndep$ to
-\SweepHighIndep{} points as the log-error scale grows from 0.10 to 0.30.
-Second, among the \FailureCount{} instances without an admitted plan,
-\CertifiedFailures{} encounter a certified reachability obstruction at one or
-more tested contraction levels. Third, capping
-each customer's contraction at its direct-reachability limit raises admission
-from \OriginalSelected{} to \CappedSelected{} instances and pooled service
-probability from \OriginalProbability\% to \CappedProbability\%, averaging
-\CappedLargeRange\% at 100 and 200 customers, at \CappedDistanceCost\% more
-distance and \CappedFleetCost{} more vehicles per instance. Pooled performance
-remains below the 95\% target. These findings are exploratory, because the
-same instances informed the design; a prespecified confirmatory protocol for
-fresh instances accompanies the archive.
+Selected plans are assessed once on untouched scenarios. On 53 seeded synthetic
+instances with 20 to 200 customers, the screened procedure exceeded uniformly
+conservative travel-time padding by \ProcConsRange{} percentage points,
+\CertifiedFailures{} of \FailureCount{} screening failures met a certified
+reachability obstruction at some contraction level, and capping each customer's
+contraction at its direct-reachability limit raised admission from
+\OriginalSelected{} to \CappedSelected{} instances, at \CappedDistanceCost\% more
+distance and \CappedFleetCost{} more vehicles. A confirmatory study with
+hypotheses fixed in a timestamped protocol before any fresh instance was solved
+confirmed all four on \ConfInstances{} new instances: the screened
+procedure exceeded conservative padding by \ConfHOneMean{} points, capping
+exceeded the uncapped procedure by \ConfHTwoMean{} points and admitted
+\ConfHThreeK{} instances against \ConfHThreeP{}, and the advantage grew with
+disturbance noise. The advantage depends on the objective weights: with equal
+weights it is not distinguishable from zero. On \SolomonN{} Solomon instances, OR-Tools found plans for \SolomonPlans{} and screening
+admitted \SolomonAdmitted{}. Pooled service probability stays below the 95\% target. Results are conditional on assumed disturbance
+parameters and synthetic geometry.
 \end{abstract}
 
 {\raggedright\noindent\textbf{Keywords:} vehicle routing; time windows;
@@ -84,7 +85,7 @@ under one planning-time matrix may miss promised windows when congestion varies
 or small delays propagate downstream. Minimising nominal distance alone does
 not price that fragility.
 
-This paper asks four questions:
+This paper asks five questions:
 \begin{enumerate}
   \item Does the complete screened procedure improve on uniformly
         conservative planning when both are compared on identical instances?
@@ -94,6 +95,8 @@ This paper asks four questions:
         contraction caps change admission success and out-of-sample service?
   \item How much distance, driver duration, and fleet use are exchanged for the
         resulting reliability?
+  \item Do the main findings repeat on fresh instances under a prespecified
+        protocol, and how sensitive are they to the objective weights?
 \end{enumerate}
 
 The proposed architecture separates \emph{candidate generation} from
@@ -113,6 +116,11 @@ separate, together with ablations of uniform travel-time padding, clock-profile
 information, fleet resources, contracted candidates and screening. The
 screened family and the statistical selection rule act together; a contrast
 against one uncontracted plan does not identify the selection rule alone.
+
+The study has two parts. The development study on 53 synthetic instances
+motivated the design, and its findings are exploratory. A confirmatory study then
+tested four prespecified hypotheses on 53 new instances, and a further
+exploratory analysis varies the objective weights.
 
 \section{Related work}
 
@@ -238,8 +246,8 @@ was specified for an earlier criteria set in which the third criterion was
 total distance, and its third row and column were not re-elicited when that
 criterion became driver duration. The weights therefore express one
 illustrative preference ordering, fixed before any experiment reported here;
-they were not elicited from a fleet operator, and sensitivity to them is not
-evaluated.
+they were not elicited from a fleet operator. Section~\ref{sec:weights} reports a
+sensitivity analysis over four weight vectors.
 
 OR-Tools implements the distance term as an arc cost, driver duration as a
 per-vehicle Time-dimension span cost, slack deficit as customer soft upper
@@ -500,6 +508,64 @@ of distance equivalence require a
 pre-specified equivalence margin; failure to reject a difference is not treated
 as proof of equality.
 
+\section{Confirmatory study and weight-sensitivity design}\label{sec:confdesign}
+
+A confirmatory protocol was fixed before any fresh instance was generated or
+solved. It specifies four directional hypotheses, their tests and decision
+rules, a failure policy, and 53 instance seeds equal to the development seeds
+shifted by 60000. The protocol, the code that runs and analyses it, and a SHA-256
+manifest of those files were committed to a public repository (commit
+\texttt{41fae67d9520bd5dd01fcac87e680a5a69325d10}) and archived on Zenodo
+\cite{ali2026freeze} before the study was run. The analysis program refuses to
+run unless the complete prescribed study is present and every frozen file matches
+the manifest.
+
+The hypotheses concern validated service-event probability on the fresh bank, with
+the instance as the unit. H1 (primary): on instances where conservative-speed
+planning returns a plan, the original procedure exceeds it. H2 (primary): the
+capped procedure exceeds the original procedure on all instances. H3: the capped
+procedure is admitted by screening on more instances than the original procedure,
+tested with an exact McNemar test at 0.05. H4: on the instances of H1, the
+advantage of the original procedure over conservative speed is larger at
+$\sigma=0.30$ than at $\sigma=0.10$ with $\rho=0$. H1 and H2 are decided at the
+97.5\% level, a Bonferroni adjustment for two primary hypotheses, and are
+confirmed only if their paired bootstrap interval lies above zero. H4 uses a 95\%
+interval. The two other hypotheses cannot rescue an unconfirmed primary one. A
+configuration without a plan scores zero on that instance, in validation and in
+every sweep cell, so a failure counts against the configuration that failed. A
+software error is recorded with its traceback, is never scored as routing
+performance, and blocks the analysis.
+
+Parameters, budgets and scenario counts equal those of the development study
+(Table~\ref{tab:parameters}). The study ran on an Apple M1 Pro laptop with ten
+cores under macOS 26.3.1, with Python 3.12.15, NumPy 2.5.3 and OR-Tools 9.15.6755.
+The development runs used Python 3.12.14 on Linux. Stage 1 launched the four
+instance sizes as four parallel processes where the written protocol lists a
+sequential loop; stage 2 used six workers as specified. These are the deviations
+from the written procedure. The scheduling change affects only the CPU time
+available to each time-limited solve.
+
+The weight analysis is exploratory. The original procedure was rerun on the
+development instances with four weight vectors: the original vector, one that
+swaps its two largest weights, a distance-heavy vector and equal weights
+(Section~\ref{sec:weights}). Each rerun regenerates the candidate family, screens it
+on the same bank and validates the selected plan or fallback on the same fresh
+bank, with the same five-second budget. The vectors were fixed before the runs,
+and each ran once.
+
+The benchmark check is also exploratory. It uses the eight R1 and RC1 Solomon
+files available in the ML4VRP 2024 competition repository \cite{ml4vrp2024}, which
+hosts Solomon's instances \cite{solomon1987}. The C1 instances are excluded because
+their horizon of 1236 time units exceeds one working shift. Coordinates are read as
+kilometres, with the study's rounded Euclidean distances and a planning speed of
+40~km/h, so that one Solomon time unit equals 1.5 minutes. Ready and due times are
+multiplied by 1.5 and floored, service time becomes 15 minutes, and the capacity
+of 200 and the 25 vehicles are kept. The shift length is the scaled depot due time,
+345 minutes for R1 and 360 minutes for RC1, starting at 06:00 so that the morning
+peak falls inside the shift. Planning times are rounded up to whole minutes as in the
+study. The pipeline code is unchanged; only the instance loader and the parameter
+constructor are replaced.
+
 \section{Results}
 
 \input{results_summary_v7.tex}
@@ -526,8 +592,13 @@ Online Resource 1.
  \label{fig:reliability}
 \end{figure}
 
-Appendix~\ref{sec:additional} reports customer outcomes on the matched subset
-(Table~\ref{tab:customers}), absolute planned resources
+\input{confirmatory_results.tex}
+\input{weight_results.tex}
+\input{solomon_results.tex}
+
+Appendix~\ref{sec:additional} reports the confirmatory results by size
+(Table~\ref{tab:conf-size}, descriptive only), customer outcomes on the matched
+subset (Table~\ref{tab:customers}), absolute planned resources
 (Table~\ref{tab:fullcost}), service-threshold sensitivity
 (Table~\ref{tab:kappa}), the instance-level failure audit
 (Table~\ref{tab:failure}), and the equal-budget deterministic benchmark against
@@ -555,13 +626,16 @@ fresh scenarios from seed $400000+$ instance seed. The 1000-scenario
 disturbance sweep uses seed $500000+$ instance seed. Earlier aggregate results
 motivated these analyses, so they form an exploratory extension on known synthetic instances. They are neither preregistered nor an external replication. The
 fresh draws do not remove reuse of the instance set. Plans in the sweep are
-not re-screened when $\sigma$ or $\rho$ changes. A proposed
-confirmatory protocol specifies four directional hypotheses, their tests,
-decision rules and failure policy for 53 new instances whose seeds are shifted
-by 60000. It becomes fixed when publicly timestamped with a hash manifest of
-the code that runs and analyses it. One pipeline smoke test, on an instance
-outside that set, was run while the protocol was prepared and is disclosed in
-it as pilot data. The protocol's results are not part of this manuscript.
+not re-screened when $\sigma$ or $\rho$ changes. The confirmatory protocol of Section~\ref{sec:confdesign} was
+publicly timestamped with a hash manifest of the code that runs and analyses it
+before the fresh instances were solved, and its results are reported in
+Section~\ref{sec:confirmatory}. One pipeline smoke test, on an instance outside
+the confirmatory set, was run while the protocol was prepared and is disclosed in
+the protocol as pilot data. The confirmatory study used only frozen scripts. The
+weight-sensitivity analysis, run after the freeze, uses a script outside the
+frozen file list. A first run of the
+weight-sensitivity script stopped on a coding error that affected only that
+script, and the corrected script produced the reported results.
 
 Every reported table and figure is regenerated from retained machine-readable
 records. Internal planning buffers are always evaluated against offered
@@ -592,10 +666,16 @@ families; the experiment is not a full factorial decomposition of every design
 decision. Second, the disruption parameters are assumed and have not been calibrated to fleet GPS residuals, so the results hold conditionally on those values and are not operational forecasts. An
 exploratory $\sigma$--$\rho$ grid is reported, but it does not replace local
 calibration. Third,
-the geometry is synthetic and the deterministic solver check is not a
-substitute for Solomon or Gehring--Homberger benchmarks or a real road network.
-Fourth, the AHP weights are one preference vector and require global
-sensitivity analysis. Fifth,
+the geometry is synthetic. The Solomon check covers only \SolomonN{} instances with 100
+customers, and the generator found plans for \SolomonPlans{} of them. The
+deterministic solver check is not a substitute for Gehring--Homberger benchmarks or a
+real road network.
+The confirmatory instances share the generator and the disturbance model of the
+development study, so they test repeatability within that setting. Fourth, the
+weights come from one preference vector. Under equal weights the advantage over
+conservative speed is not distinguishable from zero (Section~\ref{sec:weights}),
+only four vectors were tried, and the confirmatory study used the original
+vector alone. Fifth,
 Wilson screening addresses binomial sampling uncertainty for a fixed candidate;
 its nominal coverage is not a simultaneous guarantee across an adaptively
 searched grid. Held-out assessment is therefore necessary. It is also not a
@@ -607,20 +687,46 @@ rolling-horizon replanning are excluded from the present evidence.
 
 The evidence separates three mechanisms. Uniformly conservative travel times
 protect against predictable congestion by construction, padding every trip
-including off-peak ones. On matched instances the complete screened procedure
-nevertheless exceeds them by \ProcConsRange{} percentage points on average,
-although the interval at 200 customers includes zero; for
-independent disturbances its advantage grows with noise, from
-$\SweepLowIndep$ to \SweepHighIndep{} points. The growth is not monotonic
-under strong correlation, so no universal ordering is claimed. The unscreened slack-aware objective alone falls below conservative padding. The advantage comes from the complete procedure, in which the contracted candidate family and statistical selection act together.
+including off-peak ones. On matched development instances the complete screened
+procedure exceeded them by \ProcConsRange{} percentage points on average,
+although the interval at 200 customers includes zero, and for independent
+disturbances its advantage grew with noise, from $\SweepLowIndep$ to
+\SweepHighIndep{} points. The unscreened slack-aware objective alone falls
+below conservative padding. The advantage comes from the complete procedure, in
+which the contracted candidate family and statistical selection act together.
+
+A confirmatory study on \ConfInstances{} fresh instances, with hypotheses fixed in
+a timestamped protocol before any of them was solved, confirmed all four
+prespecified hypotheses. The screened procedure exceeded conservative speed by
+\ConfHOneMean{} points (97.5\% interval \ConfHOneLo{} to \ConfHOneHi{}), capping
+exceeded the original procedure by \ConfHTwoMean{} points (\ConfHTwoLo{} to
+\ConfHTwoHi{}), capping admitted \ConfHThreeK{} instances against \ConfHThreeP{}
+with none lost, and the advantage over conservative speed grew with independent
+noise. These instances share the generator and the assumed disturbance model
+with the development study, so the result shows repeatability within that
+setting.
+
+The advantage depends on the objective weights. Swapping the two largest weights
+changed nothing beyond run-to-run variation, and a distance-heavy vector kept a
+clearly positive advantage. With equal weights, fewer instances were admitted
+(\WtEqualAdmitted{} against \WtBaseAdmitted{}) and the advantage over conservative
+speed fell to \WtEqualPCMean{} points with an interval from \WtEqualPCLo{} to
+\WtEqualPCHi{}. The confirmatory study used the original weights only.
+
+On \SolomonN{} Solomon instances with the same overlay, OR-Tools found a plan for
+\SolomonPlans{}, although PyVRP/HGS finds feasible plans for the others, and
+screening admitted \SolomonAdmitted{} of those. The admitted plans reached
+service probabilities near 98\%, and the fallback plans stayed below 46\%. This
+check was exploratory, covers a small set of instances, and shows that the
+candidate generator limits what the pipeline can do on harder benchmarks.
 
 Screening failures can be diagnosed. Among the
-\FailureCount{} instances without an admitted plan, \CertifiedFailures{}
+\FailureCount{} development instances without an admitted plan, \CertifiedFailures{}
 encounter a certified reachability obstruction at one or more tested
 contraction levels. A certificate proves that a particular contracted model is
 infeasible; it does not show that reachability alone caused the procedure to
 miss its target. Capping each customer's contraction at its
-direct-reachability limit raises admission from \OriginalSelected{} to
+direct-reachability limit raised admission from \OriginalSelected{} to
 \CappedSelected{} instances. Of the instances with 100 or 200 customers,
 \CappedLargeSelected{} were admitted and \CappedLargeRetained{} retained the
 target lower bound under fresh validation, with mean service probability
@@ -631,17 +737,18 @@ experiment concerns the uncontracted objective and does not isolate the
 capped variant's mechanism. At 20 customers capping changes nothing; only two of the six failures there encounter a certificate. Of the other four, a longer search budget finds a plan for two, and two remain unresolved.
 
 Pooled over all instances, no procedure reaches the 95\% target, so procedure
-averages and selected-plan compliance must both be reported. The shortfall
-comes from instances without an admitted plan. Plans admitted by screening
-average \OriginalSelectedMean\% for the original procedure and
-\CappedSelectedMean\% for the capped procedure, while the fallback plans used
-elsewhere average \OriginalFallbackMean\% and \CappedFallbackMean\%. All
-\CappedFallbackCount{} capped-procedure fallbacks occur at 20 or 50 customers,
-so closing the remaining gap depends on admitting plans for small instances. These results are
-conditional on assumed disruption parameters and synthetic geometry, and they
-are exploratory: the instances that produced them also motivated the design.
-The prespecified confirmatory protocol states in advance what fresh
-instances must show for the two primary findings to stand.
+averages and selected-plan compliance must both be reported. In the development
+study, plans admitted by screening average \OriginalSelectedMean\% for the
+original procedure and \CappedSelectedMean\% for the capped procedure, while the
+fallback plans used elsewhere average \OriginalFallbackMean\% and
+\CappedFallbackMean\%. All \CappedFallbackCount{} capped-procedure fallbacks occur
+at 20 or 50 customers, so closing the remaining gap depends on admitting plans
+for small instances. In the confirmatory study the capped procedure reached
+\ConfPooledK\% pooled, against \ConfPooledP\% for the original procedure. These
+results are conditional on assumed disruption parameters and synthetic geometry.
+The development findings were exploratory, and the confirmatory study supports
+the main ones. Evidence from real road networks, other benchmark families and
+calibrated disturbance parameters remains outstanding.
 
 \section*{Statements and Declarations}
 
@@ -653,6 +760,9 @@ instances must show for the two primary findings to stand.
 source code, dependency versions, tests, seeds, raw JSON records, analysis
 scripts, generated tables and figures, and the confirmatory protocol. It is supplied
 as Online Resource 1 and archived at \todo{Zenodo DOI} \cite{ali2026archive}.
+The confirmatory protocol freeze is archived separately \cite{ali2026freeze}.
+The Solomon instance files in the archive are third-party benchmark data
+\cite{solomon1987,ml4vrp2024} and remain under their original terms.
 
 \paragraph{Use of generative AI.} Described in
 Section~\ref{sec:reproducibility}.
@@ -691,7 +801,8 @@ $(4.0685-4)/3=0.0228$ and the consistency ratio is $0.0254$. As stated in Sectio
 the third row and column were set when the third criterion was total distance
 and were not re-elicited for driver duration.
 
-\section{Additional matched outcomes and failure records}\label{sec:additional}
+\section{Additional outcomes and failure records}\label{sec:additional}
+\input{confirmatory_appendix.tex}
 \input{additional_results_v7.tex}
 \clearpage
 
