@@ -20,6 +20,7 @@
 
 \input{result_macros_v7.tex}
 \input{result_macros_v8.tex}
+\input{result_macros_v9.tex}
 
 \title{Reliability-Screened Routing Under Predictable and Stochastic Travel
 Variation: Matched Comparisons of Conservative Planning and Statistical
@@ -36,28 +37,29 @@ ORCID: \href{https://orcid.org/0009-0004-5079-7684}{0009-0004-5079-7684}}
 \begin{abstract}
 Routes planned on nominal travel times can fail under predictable congestion and
 random delay. This paper audits a two-layer procedure for the capacitated
-vehicle-routing problem with time windows. Replaceable OR-Tools generators
-propose plans, internal window contraction supplies candidate buffers without
-changing customer promises, and a plan is admitted only when a one-sided 95\%
-Wilson lower bound on the probability that at least 95\% of customers are served
-on time reaches 0.95. Selected plans are assessed once on untouched scenarios. On
-53 seeded synthetic instances with 20 to 200 customers, the screened procedure
-exceeded uniformly conservative travel-time padding by \ProcConsRange{} percentage
-points, \CertifiedFailures{} of \FailureCount{} screening failures met a certified
-reachability obstruction at some contraction level, and capping each customer's
-contraction at its direct-reachability limit raised admission from
-\OriginalSelected{} to \CappedSelected{} instances, at \CappedDistanceCost\% more
-distance and \CappedFleetCost{} more vehicles. A timestamped confirmatory study on
-\ConfInstances{} new instances from the same generator confirmed all four
-prespecified hypotheses: the screened procedure exceeded conservative padding by
-\ConfHOneMean{} points, capping added \ConfHTwoMean{} points and admitted
-\ConfHThreeK{} instances against \ConfHThreeP{}, and the advantage grew with
-independent noise. These results use the original objective weights; with equal
-weights the advantage is not distinguishable from zero. On \SolomonN{} Solomon
-instances, OR-Tools found plans for \SolomonPlans{} and screening admitted
-\SolomonAdmitted{}. Pooled service probability stays below the 95\% target, mainly
-through fallback plans. Results are conditional on assumed disturbance parameters
-and synthetic geometry.
+vehicle-routing problem with time windows. A replaceable generator proposes
+plans, internal window contraction supplies candidate buffers without changing
+customer promises, and a plan is admitted only when a one-sided 95\% Wilson lower
+bound on the probability that at least 95\% of customers are served on time
+reaches 0.95. Selected plans are assessed once on untouched scenarios. On 53
+seeded synthetic instances with 20 to 200 customers and OR-Tools candidates, the
+screened procedure exceeded uniformly conservative travel-time padding by
+\ProcConsRange{} percentage points, and capping each customer's contraction at its
+direct-reachability limit raised admission from \OriginalSelected{} to
+\CappedSelected{} instances, at \CappedDistanceCost\% more distance. Two
+timestamped confirmatory studies, each on 53 new instances from the same
+generator, followed. The first confirmed all four prespecified hypotheses:
+screening exceeded conservative padding by \ConfHOneMean{} points and capping
+added \ConfHTwoMean{}. The second replaced OR-Tools with hybrid genetic search.
+Screening with capping again exceeded conservative padding, by \CtwoGOneMean{}
+points, and differed from the OR-Tools procedure by \CtwoGFourMean{} points
+(95\% interval \CtwoGFourLo{} to \CtwoGFourHi{}). A conservative-speed fallback,
+suggested post hoc, did not measurably improve the capped
+procedure but helped the uncapped one. These results use the original objective
+weights; with equal weights the advantage is not distinguishable from zero.
+Pooled service probability stays below the 95\% target, mainly through fallback
+plans. Results are conditional on assumed disturbance parameters and synthetic
+geometry.
 \end{abstract}
 
 {\raggedright\noindent\textbf{Keywords:} vehicle routing; time windows;
@@ -85,7 +87,7 @@ under one planning-time matrix may miss promised windows when congestion varies
 or small delays propagate downstream. Minimising nominal distance alone does
 not price that fragility.
 
-This paper asks five questions:
+This paper asks six questions:
 \begin{enumerate}
   \item Does the complete screened procedure improve on uniformly
         conservative planning when both are compared on identical instances?
@@ -97,6 +99,9 @@ This paper asks five questions:
         resulting reliability?
   \item Do the main findings repeat on fresh instances under a prespecified
         protocol, and how sensitive are they to the objective weights?
+  \item Does screening still improve on conservative planning when candidates
+        come from a state-of-the-art generator, and does a conservative-speed
+        fallback improve the procedure when screening admits nothing?
 \end{enumerate}
 
 The proposed architecture separates \emph{candidate generation} from
@@ -117,10 +122,13 @@ information, fleet resources, contracted candidates and screening. The
 screened family and the statistical selection rule act together; a contrast
 against one uncontracted plan does not identify the selection rule alone.
 
-The study has two parts. The development study on 53 synthetic instances
-motivated the design, and its findings are exploratory. A confirmatory study then
-tested four prespecified hypotheses on 53 new instances, and a further
-exploratory analysis varies the objective weights.
+The study has three parts. The development study on 53 synthetic instances
+motivated the design, and its findings are exploratory. A first confirmatory study
+then tested four prespecified hypotheses on 53 new instances, and a further
+exploratory analysis varies the objective weights. A second confirmatory study,
+on another 53 new instances, replaced the OR-Tools generator with hybrid genetic
+search \cite{vidal2022,wouda2024} and tested the conservative-speed fallback that
+the first study had suggested post hoc.
 
 \section{Related work}
 
@@ -157,9 +165,10 @@ poorly near probabilities close to one \cite{wilson1927,brown2001}.
 
 The implementation uses Google OR-Tools as a nominal candidate generator
 \cite{ortools}. It is a practical local-search framework and gives no optimality guarantee.
-PyVRP provides a substantially stronger hybrid genetic search (HGS) benchmark for
-canonical VRPTW variants \cite{wouda2024}; comparison with such solvers is
-necessary before interpreting absolute route quality as state of the art.
+PyVRP provides a substantially stronger hybrid genetic search (HGS) for
+canonical VRPTW variants \cite{vidal2022,wouda2024}. It is used here as a
+deterministic benchmark and, in the second confirmatory study, as an alternative
+candidate generator.
 
 \section{Problem definition}
 
@@ -508,7 +517,7 @@ of distance equivalence require a
 pre-specified equivalence margin; failure to reject a difference is not treated
 as proof of equality.
 
-\section{Confirmatory study and weight-sensitivity design}\label{sec:confdesign}
+\section{First confirmatory study and weight-sensitivity design}\label{sec:confdesign}
 
 A confirmatory protocol was fixed before any fresh instance was generated or
 solved. It specifies four directional hypotheses, their tests and decision
@@ -575,6 +584,65 @@ the relative tightness of their windows, so the eight instances form a convenien
 sample of the R1 and RC1 types. The pipeline code is unchanged; only the instance loader and the parameter
 constructor are replaced.
 
+\section{Second confirmatory study design}\label{sec:conf2design}
+
+The first confirmatory study left two questions open. Its candidate generator is
+below the state of the art in route quality, so the benefit of screening might
+shrink when candidates come from a stronger search. Its post hoc analysis also
+suggested that returning the conservative-speed plan when screening admits
+nothing would raise pooled service (Section~\ref{sec:confirmatory}), a rule chosen
+after the results were seen. A second protocol tested both questions on 53 further
+instances whose seeds are the development seeds shifted by 80000.
+
+The second generator is the hybrid genetic search of PyVRP
+\cite{vidal2022,wouda2024}, version 0.14.0. It solves the same planning model as
+the OR-Tools generator: the static matrix at the planning speed, hard and possibly
+contracted windows, capacity, shift length and fleet size, with each vehicle
+departing at the latest feasible time. Its weighted objective keeps the distance,
+driver-duration and fleet terms with the same coefficients. PyVRP cannot express
+the slack-deficit term, so that term is left out of generation and kept in
+candidate selection. Each solve stops after 10,000 iterations with the instance
+seed as its random seed. The scaling ranges come from the unchanged OR-Tools anchor
+solves and are shared by both generators; because those solves are time-limited,
+the HGS half is deterministic given the ranges. The contraction grid, capped
+windows, reachability certificates, scenario banks, admission rule and selection
+score are those of the OR-Tools procedure. HGS conservative-speed planning solves
+the distance objective at 33.3~km/h. The OR-Tools half reruns the frozen pipeline
+of the first study unchanged.
+
+Two fallback rules are compared. The slack-aware rule is the one of the first
+study; for HGS it returns the uncontracted weighted plan. The conservative rule
+returns the conservative-speed plan of the same generator when screening admits
+nothing, and the slack-aware plan when no conservative plan exists. Neither rule
+changes a screening decision or uses a validation outcome.
+
+The protocol fixes four hypotheses on validated service-event probability, with
+the instance as the unit. G1 (primary): on instances where HGS conservative-speed
+planning returns a plan, the HGS capped procedure with conservative fallback
+exceeds it. G2 (primary): on all instances, the conservative fallback improves the
+OR-Tools capped procedure. G3 (secondary): the same holds for the uncapped
+OR-Tools procedure. G4: the difference between the HGS and OR-Tools capped
+procedures, both with conservative fallback, is estimated with a 95\% interval and
+no directional decision. G1 and G2 are decided at the 97.5\% level and G3 at 95\%,
+with the bootstrap, failure policy and decision rules of the first study. The
+protocol requires the abstract and conclusion to report an unconfirmed primary
+hypothesis.
+
+The protocol, the HGS code, the analysis program and a SHA-256 manifest covering
+them and the frozen files of the first study were committed to the public
+repository (commit \texttt{3ba6b71288a2a51872ab6a877fa86eb28ff7671d}) and archived
+on Zenodo \cite{ali2026freeze2} before any instance of the study was solved. A gate
+script checked the manifest, the pushed commit and tag, and the absence of results
+before the runs began. An earlier draft of the protocol prescribed seeds shifted
+by 70000. The OR-Tools half was run on those seeds before that draft was
+timestamped, and its console output, which lists the instances screening admitted,
+was seen. That seed set was abandoned in full: its records are kept in the archive
+and enter no analysis, the protocol discloses them, and the study used the seeds
+shifted by 80000 with no other change. The HGS generator was built and tested on
+the development instances, so the development HGS results are exploratory. The
+study ran on the machine and software of the first confirmatory study, with PyVRP
+0.14.0, and followed the written procedure without deviation.
+
 \section{Results}
 
 \input{results_summary_v7.tex}
@@ -604,9 +672,10 @@ Online Resource 1.
 \input{confirmatory_results.tex}
 \input{weight_results.tex}
 \input{solomon_results.tex}
+\input{study2_results.tex}
 
-Appendix~\ref{sec:additional} reports the confirmatory results by size
-(Table~\ref{tab:conf-size}, descriptive only), customer outcomes on the matched
+Appendix~\ref{sec:additional} reports the results of both confirmatory studies by
+size (Tables~\ref{tab:conf-size} and~\ref{tab:study2-size}, descriptive only), customer outcomes on the matched
 subset (Table~\ref{tab:customers}), absolute planned resources
 (Table~\ref{tab:fullcost}), service-threshold sensitivity
 (Table~\ref{tab:kappa}), the instance-level failure audit
@@ -644,7 +713,11 @@ the protocol as pilot data. The confirmatory study used only frozen scripts. The
 weight-sensitivity analysis, run after the freeze, uses a script outside the
 frozen file list. A first run of the
 weight-sensitivity script stopped on a coding error that affected only that
-script, and the corrected script produced the reported results.
+script, and the corrected script produced the reported results. The second
+confirmatory study (Section~\ref{sec:conf2design}) has its own frozen protocol and
+manifest. Its OR-Tools half uses the frozen scripts of the first study, and its HGS
+half is deterministic given the scaling ranges. The script that writes its tables
+and text stops unless its figures equal the saved output of the frozen analysis.
 
 Every reported table and figure is regenerated from retained machine-readable
 records. Internal planning buffers are always evaluated against offered
@@ -665,12 +738,14 @@ content.
 \section{Limitations}
 
 First, the generators use nominal or iteratively frozen matrices, so the
-procedure can miss better stochastic plans. The candidate generator is also
-below the state of the art: under an equal five-second budget, OR-Tools returns
+procedure can miss better stochastic plans. The OR-Tools generator is also
+below the state of the art: under an equal five-second budget, it returns
 routes about 11\% longer than PyVRP/HGS at 200 customers
 (Table~\ref{tab:hgs}). Absolute distance premiums therefore carry solver
 quality, and some of the uncertified screening failures may reflect search
-limits. Conservative speed is uniform
+limits. The second confirmatory study shows that the reliability result does not
+depend on that generator, but its HGS generator omits the slack-deficit term, so
+the two generators do not solve identical objectives. Conservative speed is uniform
 padding, and the clock-aware approximation is not an exact time-dependent
 optimizer. Generator and objective choices also differ between screened
 families; the experiment is not a full factorial decomposition of every design
@@ -695,9 +770,11 @@ Sixth, breakdown recovery, heterogeneous fleets, new-order insertion, and
 rolling-horizon replanning are excluded from the present evidence. So is
 departure-time recourse: every vehicle leaves at its planned time in every
 scenario, which makes the evaluation stricter than an operator who adjusts
-departures would face. Seventh, the prespecified fallback returns the slack-aware
-plan, which can be worse than conservative padding when screening admits nothing
-(Section~\ref{sec:solomon}).
+departures would face. Seventh, the fallback remains weak. The slack-aware plan can be worse
+than conservative padding when screening admits nothing
+(Section~\ref{sec:solomon}), and the conservative-speed fallback improved the
+uncapped procedure in the second confirmatory study but not measurably the capped
+one, which falls back on few instances.
 
 \section{Conclusion}
 
@@ -711,7 +788,7 @@ disturbances its advantage grew with noise, from $\SweepLowIndep$ to
 below conservative padding. The advantage comes from the complete procedure, in
 which the contracted candidate family and statistical selection act together.
 
-A confirmatory study on \ConfInstances{} fresh instances, with hypotheses fixed in
+A first confirmatory study on \ConfInstances{} fresh instances, with hypotheses fixed in
 a timestamped protocol before any of them was solved, confirmed all four
 prespecified hypotheses with the original weight vector. The screened procedure exceeded conservative speed by
 \ConfHOneMean{} points (97.5\% interval \ConfHOneLo{} to \ConfHOneHi{}), capping
@@ -736,12 +813,29 @@ service probabilities near 98\%, and the fallback plans stayed below 46\%. This
 check was exploratory, covers a small set of instances, and shows that the
 candidate generator limits what the pipeline can do on harder benchmarks.
 
+The second confirmatory study replaced OR-Tools with hybrid genetic search. With
+that generator, screening with capped contraction exceeded conservative-speed
+planning by \CtwoGOneMean{} points (97.5\% interval \CtwoGOneLo{} to
+\CtwoGOneHi{}), and pooled service reached \CtwoPooledHGSK\% against
+\CtwoPooledHGSCons\% for conservative speed. The HGS and OR-Tools procedures
+differed by \CtwoGFourMean{} points, with a 95\% interval from \CtwoGFourLo{} to
+\CtwoGFourHi{}; no equivalence margin was set, so the interval bounds the
+difference without showing equivalence. The reliability gain is therefore not an
+artefact of a weak generator. Capping mattered more with HGS: at 100 and 200
+customers its uncapped family was admitted on \CtwoHGSPAdmittedLarge{} of
+\CtwoLarge{} instances and its capped family on \CtwoHGSKAdmittedLarge{}.
+
 The fallback is the weakest part of the procedure. When screening admits nothing,
-the protocol returns the uncontracted slack-aware plan, which on RC106 was far worse
-than conservative speed (Section~\ref{sec:solomon}). A conservative-speed fallback,
-examined post hoc, would have raised confirmatory pooled service to \PostHocP\% for
-the original procedure and \PostHocK\% for the capped procedure. Testing that rule
-prospectively is the most direct next step.
+the original protocol returns the uncontracted slack-aware plan, which on RC106 was
+far worse than conservative speed (Section~\ref{sec:solomon}). A conservative-speed
+fallback, examined post hoc, would have raised pooled service in the first
+confirmatory study to \PostHocP\% for the original procedure and \PostHocK\% for
+the capped procedure. Tested prospectively in the second study, it did not
+measurably improve the capped procedure (G2, \CtwoGTwoMean{} points, interval
+\CtwoGTwoLo{} to \CtwoGTwoHi{}): that procedure fell back on only
+\CtwoORTKFallbacks{} instances, and on \CtwoFallbacksChanged{} of them the rule
+changed the plan, with mixed effects. It did improve the uncapped procedure, by
+\CtwoGThreeMean{} points (95\% interval \CtwoGThreeLo{} to \CtwoGThreeHi{}).
 
 Screening failures can be diagnosed. Among the
 \FailureCount{} development instances without an admitted plan, \CertifiedFailures{}
@@ -769,8 +863,8 @@ at 20 or 50 customers, so closing the remaining gap depends on admitting plans
 for small instances. In the confirmatory study the capped procedure reached
 \ConfPooledK\% pooled, against \ConfPooledP\% for the original procedure. These
 results are conditional on assumed disruption parameters and synthetic geometry.
-The development findings were exploratory, and the confirmatory study supports
-the main ones. Evidence from real road networks, other benchmark families and
+The development findings were exploratory, and the two confirmatory studies
+support the main ones. Evidence from real road networks, other benchmark families and
 calibrated disturbance parameters remains outstanding.
 
 \section*{Statements and Declarations}
@@ -781,10 +875,10 @@ calibrated disturbance parameters remains outstanding.
 
 \paragraph{Data and code availability.} The reproducibility archive contains
 source code, dependency versions, tests, seeds, raw JSON records, analysis
-scripts, generated tables and figures, and the confirmatory protocol. It is supplied
+scripts, generated tables and figures, and both confirmatory protocols. It is supplied
 as Online Resource 1 and archived on Zenodo \cite{ali2026archive}.
-The confirmatory protocol freeze, archived before any confirmatory instance was
-solved, is a separate record \cite{ali2026freeze}.
+The two confirmatory protocol freezes, each archived before any instance of its
+study was solved, are separate records \cite{ali2026freeze,ali2026freeze2}.
 The Solomon instance files in the archive are third-party benchmark data
 \cite{solomon1987,ml4vrp2024} and remain under their original terms.
 
@@ -827,6 +921,7 @@ and were not re-elicited for driver duration.
 
 \section{Additional outcomes and failure records}\label{sec:additional}
 \input{confirmatory_appendix.tex}
+\input{study2_appendix.tex}
 \input{additional_results_v7.tex}
 \clearpage
 

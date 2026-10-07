@@ -270,7 +270,7 @@ def main():
         f"{out['common_subset']} instances & {interval((h4['mean_pp'], h4['lo_pp'], h4['hi_pp']))} & 95\\% & {verdict(h4['verdict'])}",
     ]
     conf_tex = [
-        r"\subsection{Confirmatory study}\label{sec:confirmatory}", "",
+        r"\subsection{First confirmatory study}\label{sec:confirmatory}", "",
         r"The four hypotheses of the prespecified protocol were evaluated on "
         f"{out['instances']} new instances (Table~\\ref{{tab:confirmatory}}). Every decision uses the "
         r"unrounded interval limits. The protocol's validation passed before any quantity was computed.",
@@ -307,7 +307,8 @@ def main():
         f"{f1(extra['P']['posthoc'])}\\% for the original procedure ({extra['P']['changed']} instances changed) and from "
         f"{f1(out['pooled_mean_pp']['capped_procedure'])}\\% to {f1(extra['K']['posthoc'])}\\% for the capped procedure "
         f"({extra['K']['changed']} instances changed). The fallback rule uses no validation outcome, but this variant was "
-        f"chosen after the results were seen, so it is exploratory.",
+        f"chosen after the results were seen, so it is exploratory. The second confirmatory study tests it "
+        f"prospectively (Section~\\ref{{sec:confirmatory2}}).",
         "",
         "These instances come from the same generator and the same assumed disturbance model as the development study. "
         "The result establishes repeatability within that setting. It does not address real road networks, calibrated "
@@ -322,7 +323,7 @@ def main():
         cell = lambda k: f"{v[k]['selected']}/{v['instances']} ({v[k]['retained']}) & {f1(v[k]['mean_pp'])}"
         size_rows.append(f"{n} & {v['instances']} & {cell('procedure')} & {cell('screened_conservative')} & {cell('capped_procedure')}")
     (ROOT / "paper/confirmatory_appendix.tex").write_text("\n".join([
-        table("Confirmatory study by size (descriptive). For each procedure, the number of instances admitted by "
+        table("First confirmatory study by size (descriptive). For each procedure, the number of instances admitted by "
               "screening, the number of those that retained the 0.95 lower bound on the fresh bank in parentheses, "
               "and the mean validated service-event probability (\\%) over all instances including fallbacks.",
               "tab:conf-size", r"@{}rrrrrrrr@{}",

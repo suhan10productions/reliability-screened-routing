@@ -1,0 +1,26 @@
+\subsection{Second confirmatory study}\label{sec:confirmatory2}
+
+In the exploratory development run on the 53 development instances, the HGS capped procedure with conservative fallback exceeded HGS conservative-speed planning by 27.0 points and pooled 94.2\%. Table~\ref{tab:confirmatory2} gives the prespecified results on the 53 fresh instances of the second study.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Second confirmatory study on 53 fresh instances. Differences are in percentage points of validated service-event probability; intervals are paired bootstrap intervals over instances. G1 uses the 49 instances where HGS conservative-speed planning returned a plan.}
+\label{tab:confirmatory2}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{3.3cm}cc@{}}
+\toprule
+Hypothesis & Quantity & Estimate [interval] & Level & Decision\\
+\midrule
+G1 (primary) & HGS capped with conservative fallback minus HGS conservative, 49 instances & 27.9 [23.0, 32.8] & 97.5\% & confirmed\\
+G2 (primary) & OR-Tools capped, conservative minus slack-aware fallback, 53 instances & 0.4 [$-$0.7, 2.1] & 97.5\% & not confirmed\\
+G3 & OR-Tools uncapped, conservative minus slack-aware fallback, 53 instances & 3.8 [1.6, 6.2] & 95\% & confirmed\\
+G4 & HGS minus OR-Tools, both capped with conservative fallback, 53 instances & $-$0.2 [$-$4.0, 3.7] & 95\% & estimate only\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+G1 was confirmed: with the HGS generator, screening with capped contraction exceeded conservative padding by 27.9 points, and pooled service probability reached 91.5\% against 58.4\% for HGS conservative speed. Capping was essential with this generator: at 100 and 200 customers the HGS capped family was admitted on 18 of 18 instances and the uncapped family on 3.
+
+G2 was not confirmed. The OR-Tools capped procedure admitted a plan on 45 of 53 instances and fell back on 8. On 4 of those no conservative-speed plan existed, so both rules returned the same plan. On the remaining 4 the conservative fallback changed service probability by +5.4, $-$3.1, $-$12.0 and +30.0 points. The post hoc gain reported for the capped procedure in the first study did not replicate. For the uncapped procedure, which falls back more often, the conservative fallback helped (G3, 3.8 points).
+
+The difference between the two generators under the capped procedure with conservative fallback (G4) was $-$0.2 points with a 95\% interval from $-$4.0 to 3.7. No equivalence margin was prespecified, so this interval bounds the difference without establishing equivalence. The HGS $\beta=0$ plan, which lacks the slack term, was a weak fallback: the uncapped HGS procedure pooled 51.0\% with it and 74.7\% with the conservative fallback (descriptive).
