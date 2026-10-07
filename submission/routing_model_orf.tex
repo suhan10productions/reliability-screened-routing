@@ -50,7 +50,7 @@ direct-reachability limit raised admission from \OriginalSelected{} to
 timestamped confirmatory studies, each on 53 new instances from the same
 generator, followed. The first confirmed all four prespecified hypotheses:
 screening exceeded conservative padding by \ConfHOneMean{} points and capping
-added \ConfHTwoMean{}. The second replaced OR-Tools with hybrid genetic search.
+added \ConfHTwoMean{}. The second replaced OR-Tools with hybrid genetic search (HGS).
 With HGS candidates, screening with capping exceeded HGS conservative padding
 by \CtwoGOneMean{} points, and differed from the OR-Tools procedure by \CtwoGFourMean{} points
 (95\% interval \CtwoGFourLo{} to \CtwoGFourHi{}). A conservative-speed fallback,
@@ -68,12 +68,6 @@ reproducibility\par}
 
 \medskip
 \noindent\textbf{MSC Classification:} 90B06, 90C59, 90C15, 62G09
-
-\section*{Acknowledgements}
-The author thanks the researchers who answered methodological questions by
-e-mail during the project.
-These discussions informed experimental design; all claims in the paper rest
-on the reported model, code, and experiments.
 
 \clearpage
 
@@ -691,8 +685,8 @@ re-solved exactly that contracted model with a longer budget: 30~s, then
 120~s for those still without a plan. In \BudgetDiagSearchLimits{} cases a plan
 was found at that contraction level, so the original outcome was a search
 limit. The remaining \BudgetDiagUnresolved{} still have no plan after 120~s,
-which does not prove infeasibility. The script and records are part of
-Online Resource 1.
+which does not prove infeasibility. The script and records are in the
+reproducibility archive \cite{ali2026archive}.
 
 \begin{figure}[ht]
  \centering
@@ -722,7 +716,7 @@ PyVRP/HGS (Table~\ref{tab:hgs}).
 
 \section{Reproducibility and implementation checks}\label{sec:reproducibility}
 
-The study archive (Online Resource 1) contains the candidate generator, scenario-bank
+The study archive \cite{ali2026archive} contains the candidate generator, scenario-bank
 implementation, test suite, experiment driver, raw JSON records, and the script
 that produces the manuscript tables and figure. Tests cover FIFO behavior,
 lognormal moments, order-invariant common random numbers, Wilson calculations,
@@ -913,6 +907,12 @@ The development findings were exploratory, and the two confirmatory studies
 support the main ones. Evidence from real road networks, other benchmark families and
 calibrated disturbance parameters remains outstanding.
 
+\section*{Acknowledgements}
+The author thanks the researchers who answered methodological questions by
+e-mail during the project.
+These discussions informed experimental design; all claims in the paper rest
+on the reported model, code, and experiments.
+
 \section*{Statements and Declarations}
 
 \paragraph{Competing interests.} The author has no relevant financial or non-financial interests to disclose.
@@ -921,8 +921,8 @@ calibrated disturbance parameters remains outstanding.
 
 \paragraph{Data and code availability.} The reproducibility archive contains
 source code, dependency versions, tests, seeds, raw JSON records, analysis
-scripts, generated tables and figures, and both confirmatory protocols. It is supplied
-as Online Resource 1 and archived on Zenodo \cite{ali2026archive}.
+scripts, generated tables and figures, and both confirmatory protocols. It is archived on
+Zenodo \cite{ali2026archive}.
 The two confirmatory protocol freezes, each archived before any instance of its
 study was solved, are separate records \cite{ali2026freeze,ali2026freeze2}.
 The Solomon instance files in the archive are third-party benchmark data

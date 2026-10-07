@@ -272,7 +272,13 @@ def main():
         'CappedFleetLarge':f"{float(np.mean([r['configurations']['capped_procedure']['plan']['metrics']['fleet']-r['configurations']['procedure']['plan']['metrics']['fleet'] for r in rows if r['customers']==200])):.2f}",
     })
     (ROOT/'paper/result_macros_v7.tex').write_text('\n'.join('\\newcommand{\\'+k+'}{'+v+'}' for k,v in macros.items()))
-    plt.rcParams.update({'font.size':9,'font.family':'DejaVu Sans'})
+    # Journal artwork rules: Arial/Helvetica lettering, fonts embedded as TrueType (Type 42).
+    from matplotlib import font_manager
+    installed={f.name for f in font_manager.fontManager.ttflist}
+    sans=next((f for f in ('Arial','Liberation Sans','Helvetica') if f in installed),'DejaVu Sans')
+    plt.rcParams.update({'font.size':9,'font.family':'sans-serif','font.sans-serif':[sans],
+                         'mathtext.fontset':'custom','mathtext.rm':sans,'mathtext.it':sans+':italic',
+                         'mathtext.cal':sans,'pdf.fonttype':42,'ps.fonttype':42})
     fig,ax=plt.subplots(figsize=(6.3,3.6))
     for rho,marker,color in [(0.,'o','0.15'),(.5,'s','0.45'),(.9,'^','0.68')]:
         intervals=[summary['sensitivity'][f'{s:.2f},{rho:.1f}']['procedure_minus_conservative'] for s in (.1,.2,.3)]
@@ -284,7 +290,10 @@ def main():
     ax.set(xlabel=r'Log-error scale $\sigma$',ylabel='P \u2212 C service probability\n(percentage points)',xticks=[.1,.2,.3])
     ax.set_xticklabels(['0.10','0.20','0.30'])
     ax.spines[['top','right']].set_visible(False);ax.legend(frameon=False,ncol=3,loc='upper left')
-    fig.tight_layout();fig.savefig(ROOT/'paper/matched_sensitivity_v7.pdf',bbox_inches='tight');plt.close(fig)
+    fig.tight_layout()
+    for out in ('paper/matched_sensitivity_v7.pdf','paper/Fig1.pdf','paper/Fig1.eps'):
+        fig.savefig(ROOT/out,bbox_inches='tight')
+    plt.close(fig)
     print(json.dumps({k:summary[k] for k in ('procedure','screened_conservative','capped_procedure','all_paired_vs_original','failures','all_feasible_counts','arcs_departing_after_1700_primary')},indent=2))
 
 
