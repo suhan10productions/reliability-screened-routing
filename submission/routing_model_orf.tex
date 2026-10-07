@@ -159,7 +159,19 @@ Tarantilis optimize self-imposed time windows under stochastic travel times
 \cite{vareias2019}, which is the closest conceptual analogue to the internal
 window contraction used here.
 
-The present method differs in where the statistical claim is made. It does not
+A second line of work builds the uncertainty model into the optimization. Agra
+et al. solve a robust VRPTW in which travel times range over an uncertainty set
+\cite{agra2013}. Jaillet, Qi and Sim route to minimize a requirements violation
+index, which measures how far arrival times can breach their windows when the
+travel-time distribution is only partly known \cite{jaillet2016}, and Zhang et
+al. develop a riskiness index for time windows under uncertainty together with
+an exact solution algorithm \cite{zhang2019}. Gendreau, Jabali and Rei survey
+stochastic routing models and the directions that remain open
+\cite{gendreau2016}. These methods require a solver built for their uncertainty
+model, and none of them is compared with the procedure in this paper.
+
+The present method differs from both lines in where the statistical claim is
+made. It does not
 embed a stochastic feasibility approximation inside a specialist route-search
 algorithm. Instead, it accepts routes from a replaceable nominal solver,
 searches an internal-buffer family on one scenario bank, and audits the chosen
@@ -771,7 +783,10 @@ routes about 11\% longer than PyVRP/HGS at 200 customers
 quality, and some of the uncertified screening failures may reflect search
 limits. The second confirmatory study shows that the reliability result does not
 depend on that generator, but its HGS generator omits the slack-deficit term, so
-the two generators do not solve identical objectives. Conservative speed is uniform
+the two generators do not solve identical objectives. The comparators are
+padding-based: uniform conservative speed and the same screening applied to
+conservative-speed candidates. No robust or chance-constrained VRPTW optimizer
+\cite{agra2013,jaillet2016,zhang2019} is compared. Conservative speed is uniform
 padding, and the clock-aware approximation is not an exact time-dependent
 optimizer. Generator and objective choices also differ between screened
 families; the experiment is not a full factorial decomposition of every design
@@ -813,6 +828,11 @@ disturbances its advantage grew with noise, from $\SweepLowIndep$ to
 \SweepHighIndep{} points. The unscreened slack-aware objective alone falls
 below conservative padding. The advantage comes from the complete procedure, in
 which the contracted candidate family and statistical selection act together.
+Screening also lifts conservative padding: applied to conservative-speed
+candidates, it performed about as well as the original procedure, and the capped
+procedure had the highest service probability of the three
+(Table~\ref{tab:screen}; exploratory). The fixed
+20\% pad is therefore the weaker of the two padding comparators.
 
 A first confirmatory study on \ConfInstances{} fresh instances, with hypotheses fixed in
 a timestamped protocol before any of them was solved, confirmed all four
