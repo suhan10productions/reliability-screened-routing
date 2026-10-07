@@ -23,7 +23,7 @@ def ci(values,scale=1.):
 
 
 def fmt(x,digits=1):
-    return '--' if x is None else f'{x[0]:.{digits}f} [{x[1]:.{digits}f}, {x[2]:.{digits}f}]'
+    return '--' if x is None else f'{x[0]:.{digits}f} [{x[1]:.{digits}f}, {x[2]:.{digits}f}]'.replace('-', '$-$')
 
 
 def val(r,c,metric='service_level_success'):
