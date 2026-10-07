@@ -34,30 +34,30 @@ ORCID: \href{https://orcid.org/0009-0004-5079-7684}{0009-0004-5079-7684}}
 \maketitle
 
 \begin{abstract}
-Routes planned on nominal travel times can meet every time window on
-paper and still fail under predictable congestion and random delay. This paper
-audits a two-layer procedure for the capacitated vehicle-routing problem with
-time windows. Replaceable OR-Tools generators propose plans, internal window
-contraction supplies candidate buffers without changing customer promises, and
-a plan is admitted only when a one-sided 95\% Wilson lower bound on the
-probability that at least 95\% of customers are served on time reaches 0.95.
-Selected plans are assessed once on untouched scenarios. On 53 seeded synthetic
-instances with 20 to 200 customers, the screened procedure exceeded uniformly
-conservative travel-time padding by \ProcConsRange{} percentage points,
-\CertifiedFailures{} of \FailureCount{} screening failures met a certified
+Routes planned on nominal travel times can fail under predictable congestion and
+random delay. This paper audits a two-layer procedure for the capacitated
+vehicle-routing problem with time windows. Replaceable OR-Tools generators
+propose plans, internal window contraction supplies candidate buffers without
+changing customer promises, and a plan is admitted only when a one-sided 95\%
+Wilson lower bound on the probability that at least 95\% of customers are served
+on time reaches 0.95. Selected plans are assessed once on untouched scenarios. On
+53 seeded synthetic instances with 20 to 200 customers, the screened procedure
+exceeded uniformly conservative travel-time padding by \ProcConsRange{} percentage
+points, \CertifiedFailures{} of \FailureCount{} screening failures met a certified
 reachability obstruction at some contraction level, and capping each customer's
 contraction at its direct-reachability limit raised admission from
 \OriginalSelected{} to \CappedSelected{} instances, at \CappedDistanceCost\% more
-distance and \CappedFleetCost{} more vehicles. A confirmatory study with
-hypotheses fixed in a timestamped protocol before any fresh instance was solved
-confirmed all four on \ConfInstances{} new instances: the screened
-procedure exceeded conservative padding by \ConfHOneMean{} points, capping
-exceeded the uncapped procedure by \ConfHTwoMean{} points and admitted
+distance and \CappedFleetCost{} more vehicles. A timestamped confirmatory study on
+\ConfInstances{} new instances from the same generator confirmed all four
+prespecified hypotheses: the screened procedure exceeded conservative padding by
+\ConfHOneMean{} points, capping added \ConfHTwoMean{} points and admitted
 \ConfHThreeK{} instances against \ConfHThreeP{}, and the advantage grew with
-disturbance noise. The advantage depends on the objective weights: with equal
-weights it is not distinguishable from zero. On \SolomonN{} Solomon instances, OR-Tools found plans for \SolomonPlans{} and screening
-admitted \SolomonAdmitted{}. Pooled service probability stays below the 95\% target. Results are conditional on assumed disturbance
-parameters and synthetic geometry.
+independent noise. These results use the original objective weights; with equal
+weights the advantage is not distinguishable from zero. On \SolomonN{} Solomon
+instances, OR-Tools found plans for \SolomonPlans{} and screening admitted
+\SolomonAdmitted{}. Pooled service probability stays below the 95\% target, mainly
+through fallback plans. Results are conditional on assumed disturbance parameters
+and synthetic geometry.
 \end{abstract}
 
 {\raggedright\noindent\textbf{Keywords:} vehicle routing; time windows;
@@ -530,7 +530,12 @@ advantage of the original procedure over conservative speed is larger at
 $\sigma=0.30$ than at $\sigma=0.10$ with $\rho=0$. H1 and H2 are decided at the
 97.5\% level, a Bonferroni adjustment for two primary hypotheses, and are
 confirmed only if their paired bootstrap interval lies above zero. H4 uses a 95\%
-interval. The two other hypotheses cannot rescue an unconfirmed primary one. A
+interval. The two other hypotheses cannot rescue an unconfirmed primary one. H3 and H4 are
+secondary and carry less evidential weight than H1 and H2, and Holm's procedure in
+place of the Bonferroni adjustment would not change the two primary decisions. H4
+compares fixed plans: each plan is screened under the primary disturbance setting
+($\sigma=0.20$, $\rho=0.5$) and then evaluated across the sweep without
+re-screening. A
 configuration without a plan scores zero on that instance, in validation and in
 every sweep cell, so a failure counts against the configuration that failed. A
 software error is recorded with its traceback, is never scored as routing
@@ -563,7 +568,11 @@ multiplied by 1.5 and floored, service time becomes 15 minutes, and the capacity
 of 200 and the 25 vehicles are kept. The shift length is the scaled depot due time,
 345 minutes for R1 and 360 minutes for RC1, starting at 06:00 so that the morning
 peak falls inside the shift. Planning times are rounded up to whole minutes as in the
-study. The pipeline code is unchanged; only the instance loader and the parameter
+study. The mapping keeps Solomon's relation between travel time and window width,
+because one distance unit takes one Solomon time unit to drive at the planning
+speed. The C1 instances could be fitted by compressing time, but that would change
+the relative tightness of their windows, so the eight instances form a convenience
+sample of the R1 and RC1 types. The pipeline code is unchanged; only the instance loader and the parameter
 constructor are replaced.
 
 \section{Results}
@@ -647,9 +656,11 @@ adaptive within-run selection from using its own validation outcomes.
 \paragraph{Use of generative AI tools.} Generative AI assistants were used for code development,
 experiment implementation, code review, analysis checking, and drafting and
 editing text. The assistants were OpenAI's ChatGPT (Astra 6) and Anthropic's Claude (Opus 5, Opus 5.5 and Sonnet 5). They are not authors. Every experiment was run from the archived
-code, every reported number regenerates from the raw records, and the headline
-results were recomputed independently of the analysis scripts. The author
-reviewed all code and text and takes full responsibility for the content.
+code, every reported number regenerates from the archived raw records, and the headline
+results were recomputed independently of the analysis scripts. Rerunning the solver can return different routes, because each solve stops at a
+wall-clock limit; Section~\ref{sec:weights} quantifies this run-to-run variation.
+The author reviewed all code and text and takes full responsibility for the
+content.
 
 \section{Limitations}
 
@@ -681,7 +692,12 @@ its nominal coverage is not a simultaneous guarantee across an adaptively
 searched grid. Held-out assessment is therefore necessary. It is also not a
 proof of feasibility under distributional misspecification.
 Sixth, breakdown recovery, heterogeneous fleets, new-order insertion, and
-rolling-horizon replanning are excluded from the present evidence.
+rolling-horizon replanning are excluded from the present evidence. So is
+departure-time recourse: every vehicle leaves at its planned time in every
+scenario, which makes the evaluation stricter than an operator who adjusts
+departures would face. Seventh, the prespecified fallback returns the slack-aware
+plan, which can be worse than conservative padding when screening admits nothing
+(Section~\ref{sec:solomon}).
 
 \section{Conclusion}
 
@@ -697,7 +713,7 @@ which the contracted candidate family and statistical selection act together.
 
 A confirmatory study on \ConfInstances{} fresh instances, with hypotheses fixed in
 a timestamped protocol before any of them was solved, confirmed all four
-prespecified hypotheses. The screened procedure exceeded conservative speed by
+prespecified hypotheses with the original weight vector. The screened procedure exceeded conservative speed by
 \ConfHOneMean{} points (97.5\% interval \ConfHOneLo{} to \ConfHOneHi{}), capping
 exceeded the original procedure by \ConfHTwoMean{} points (\ConfHTwoLo{} to
 \ConfHTwoHi{}), capping admitted \ConfHThreeK{} instances against \ConfHThreeP{}
@@ -714,11 +730,18 @@ speed fell to \WtEqualPCMean{} points with an interval from \WtEqualPCLo{} to
 \WtEqualPCHi{}. The confirmatory study used the original weights only.
 
 On \SolomonN{} Solomon instances with the same overlay, OR-Tools found a plan for
-\SolomonPlans{}, although PyVRP/HGS finds feasible plans for the others, and
-screening admitted \SolomonAdmitted{} of those. The admitted plans reached
+\SolomonPlans{} (PyVRP/HGS finds feasible plans for the other \SolomonNoPlan{}), and
+screening admitted \SolomonAdmitted{} of those \SolomonPlans{}. The admitted plans reached
 service probabilities near 98\%, and the fallback plans stayed below 46\%. This
 check was exploratory, covers a small set of instances, and shows that the
 candidate generator limits what the pipeline can do on harder benchmarks.
+
+The fallback is the weakest part of the procedure. When screening admits nothing,
+the protocol returns the uncontracted slack-aware plan, which on RC106 was far worse
+than conservative speed (Section~\ref{sec:solomon}). A conservative-speed fallback,
+examined post hoc, would have raised confirmatory pooled service to \PostHocP\% for
+the original procedure and \PostHocK\% for the capped procedure. Testing that rule
+prospectively is the most direct next step.
 
 Screening failures can be diagnosed. Among the
 \FailureCount{} development instances without an admitted plan, \CertifiedFailures{}
@@ -759,8 +782,9 @@ calibrated disturbance parameters remains outstanding.
 \paragraph{Data and code availability.} The reproducibility archive contains
 source code, dependency versions, tests, seeds, raw JSON records, analysis
 scripts, generated tables and figures, and the confirmatory protocol. It is supplied
-as Online Resource 1 and archived at \todo{Zenodo DOI} \cite{ali2026archive}.
-The confirmatory protocol freeze is archived separately \cite{ali2026freeze}.
+as Online Resource 1 and archived on Zenodo \cite{ali2026archive}.
+The confirmatory protocol freeze, archived before any confirmatory instance was
+solved, is a separate record \cite{ali2026freeze}.
 The Solomon instance files in the archive are third-party benchmark data
 \cite{solomon1987,ml4vrp2024} and remain under their original terms.
 

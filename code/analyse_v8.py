@@ -90,7 +90,25 @@ def confirmatory():
            for k in ("procedure", "screened_conservative", "capped_procedure")}
     ret = {k: sum(v[k]["retained"] for v in out["descriptive_by_size"].values())
            for k in ("procedure", "screened_conservative", "capped_procedure")}
-    return out, env, no_plan, sel, ret
+    R = [stage2[s] for s in sorted(stage2)]
+    val = lambda r, c: None if r["configurations"][c] is None else r["configurations"][c]["validation"]["service_level_success"]
+    selP = lambda r: bool(r["old_failure_audit"]["selected"])
+    selK = lambda r: r["capped_procedure"]["selected_plan"] is not None
+    extra = {}
+    for tag, chosen, c in (("P", selP, "procedure"), ("K", selK, "capped_procedure")):
+        adm = [val(r, c) for r in R if chosen(r)]
+        fb = [val(r, c) for r in R if not chosen(r)]
+        alt = [val(r, c) if chosen(r) else (val(r, "conservative") if val(r, "conservative") is not None else val(r, c)) for r in R]
+        extra[tag] = dict(adm=100 * float(np.mean(adm)), fb=100 * float(np.mean(fb)), nfb=len(fb),
+                          posthoc=100 * float(np.mean(alt)),
+                          changed=sum(1 for r in R if not chosen(r) and val(r, "conservative") is not None))
+    d = lambda r: (val(r, "capped_procedure") or 0.0) - (val(r, "procedure") or 0.0)
+    konly = [r for r in R if selK(r) and not selP(r)]
+    neither = [r for r in R if not selK(r) and not selP(r)]
+    assert all(abs(d(r)) < 1e-12 for r in neither), "procedures must share their fallback"
+    extra["h2_from_konly"] = 100 * sum(d(r) for r in konly) / len(R)
+    extra["n_konly"] = len(konly)
+    return out, env, no_plan, sel, ret, extra
 
 
 def weights():
@@ -186,6 +204,11 @@ def solomon():
         f"{rng('conservative', cons_adm)}\\% for conservative speed and {rng('nominal', admitted)}\\% for nominal distance. "
         f"On the other {num[len(fallback)]}, the procedure returned the slack-aware fallback: " + " and ".join(fb_text) + ". "
         "Capping changed no result on any instance.", "",
+        *[f"On {k} the procedure was therefore "
+          f"{summ[k]['conservative'] - summ[k]['procedure']:.1f} points worse than conservative speed. Screening admitted "
+          f"no plan there, and the slack-aware fallback is weaker than the conservative plan on that instance. The "
+          f"conservative-speed fallback examined post hoc in Section~\\ref{{sec:confirmatory}} would have returned "
+          f"{summ[k]['conservative']:.1f}\\%." for k in low], "",
         f"The {num[len(order)]} instances are all the R1 and RC1 files available in the source repository. They give no basis "
         "for an interval estimate, and no Solomon comparison was prespecified. The admitted plans reached "
         f"{rng('procedure', admitted)}\\% and the fallback plans {rng('procedure', fallback)}\\%, a split similar to that on the synthetic instances. The generator, "
@@ -197,7 +220,7 @@ def solomon():
 
 
 def main():
-    out, env, no_plan, sel, ret = confirmatory()
+    out, env, no_plan, sel, ret, extra = confirmatory()
     h1, h2, h3, h4 = out["H1_P_minus_C"], out["H2_K_minus_P"], out["H3_admission"], out["H4_noise_growth"]
     rows, noise, arch, k_common, n_inst = weights()
     verdict = lambda v: "confirmed" if v == "CONFIRMED" else "not confirmed"
@@ -216,6 +239,11 @@ def main():
         "ConfRetainedP": f"{ret['procedure']}/{sel['procedure']}",
         "ConfRetainedK": f"{ret['capped_procedure']}/{sel['capped_procedure']}",
         "ConfNoPlanConservative": str(no_plan["conservative"]), "ConfNoPlanClock": str(no_plan["clock_aware"]),
+        "ConfAdmMeanP": f1(extra["P"]["adm"]), "ConfFbMeanP": f1(extra["P"]["fb"]), "ConfFbCountP": str(extra["P"]["nfb"]),
+        "ConfAdmMeanK": f1(extra["K"]["adm"]), "ConfFbMeanK": f1(extra["K"]["fb"]), "ConfFbCountK": str(extra["K"]["nfb"]),
+        "PostHocP": f1(extra["P"]["posthoc"]), "PostHocK": f1(extra["K"]["posthoc"]),
+        "PostHocChangedP": str(extra["P"]["changed"]), "PostHocChangedK": str(extra["K"]["changed"]),
+        "HTwoFromKonly": f1(extra["h2_from_konly"]),
         "WtEqualDiffMean": f1(rows["equal"]["diff"][0]), "WtEqualDiffLo": f1(rows["equal"]["diff"][1]),
         "WtEqualDiffHi": f1(rows["equal"]["diff"][2]),
         "WtEqualPCMean": f1(rows["equal"]["pc"][0]), "WtEqualPCLo": f1(rows["equal"]["pc"][1]),
@@ -263,7 +291,23 @@ def main():
         f"Pooled over all instances, service probability was {f1(out['pooled_mean_pp']['procedure'])}\\% for the original "
         f"procedure, {f1(out['pooled_mean_pp']['screened_conservative'])}\\% for screened conservative speed and "
         f"{f1(out['pooled_mean_pp']['capped_procedure'])}\\% for the capped procedure, so the 95\\% target is still not met "
-        f"on average. Screened conservative speed was not a prespecified comparison, and its pooled value is descriptive only. ",
+        f"on average. Screened conservative speed was not a prespecified comparison, and its pooled value is descriptive only. "
+        f"As in the development study, the shortfall comes from instances without an admitted plan. Plans admitted by "
+        f"screening averaged {f1(extra['P']['adm'])}\\% for the original procedure and {f1(extra['K']['adm'])}\\% for the capped "
+        f"procedure, while the fallback plans averaged {f1(extra['P']['fb'])}\\% ({extra['P']['nfb']} instances) and "
+        f"{f1(extra['K']['fb'])}\\% ({extra['K']['nfb']} instances).",
+        "",
+        f"H2 and H3 are not independent. When neither procedure admits a plan, both return the same fallback, and "
+        f"{f1(extra['h2_from_konly'])} of the {f1(h2['mean_pp'])} points of H2 come from the {extra['n_konly']} instances that only "
+        f"the capped procedure admits. The two results are one finding measured twice.",
+        "",
+        f"\\paragraph{{Post hoc fallback.}} The protocol fixes the fallback: without an admitted plan, both procedures return "
+        f"the uncontracted slack-aware plan. A variant that returns the conservative-speed plan instead, where that plan "
+        f"exists, would have raised pooled service on the same fresh bank from {f1(out['pooled_mean_pp']['procedure'])}\\% to "
+        f"{f1(extra['P']['posthoc'])}\\% for the original procedure ({extra['P']['changed']} instances changed) and from "
+        f"{f1(out['pooled_mean_pp']['capped_procedure'])}\\% to {f1(extra['K']['posthoc'])}\\% for the capped procedure "
+        f"({extra['K']['changed']} instances changed). The fallback rule uses no validation outcome, but this variant was "
+        f"chosen after the results were seen, so it is exploratory.",
         "",
         "These instances come from the same generator and the same assumed disturbance model as the development study. "
         "The result establishes repeatability within that setting. It does not address real road networks, calibrated "

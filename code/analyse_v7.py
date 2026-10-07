@@ -118,7 +118,7 @@ def main():
         'The service gain is therefore a trade-off against some operating resources.')
     sections.append(r'\subsection{Screening a replaceable generator and capping contractions}')
     sections.append(table('All-instance procedure outcomes. Selected counts admission-bank lower bounds reaching 0.95; retained counts those selections whose fresh validation lower bound also reaches 0.95. Probability includes every fallback, as well as selected plans.',
-        'tab:screen','rllll','$n$ & Procedure & Selected & Retained & Probability (\\%)',procedure_rows,'small'))
+        'tab:screen','rllll','$n$ & Procedure & Selected / instances & Retained / selected & Probability (\\%)',procedure_rows,'small'))
     for c in ('procedure','screened_conservative','capped_procedure'):
         selected=sum(summary['sizes'][str(n)]['screening'][c]['selected'] for n in SIZES)
         retained=sum(summary['sizes'][str(n)]['screening'][c]['retained'] for n in SIZES)

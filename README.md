@@ -127,3 +127,20 @@ software checks, not fresh experimental evidence.
 
 `code/ahp_weights.py` reproduces the AHP weights and consistency ratio from
 the pairwise-comparison matrix given in the manuscript's appendix.
+
+## Confirmatory study 2 (proposed): HGS generator and fallback rule
+
+`CONFIRMATORY_PROTOCOL_2.md` tests, on 53 fresh instances (development seeds +
+80000), whether the screening benefit survives a state-of-the-art candidate
+generator (PyVRP hybrid genetic search) and whether a conservative-speed
+fallback improves the capped procedure. Both generators run on the same
+instances: the frozen OR-Tools pipeline unchanged, and the HGS pipeline
+(`code/hgs_generator.py`, `code/study_hgs.py`). The HGS generator solves the
+same planning model as OR-Tools with a fixed iteration budget and seed.
+
+The HGS pipeline was developed on the 53 development instances
+(`results/hgs_dev`, exploratory). `code/confirm_analysis_hgs.py` validates both
+halves against `FROZEN_MANIFEST_2.json` before computing anything, reusing the
+frozen validator of study 1 for the OR-Tools half;
+`code/check_hgs_safeguards.py` demonstrates its checks. Run sheet:
+`NEXT_RUNS_2.md`.
