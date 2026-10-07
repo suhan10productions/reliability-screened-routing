@@ -51,8 +51,8 @@ timestamped confirmatory studies, each on 53 new instances from the same
 generator, followed. The first confirmed all four prespecified hypotheses:
 screening exceeded conservative padding by \ConfHOneMean{} points and capping
 added \ConfHTwoMean{}. The second replaced OR-Tools with hybrid genetic search.
-Screening with capping again exceeded conservative padding, by \CtwoGOneMean{}
-points, and differed from the OR-Tools procedure by \CtwoGFourMean{} points
+With HGS candidates, screening with capping exceeded HGS conservative padding
+by \CtwoGOneMean{} points, and differed from the OR-Tools procedure by \CtwoGFourMean{} points
 (95\% interval \CtwoGFourLo{} to \CtwoGFourHi{}). A conservative-speed fallback,
 suggested post hoc, did not measurably improve the capped
 procedure but helped the uncapped one. These results use the original objective
@@ -115,10 +115,18 @@ probability as instance size grows.
 
 The contribution is integrative. Time-dependent
 speed profiles, multi-criteria routing, chance constraints, Monte Carlo
-evaluation, and Wilson intervals are established ideas. The contribution is a
-reproducible pipeline that keeps their roles statistically and computationally
-separate, together with ablations of uniform travel-time padding, clock-profile
-information, fleet resources, contracted candidates and screening. The
+evaluation, and Wilson intervals are established ideas. The paper contributes an
+architecture and the evidence for it. The architecture treats the routing solver
+as a replaceable candidate generator and makes every reliability decision after
+it: internal window contraction produces a family of candidates, a statistical
+screen admits or rejects each one, and an independent scenario bank validates the
+choice. Capping each customer's contraction at its direct-reachability limit
+removes a failure mode in which contraction makes individually reachable
+customers unreachable. The evidence consists of a development study with
+ablations of uniform travel-time padding, clock-profile information, fleet
+resources, contracted candidates and screening; two confirmatory studies with
+publicly timestamped protocols; and a test in which the OR-Tools generator is
+replaced by hybrid genetic search. The
 screened family and the statistical selection rule act together; a contrast
 against one uncontracted plan does not identify the selection rule alone.
 
@@ -253,9 +261,10 @@ single Analytic Hierarchy Process (AHP) pairwise-comparison matrix with consiste
 Appendix~\ref{sec:ahp-matrix} and in \texttt{code/ahp\_weights.py}. The matrix
 was specified for an earlier criteria set in which the third criterion was
 total distance, and its third row and column were not re-elicited when that
-criterion became driver duration. The weights therefore express one
-illustrative preference ordering, fixed before any experiment reported here;
-they were not elicited from a fleet operator. Section~\ref{sec:weights} reports a
+criterion became driver duration. The weights are therefore a fixed experimental preference vector that defines
+the candidate-selection objective. They were fixed before any experiment reported
+here, were not elicited from a fleet operator, and make no claim about the
+preferences of any industry. Section~\ref{sec:weights} reports a
 sensitivity analysis over four weight vectors.
 
 OR-Tools implements the distance term as an arc cost, driver duration as a
@@ -378,6 +387,24 @@ For procedure-level reporting, a prespecified fallback makes the output defined
 on every instance. If no candidate passes screening, the uncontracted
 slack-aware plan ($\beta=0$) is returned. Validation never changes this choice; it only estimates the performance of the plan already chosen. Selected-only results are shown only when labelled as such; the primary
 procedure comparison includes all instances.
+
+Three reliability quantities appear in the results, and they answer different
+questions:
+\begin{itemize}
+  \item[$\bullet$] \textbf{Admission criterion.} The Wilson lower bound \eqref{eq:wilson} on
+        the screening bank, computed for each candidate. A candidate is admitted
+        when it reaches $\alpha=0.95$.
+  \item[$\bullet$] \textbf{Selected-plan probability.} The validated estimate of
+        $\Pr[J_\kappa=1]$ for a plan that passed screening, from the untouched
+        bank.
+  \item[$\bullet$] \textbf{Procedure-level probability.} The validated probability averaged
+        over all instances, including those on which screening admitted nothing
+        and the fallback was returned.
+\end{itemize}
+The chance constraint \eqref{eq:chance} is the requirement that screening tests
+for each admitted plan. The procedure-level average falls below $\alpha$ whenever
+fallback plans are weaker, so the results report admitted plans and the
+procedure as a whole separately.
 
 \subsection{Generator replacement and reachability-capped contraction}
 
