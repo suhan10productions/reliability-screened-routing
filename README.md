@@ -203,3 +203,19 @@ The frozen confirmatory analyses round their figures to two decimals.
 `code/exact_display.py` reruns them with that display rounding switched off, so
 `analyse_v8.py` and `analyse_v9.py` round exact values to one decimal; both
 scripts still stop unless the results match the saved confirmatory output.
+
+## Confirmatory study 3 (proposed): robust comparison on new instances
+
+`CONFIRMATORY_PROTOCOL_3.md` turns the exploratory robust comparison into a
+prespecified test on the 90 confirmatory instances with up to 100 customers
+(studies 1 and 2). It fixes four hypotheses (R1-R4), the decision rules and the
+analysis (`code/confirm_analysis_robust.py`), and is frozen by
+`FROZEN_MANIFEST_3.json` (`code/freeze_manifest_robust.py`). No robust plan is
+computed for these instances before the protocol and manifest are publicly
+timestamped. `tests/test_confirm_analysis_robust.py` checks the safeguards, and
+the analysis's `descriptive` mode reproduces the exploratory development
+results.
+
+Exploratory runs with 200 customers use `study_robust.py --reduced-grid`
+(Gamma 3 and box, theta 0.4 and 0.6). `code/weight_bracketing.py` reruns the
+weight analysis with two diagnostic vectors and stores the plans.

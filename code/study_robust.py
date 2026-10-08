@@ -37,6 +37,8 @@ DESIGN = {20: (6, 20, 7200), 50: (14, 15, 7500), 100: (26, 10, 8000), 200: (40, 
 DELTAS = (0.2, 0.4, 0.6)
 GAMMAS = (1, 2, 3, 5, "box")
 GRID = [(0, 0.0)] + [(g, d) for d in DELTAS for g in GAMMAS]
+# A reduced grid for the exploratory runs with 200 customers, where the search is slow.
+REDUCED_GRID = [(3, 0.4), ("box", 0.4), (3, 0.6), ("box", 0.6)]
 ITERATIONS = {20: 6000, 50: 6000, 100: 3000, 200: 2000}
 SCREEN_N, VALID_N = 1000, 5000
 
@@ -45,14 +47,14 @@ def key(gamma, delta) -> str:
     return f"{'box' if gamma == 'box' else 'G' + str(gamma)}_d{delta:g}"
 
 
-def run_instance(n: int, seed: int, capped: bool = False) -> dict:
+def run_instance(n: int, seed: int, capped: bool = False, reduced: bool = False) -> dict:
     started = time.perf_counter()
     params, profile = ModelParams(), SpeedProfile()
     data = make_synthetic_instance(n, DESIGN[n][0], seed)
     screen = ScenarioBank(SCREEN_N, 100_000 + seed, params)
     valid = ScenarioBank(VALID_N, 400_000 + seed, params)
     settings = {}
-    grid = [x for x in GRID if not (capped and x[0] == 0)]
+    grid = REDUCED_GRID if reduced else [x for x in GRID if not (capped and x[0] == 0)]
     for gamma, delta in grid:
         t0 = time.perf_counter()
         plan = RobustSolver(data, params, None if gamma == "box" else gamma, delta,
@@ -76,11 +78,11 @@ def run_instance(n: int, seed: int, capped: bool = False) -> dict:
     }
 
 
-def _task(n, seed, out, capped):
+def _task(n, seed, out, capped, reduced=False):
     path = Path(out) / f"instance_{seed}.json"
     if path.exists():
         return seed, "exists"
-    rec = run_instance(n, seed, capped)
+    rec = run_instance(n, seed, capped, reduced)
     path.write_text(json.dumps(rec))
     ok = sum(v["status"] == "ok" for v in rec["settings"].values())
     return seed, {"n": n, "settings_with_plan": ok, "elapsed": round(rec["elapsed_seconds"], 1)}
@@ -93,6 +95,8 @@ def main():
     ap.add_argument("--limit", type=int)
     ap.add_argument("--workers", type=int, default=1)
     ap.add_argument("--capped", action="store_true")
+    ap.add_argument("--reduced-grid", action="store_true",
+                    help="Gamma 3 and box at delta 0.4 and 0.6 only (exploratory runs with 200 customers)")
     ap.add_argument("--output", type=Path, required=True)
     a = ap.parse_args()
     a.output.mkdir(parents=True, exist_ok=True)
@@ -102,7 +106,7 @@ def main():
         count = count if a.limit is None else min(count, a.limit)
         tasks += [(n, first + a.seed_shift + i) for i in range(count)]
     with ProcessPoolExecutor(max_workers=a.workers) as pool:
-        futs = {pool.submit(_task, n, s, str(a.output), a.capped): (n, s) for n, s in tasks}
+        futs = {pool.submit(_task, n, s, str(a.output), a.capped, a.reduced_grid): (n, s) for n, s in tasks}
         for f in as_completed(futs):
             n, s = futs[f]
             try:
