@@ -1,6 +1,6 @@
 \subsection{Complete procedures on matched instances}
 
-Table~\ref{tab:matched} puts every original configuration on the same conservative-feasible subset. The paired contrasts are computed from individual instance differences. Their intervals therefore quantify the comparison directly; they are not obtained by subtracting endpoints of separate confidence intervals.
+Table~\ref{tab:matched} compares every original configuration on the same subset of instances, those on which conservative-speed planning returned a plan. The paired contrasts are computed from differences within each instance, so their intervals measure the comparison directly; they are not obtained by subtracting the endpoints of separate intervals.
 
 \begin{table}[htbp]
 \centering
@@ -23,7 +23,7 @@ $n$ & $k$ & N & C & S & F & P\\
 \begin{table}[htbp]
 \centering
 \small
-\caption{Paired probability differences (percentage points) on exactly the same subsets as Table~\ref{tab:matched}. SC denotes screened conservative-speed with its prespecified fallback.}
+\caption{Paired differences in service probability (percentage points) on the same subsets as Table~\ref{tab:matched}. SC denotes screened conservative speed with its prespecified fallback.}
 \label{tab:paired}
 \begin{tabular}{rlll}
 \toprule
@@ -38,7 +38,7 @@ $n$ & S minus C & P minus C & SC minus C\\
 \end{table}
 
 
-In the paired contrasts of Table~\ref{tab:paired}, the complete original procedure improves on conservative-speed planning by 8.3--21.4 percentage points across sizes. The unscreened slack-aware objective does not show this advantage. At $n=200$ the interval includes zero, so the positive mean at that size is not conclusive.
+In the paired contrasts of Table~\ref{tab:paired}, the complete original procedure exceeds conservative-speed planning by 8.3--21.4 percentage points, depending on size. The slack-aware objective without screening shows no such advantage. At $n=200$ the interval includes zero, so the positive mean at that size is not conclusive.
 
 \subsection{Resources on the common subset}
 
@@ -60,16 +60,16 @@ $n$ & Distance & Scheduled time & Simulated time & Fleet\\
 \end{table}
 
 
-Scheduled driver duration is not identical to realized labour time: the conservative planner budgets padded arc times, while the evaluator may traverse those arcs faster. Table~\ref{tab:cost} therefore includes both measures. Absolute distance premiums also carry solver-quality uncertainty: the five-second deterministic OR-Tools benchmark remains about 11\% longer than HGS at $n=200$.
+Scheduled driver duration differs from the realized driving, service and waiting time in simulation: the conservative planner budgets padded arc times, while in simulation those arcs may be driven faster. Table~\ref{tab:cost} therefore reports both. Absolute distance premiums also depend on solver quality: in the five-second deterministic benchmark, OR-Tools routes are about 11\% longer than HGS routes at $n=200$.
 
-The matched data do not support uniform resource dominance: at $n=20$ the original procedure has slightly greater scheduled time and more vehicles; at $n=100$ it also uses slightly more vehicles. The simulated-time interval excludes zero only for the increase at $n=20$. The service gain is therefore a trade-off against some operating resources.
+The original procedure does not use fewer resources at every size. At $n=20$ it has slightly more scheduled time and more vehicles, and at $n=100$ it also uses slightly more vehicles. The simulated-time interval excludes zero only for the increase at $n=20$. The service gain is therefore bought with some extra operating resources.
 
 \subsection{Screening a replaceable generator and capping contractions}
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{All-instance procedure outcomes. Selected counts admission-bank lower bounds reaching 0.95; retained counts those selections whose fresh validation lower bound also reaches 0.95. Probability includes every fallback, as well as selected plans.}
+\caption{Procedure outcomes on all instances. Selected counts instances where the lower bound of some candidate on the screening bank reached 0.95; retained counts the selections whose lower bound on the fresh validation bank also reached 0.95. Probability includes fallback plans as well as selected plans.}
 \label{tab:screen}
 \begin{tabular}{rllll}
 \toprule
@@ -92,12 +92,12 @@ $n$ & Procedure & Selected / instances & Retained / selected & Probability (\%)\
 \end{table}
 
 
-In Table~\ref{tab:screen}, the screened conservative generator selects on 25/53 instances; 25 selections retain the target lower bound. Its all-instance paired difference from the original procedure is $-$0.3 [$-$5.5, 5.0] points. The capped variant selects on 42/53, with 40 retained; its corresponding difference is 7.7 [3.5, 12.5] points. Capping removes only an individual reachability obstruction; capacity, sequencing and finite-search limitations remain.
+In Table~\ref{tab:screen}, screened conservative speed selects a plan on 25 of 53 instances, and 25 of these selections keep the target lower bound on the fresh bank. Over all instances, its paired difference from the original procedure is $-$0.3 [$-$5.5, 5.0] points. The capped variant selects a plan on 42 of 53, with 40 retained, and its paired difference from the original procedure is 7.7 [3.5, 12.5] points. Capping removes only the reachability obstruction at individual customers; limits from capacity, sequencing and finite search remain.
 
 \begin{table}[htbp]
 \centering
 \scriptsize
-\caption{Operational price of the capped variant relative to the original procedure on all 53 instances. Percentage changes are paired per instance; fleet changes are absolute. Capping can permit different route and resource choices, so its reliability gain is not attributed to schedule structure alone.}
+\caption{Operating cost of the capped variant relative to the original procedure on all 53 instances. Percentage changes are paired by instance; fleet changes are absolute. Capping can lead to different routes and resources, so its reliability gain is not attributed to schedule structure alone.}
 \label{tab:cap-cost}
 \begin{tabular}{rllll}
 \toprule
@@ -112,14 +112,14 @@ $n$ & Distance & Scheduled time & Simulated time & Fleet\\
 \end{table}
 
 
-Pooled over all instances (Table~\ref{tab:cap-cost}), the capped variant costs 2.5\% more distance and 0.43 additional vehicles than the original procedure. At $n=200$, the additional fleet use is material and should not be obscured by the earlier fleet-matched ablation of the uncontracted objective.
+Over all instances (Table~\ref{tab:cap-cost}), the capped variant uses 2.5\% more distance and 0.43 more vehicles than the original procedure. At $n=200$ the extra fleet is substantial. The earlier fleet-matched ablation concerns the uncontracted objective and does not cover this cost.
 
 \subsection{Clock-aware approximation}
 
 \begin{table}[htbp]
 \centering
 \scriptsize
-\caption{Clock-aware approximation: identical matched subsets within each row, restricted to an exact deterministic schedule being found by the approximation. Probabilities and paired changes are percentages and percentage points, respectively. The two matrix solves share a five-second search allowance.}
+\caption{Clock-aware approximation. Each row uses the same instances for every column: those where the approximation found an exact deterministic schedule. Probabilities are percentages, and paired changes are percentage points. The two matrix solves share a five-second search budget.}
 \label{tab:clock}
 \begin{tabular}{rrllll}
 \toprule
@@ -134,16 +134,16 @@ $n$ & Found & Nominal & Clock-aware & Original P & Clock minus N\\
 \end{table}
 
 
-The clock-aware rows test a practical departure-time approximation. Exact deterministic retiming verifies each reported route, so its success at $\sigma=0$ is an acceptance condition and says nothing about stochastic robustness. Conservative-speed planning likewise guarantees deterministic on-time service within the planned horizon by upper-bounding every arc time. Both 100\% rows hold by construction.
+The clock-aware rows test a practical approximation that uses departure times. Exact deterministic retiming checks every reported route, so its success at $\sigma=0$ is a condition for acceptance and says nothing about robustness to random delay. Conservative-speed planning also guarantees deterministic on-time service within the planned horizon, because its planned arc times are never shorter than the deterministic ones. Both 100\% results hold by construction.
 
-In Table~\ref{tab:clock}, the approximation improves on nominal distance by 17.2--19.1 points on its feasible subsets, but remains below the original procedure. Its latest-feasible-departure rule and two-pass search are part of this result; the comparison does not establish what an optimal time-dependent planner could achieve.
+In Table~\ref{tab:clock}, the approximation exceeds nominal distance by 17.2--19.1 points on the instances where it finds a schedule, but stays below the original procedure. The latest-feasible-departure rule and the two-pass search are part of this result, and the comparison does not show what an optimal time-dependent planner could achieve.
 
 \subsection{Matched disturbance sensitivity}
 
 \begin{table}[htbp]
 \centering
 \scriptsize
-\caption{Fixed-plan sensitivity on the common 46 instances. Each cell uses 1,000 common scenarios from a bank separate from primary validation; plans are not re-screened or reoptimized for each parameter setting. C, P and SC are conservative speed, original procedure and screened conservative.}
+\caption{Fixed-plan sensitivity on the 46 common instances. Each cell uses 1,000 common scenarios from a bank separate from the main validation bank; plans are not re-screened or re-optimized for each setting. C, P and SC are conservative speed, the original procedure and screened conservative speed.}
 \label{tab:sensitivity}
 \begin{tabular}{rrllll}
 \toprule
@@ -163,10 +163,10 @@ $\sigma$ & $\rho$ & C (\%) & P (\%) & SC (\%) & P minus C (points)\\
 \end{table}
 
 
-The mechanism comparison of interest is the paired P-minus-C column of Table~\ref{tab:sensitivity}, which Fig.~\ref{fig:reliability} also plots across the disturbance grid. Changes in its sign or magnitude describe fixed-plan performance under each setting. On its own, this column cannot separate screening from the contracted candidate family, and the nine cells share instances and common random numbers.
+The comparison of interest in Table~\ref{tab:sensitivity} is the paired difference P minus C, which Fig.~\ref{fig:reliability} plots across the disturbance grid. It shows how the same fixed plans compare under each setting. This column alone cannot separate screening from the contracted candidate family, and the nine cells share instances and common random numbers.
 
-For independent disturbances, increasing $\sigma$ from 0.10 to 0.30 changes the paired contrast from $-$3.1 [$-$10.7, 3.9] to 30.5 [19.8, 40.5] points. This supports a growing advantage of the complete screened family in that regime. At $\rho=0.9$ the increase is not monotonic, so the data do not support a universal monotonic relationship between noise scale and screening value.
+For independent disturbances, raising $\sigma$ from 0.10 to 0.30 moves the paired difference from $-$3.1 [$-$10.7, 3.9] to 30.5 [19.8, 40.5] points. This supports a growing advantage of the complete screened procedure in that setting. At $\rho=0.9$ the increase is not monotonic, so the data do not show that the value of screening always rises with the noise scale.
 
 \subsection{Diagnosis of screening failures}
 
-Of the 21 original screening failures, 17 reach a buffer with an explicit customer-reachability contradiction and 4 have no such certificate through 60 minutes. 8 instances also contain a no-plan outcome before any certificate. Those outcomes remain unresolved: failure of a necessary reachability test proves infeasibility, but passing it does not establish a feasible multi-customer routing. The per-instance audit appears in Appendix~\ref{sec:failure-audit}.
+Of the 21 instances on which the original procedure admitted no plan, 17 reach a buffer at which some customer is provably unreachable, and 4 have no such certificate up to 60 minutes. On 8 instances the solver also returned no plan at a buffer not covered by a certificate. Those outcomes remain unresolved: failing a necessary reachability test proves infeasibility, but passing it does not show that a feasible multi-customer routing exists. Appendix~\ref{sec:failure-audit} gives the audit for each instance.

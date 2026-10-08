@@ -177,7 +177,7 @@ def solomon():
     for k in fallback:
         if summ[k]["conservative"] is None:
             fb_text.append(f"{k} ({summ[k]['procedure']:.1f}\\%; conservative speed returned no plan there, although HGS finds a "
-                           f"feasible plan for its matrix)" if k in hgs_cons else
+                           f"feasible plan on its matrix)" if k in hgs_cons else
                            f"{k} ({summ[k]['procedure']:.1f}\\%; conservative speed returned no plan there)")
         else:
             gap = summ[k]["conservative"] - summ[k]["procedure"]
@@ -187,32 +187,30 @@ def solomon():
     num = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight"}
     tex = [
         r"\subsection{Solomon instances}\label{sec:solomon}", "",
-        f"The unchanged pipeline was run on {num[len(order)]} 100-customer Solomon instances with the time-dependent profile "
-        r"and disturbance model of the study overlaid (Section~\ref{sec:confdesign}). Within its five-second budget, "
+        f"The unchanged pipeline was run on {num[len(order)]} 100-customer Solomon instances, with the study's "
+        r"time-dependent profile and disturbance model added (Section~\ref{sec:confdesign}). Within its five-second budget, "
         f"OR-Tools returned a nominal plan for {num[len(plans)]} of the {num[len(order)]} instances (Table~\\ref{{tab:solomon}}). "
         f"PyVRP/HGS finds a feasible plan for the other {num[len(no_plan)]}, {names(no_plan)}, within "
-        f"{int(hgs[no_plan[0]]['budget_s'])} seconds, so these outcomes are search limits of the generator and not "
-        "infeasibility of the mapped instances. The failure policy records them as missing plans, and every dependent "
-        "configuration is recorded as not attempted.", "",
+        f"{int(hgs[no_plan[0]]['budget_s'])} seconds, so these failures are search limits of the generator, not "
+        "infeasibility of the mapped instances. The failure policy records them as missing plans, and every configuration "
+        "that depends on them as not attempted.", "",
         table("Solomon instances: validated service-event probability (\\%). A dash marks a configuration with no plan. "
               "\\emph{Plan} states whether OR-Tools returned a nominal plan; \\emph{Admitted} states whether screening admitted a plan "
               "for the original procedure, which otherwise returns the slack-aware fallback.",
               "tab:solomon", r"@{}lcccccccc@{}".replace("cccccccc", "ccccccc"),
               r"Instance & Plan & Nominal & Conservative & Slack-aware & Original & Capped & Admitted", rows),
-        f"On the {num[len(plans)]} instances with a plan, screening admitted a plan for {num[len(admitted)]} "
+        f"Of the {num[len(plans)]} instances with a plan, screening admitted a plan on {num[len(admitted)]} "
         f"({names(admitted)}). Their validated service probability was {rng('procedure', admitted)}\\%, against "
         f"{rng('conservative', cons_adm)}\\% for conservative speed and {rng('nominal', admitted)}\\% for nominal distance. "
         f"On the other {num[len(fallback)]}, the procedure returned the slack-aware fallback: " + " and ".join(fb_text) + ". "
         "Capping changed no result on any instance.", "",
-        *[f"On {k} the procedure was therefore "
-          f"{summ[k]['conservative'] - summ[k]['procedure']:.1f} points worse than conservative speed. Screening admitted "
-          f"no plan there, and the slack-aware fallback is weaker than the conservative plan on that instance. The "
+        *[f"On {k}, screening admitted no plan, and the slack-aware fallback was weaker than the conservative plan. The "
           f"conservative-speed fallback examined post hoc in Section~\\ref{{sec:confirmatory}} would have returned "
-          f"{summ[k]['conservative']:.1f}\\%." for k in low], "",
-        f"The {num[len(order)]} instances are all the R1 and RC1 files available in the source repository. They give no basis "
-        "for an interval estimate, and no Solomon comparison was prespecified. The admitted plans reached "
-        f"{rng('procedure', admitted)}\\% and the fallback plans {rng('procedure', fallback)}\\%, a split similar to that on the synthetic instances. The generator, "
-        "however, returned no plan on a substantial share of these harder instances.", "",
+          f"{summ[k]['conservative']:.1f}\\% there." for k in low], "",
+        f"The {num[len(order)]} instances are all the R1 and RC1 files in the source repository. They give no basis for an "
+        "interval estimate, and no Solomon comparison was prespecified. The admitted plans reached "
+        f"{rng('procedure', admitted)}\\% and the fallback plans {rng('procedure', fallback)}\\%, a split similar to that on "
+        "the synthetic instances. The generator, however, returned no plan on a substantial share of these harder instances.", "",
     ]
     (ROOT / "paper/solomon_results.tex").write_text("\n".join(tex))
     return {"SolomonN": str(len(order)), "SolomonPlans": str(len(plans)), "SolomonAdmitted": str(len(admitted)),
@@ -271,27 +269,28 @@ def main():
     ]
     conf_tex = [
         r"\subsection{First confirmatory study}\label{sec:confirmatory}", "",
-        r"The four hypotheses of the prespecified protocol were evaluated on "
+        r"The four hypotheses of the prespecified protocol were tested on "
         f"{out['instances']} new instances (Table~\\ref{{tab:confirmatory}}). Every decision uses the "
-        r"unrounded interval limits. The protocol's validation passed before any quantity was computed.",
+        r"unrounded interval limits, and the protocol's validation checks passed before any quantity was computed.",
         "",
-        table("Confirmatory results on 53 fresh instances. Differences are in percentage points of validated "
+        table("First confirmatory study on 53 new instances. Differences are in percentage points of validated "
               "service-event probability; intervals are paired bootstrap intervals over instances. "
               "Conservative speed returned a plan on " + str(out['common_subset']) + " of " + str(out['instances']) +
-              " instances, and H1 and H4 use those instances as the protocol defines.",
+              " instances, and H1 and H4 use those instances, as the protocol specifies.",
               "tab:confirmatory", r"@{}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{3.5cm}cc@{}",
               r"Hypothesis & Quantity & Estimate [interval] & Level & Decision", hyp_rows, size="footnotesize"),
         f"All four hypotheses were confirmed. The original procedure exceeded conservative speed by "
-        f"{f1(h1['mean_pp'])} points, capping exceeded the original procedure by {f1(h2['mean_pp'])} points, and "
-        f"capping admitted {h3['K_selected']} instances against {h3['P_selected']}. Capping lost no instance that the "
-        f"original procedure admitted ({h3['K_only']} gained, {h3['P_only']} lost). The advantage over conservative speed "
-        f"was {f1(h4['mean_pp'])} points larger at $\\sigma=0.30$ than at $\\sigma=0.10$ for independent disturbances. "
+        f"{f1(h1['mean_pp'])} points, and capping added {f1(h2['mean_pp'])} points. "
+        f"Capping admitted {h3['K_selected']} instances against {h3['P_selected']} and lost none that the "
+        f"original procedure admitted ({h3['K_only']} gained, {h3['P_only']} lost). For independent disturbances, the advantage "
+        f"over conservative speed was {f1(h4['mean_pp'])} points larger at $\\sigma=0.30$ than at $\\sigma=0.10$. "
         f"Of the plans admitted on the screening bank, {ret['procedure']} of {sel['procedure']} (original) and "
-        f"{ret['capped_procedure']} of {sel['capped_procedure']} (capped) retained the 0.95 lower bound on the fresh bank. "
-        f"Pooled over all instances, service probability was {f1(out['pooled_mean_pp']['procedure'])}\\% for the original "
+        f"{ret['capped_procedure']} of {sel['capped_procedure']} (capped) kept the 0.95 lower bound on the fresh bank.",
+        "",
+        f"Averaged over all instances, service probability was {f1(out['pooled_mean_pp']['procedure'])}\\% for the original "
         f"procedure, {f1(out['pooled_mean_pp']['screened_conservative'])}\\% for screened conservative speed and "
-        f"{f1(out['pooled_mean_pp']['capped_procedure'])}\\% for the capped procedure, so the 95\\% target is still not met "
-        f"on average. Screened conservative speed was not a prespecified comparison, and its pooled value is descriptive only. "
+        f"{f1(out['pooled_mean_pp']['capped_procedure'])}\\% for the capped procedure, so on average the 95\\% target is "
+        f"still not met. Screened conservative speed was not a prespecified comparison, and its value is descriptive only. "
         f"As in the development study, the shortfall comes from instances without an admitted plan. Plans admitted by "
         f"screening averaged {f1(extra['P']['adm'])}\\% for the original procedure and {f1(extra['K']['adm'])}\\% for the capped "
         f"procedure, while the fallback plans averaged {f1(extra['P']['fb'])}\\% ({extra['P']['nfb']} instances) and "
@@ -299,19 +298,19 @@ def main():
         "",
         f"H2 and H3 are not independent. When neither procedure admits a plan, both return the same fallback, and "
         f"{f1(extra['h2_from_konly'])} of the {f1(h2['mean_pp'])} points of H2 come from the {extra['n_konly']} instances that only "
-        f"the capped procedure admits. The two results are one finding measured twice.",
+        f"the capped procedure admits. The two hypotheses measure one finding twice.",
         "",
-        f"\\paragraph{{Post hoc fallback.}} The protocol fixes the fallback: without an admitted plan, both procedures return "
-        f"the uncontracted slack-aware plan. A variant that returns the conservative-speed plan instead, where that plan "
+        f"\\paragraph{{Post hoc fallback.}} The protocol fixes the fallback: when no plan is admitted, both procedures return "
+        f"the uncontracted slack-aware plan. Returning the conservative-speed plan instead, where that plan "
         f"exists, would have raised pooled service on the same fresh bank from {f1(out['pooled_mean_pp']['procedure'])}\\% to "
         f"{f1(extra['P']['posthoc'])}\\% for the original procedure ({extra['P']['changed']} instances changed) and from "
         f"{f1(out['pooled_mean_pp']['capped_procedure'])}\\% to {f1(extra['K']['posthoc'])}\\% for the capped procedure "
-        f"({extra['K']['changed']} instances changed). The fallback rule uses no validation outcome, but this variant was "
-        f"chosen after the results were seen, so it is exploratory. The second confirmatory study tests it "
+        f"({extra['K']['changed']} instances changed). This rule uses no validation outcome, but it was "
+        f"chosen after the results were seen, so the comparison is exploratory. The second confirmatory study tests it "
         f"prospectively (Section~\\ref{{sec:confirmatory2}}).",
         "",
-        "These instances come from the same generator and the same assumed disturbance model as the development study. "
-        "The result establishes repeatability within that setting. It does not address real road networks, calibrated "
+        "These instances come from the same generator and the same assumed disturbance model as the development study, "
+        "so the result shows repeatability within that setting. It says nothing about real road networks, calibrated "
         "parameters or other instance families.",
         "",
     ]
@@ -323,9 +322,9 @@ def main():
         cell = lambda k: f"{v[k]['selected']}/{v['instances']} ({v[k]['retained']}) & {f1(v[k]['mean_pp'])}"
         size_rows.append(f"{n} & {v['instances']} & {cell('procedure')} & {cell('screened_conservative')} & {cell('capped_procedure')}")
     (ROOT / "paper/confirmatory_appendix.tex").write_text("\n".join([
-        table("First confirmatory study by size (descriptive). For each procedure, the number of instances admitted by "
-              "screening, the number of those that retained the 0.95 lower bound on the fresh bank in parentheses, "
-              "and the mean validated service-event probability (\\%) over all instances including fallbacks.",
+        table("First confirmatory study by size (descriptive). For each procedure: the number of instances admitted by "
+              "screening, with the number that kept the 0.95 lower bound on the fresh bank in parentheses, "
+              "and the mean validated service-event probability (\\%) over all instances, including fallbacks.",
               "tab:conf-size", r"@{}rrrrrrrr@{}",
               r"$n$ & Inst. & \multicolumn{2}{c}{Original} & \multicolumn{2}{c}{Screened conservative} & \multicolumn{2}{c}{Capped}",
               size_rows, size="footnotesize")]))
@@ -340,24 +339,24 @@ def main():
     wt_tex = [
         r"\subsection{Sensitivity to the objective weights}\label{sec:weights}", "",
         f"The original procedure was rerun on the {n_inst} development instances with four weight vectors "
-        r"(Table~\ref{tab:weights}); the confirmatory study used the original vector only. Each rerun regenerates the "
+        r"(Table~\ref{tab:weights}); neither confirmatory study varied the weights. Each rerun regenerates the "
         "candidate family, screens it on the same bank and validates the selected plan or fallback on the same fresh bank. "
         "Conservative-speed planning does not use the weights, so its archived outcome is reused. "
-        f"The rerun of the original weights differs from the archived run by {f1(noise[0])} points pooled "
+        f"The rerun with the original weights differs from the archived run by {f1(noise[0])} points pooled "
         f"([{f1(noise[1])}, {f1(noise[2])}]) and by one admitted instance ({rows['baseline_rerun']['selected']} against "
-        f"{arch['selected']}), which is the run-to-run variation of a time-limited search.",
+        f"{arch['selected']}). This is the run-to-run variation of a time-limited search.",
         "",
-        table("Weight sensitivity on the " + str(n_inst) + " development instances. Weights are ordered fuel, slack, driver duration, fleet "
-              "use. The advantage over conservative speed uses the " + str(k_common) + " instances where it returned a plan. "
-              "The last column is the paired difference in service probability from the rerun of the original weights over "
-              "all 53 instances (percentage points).",
+        table("Weight sensitivity on the " + str(n_inst) + " development instances. Weights are ordered distance cost, slack deficit, "
+              "driver duration, fleet use. The advantage over conservative speed uses the " + str(k_common) + " instances where "
+              "conservative speed returned a plan. The last column is the paired difference in service probability from the "
+              "rerun with the original weights, over all 53 instances (percentage points).",
               "tab:weights", r"@{}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{2.5cm}@{}",
               r"Vector & Weights & Admitted & Pooled (\%) & Advantage over conservative [95\%] & Paired difference [95\%]",
               wrows, size="footnotesize", tabcolsep=3),
-        f"Swapping the two largest weights changed nothing beyond the run-to-run variation. The distance-heavy vector gave "
-        f"a lower pooled value, by {f1(abs(rows['distance_heavy']['diff'][0]))} points, with a paired interval that includes "
+        f"Swapping the two largest weights changed nothing beyond the run-to-run variation. The distance-heavy vector "
+        f"gave pooled service {f1(abs(rows['distance_heavy']['diff'][0]))} points lower, with a paired interval that includes "
         f"zero, and its advantage over conservative speed stayed clearly positive "
-        f"({interval(rows['distance_heavy']['pc'])}). Equal weights gave the largest change. They admitted "
+        f"({interval(rows['distance_heavy']['pc'])}). Equal weights changed the most. They admitted "
         f"{rows['equal']['selected']} instances against {rows['baseline_rerun']['selected']}, lowered pooled service by "
         f"{f1(abs(rows['equal']['diff'][0]))} points (paired interval {interval(rows['equal']['diff'])}; "
         f"{f1(rows['equal']['diff_adj'][1])} to {f1(rows['equal']['diff_adj'][2])} after adjusting the level for three "
@@ -366,10 +365,10 @@ def main():
         f"only under the original weights and {rows['equal']['only_w']} only under equal weights (exact $p={rows['equal']['p']:.3f}$, unadjusted; the "
         f"adjusted threshold for three comparisons is 0.017).",
         "",
-        "This analysis is exploratory. It uses the development instances and four vectors chosen without a search for the "
-        "point at which the advantage fades, and each vector was run once. The records do not store route structure, so "
-        "the reason equal weights perform worse is not tested here. Equal weights give fleet size and driver duration "
-        "a weight of 0.25 each, against 0.06 and 0.11 in the original vector.",
+        "This analysis is exploratory. It uses the development instances and four vectors, chosen without searching for the "
+        "point at which the advantage disappears, and each vector was run once. The records do not store route structure, so "
+        "the reason equal weights do worse is not tested here. Equal weights give fleet size and driver duration "
+        "0.25 each, against 0.06 and 0.11 in the original vector.",
         "",
     ]
     (ROOT / "paper/weight_results.tex").write_text("\n".join(wt_tex))

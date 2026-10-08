@@ -50,10 +50,10 @@ def main():
     summary={'schema':'routeops-v7-summary-1','matched_instances':len(common),'sizes':{},'sensitivity':{}}
     sections=[]; supplementary=[]
     sections.append(r'\subsection{Complete procedures on matched instances}')
-    sections.append('Table~\\ref{tab:matched} puts every original configuration on the same '
-        'conservative-feasible subset. The paired contrasts are computed from individual '
-        'instance differences. Their intervals therefore quantify the comparison directly; '
-        'they are not obtained by subtracting endpoints of separate confidence intervals.')
+    sections.append('Table~\\ref{tab:matched} compares every original configuration on the same '
+        'subset of instances, those on which conservative-speed planning returned a plan. The paired contrasts '
+        'are computed from differences within each instance, so their intervals measure the comparison directly; '
+        'they are not obtained by subtracting the endpoints of separate intervals.')
     means=[];contrasts=[];costs=[];procedure_rows=[];clock_rows=[];cap_cost_rows=[]
     for n in SIZES:
         full=[r for r in rows if r['customers']==n]; matched=[r for r in common if r['customers']==n]
@@ -99,25 +99,25 @@ def main():
         summary['sizes'][str(n)]=s
     sections.append(table('Validated service-event probability (\\%) on the same 46 instances: every entry in a row has the displayed denominator. Entries are mean [95\\% instance-bootstrap interval]. N, C, S, F and P denote nominal, conservative-speed, slack-aware, fleet-matched and original procedure, respectively.',
         'tab:matched','rrlllll','$n$ & $k$ & N & C & S & F & P',means,'scriptsize'))
-    sections.append(table('Paired probability differences (percentage points) on exactly the same subsets as Table~\\ref{tab:matched}. SC denotes screened conservative-speed with its prespecified fallback.',
+    sections.append(table('Paired differences in service probability (percentage points) on the same subsets as Table~\\ref{tab:matched}. SC denotes screened conservative speed with its prespecified fallback.',
         'tab:paired','rlll','$n$ & S minus C & P minus C & SC minus C',contrasts,'small'))
     proc_range=[summary['sizes'][str(n)]['paired']['procedure_minus_conservative'][0] for n in SIZES]
-    sections.append(f'In the paired contrasts of Table~\\ref{{tab:paired}}, the complete original procedure improves on conservative-speed planning by '
-        f'{min(proc_range):.1f}--{max(proc_range):.1f} percentage points across sizes. '
-        'The unscreened slack-aware objective does not show this advantage. '
+    sections.append(f'In the paired contrasts of Table~\\ref{{tab:paired}}, the complete original procedure exceeds conservative-speed planning by '
+        f'{min(proc_range):.1f}--{max(proc_range):.1f} percentage points, depending on size. '
+        'The slack-aware objective without screening shows no such advantage. '
         'At $n=200$ the interval includes zero, so the positive mean at that size is not conclusive.')
     sections.append(r'\subsection{Resources on the common subset}')
     sections.append(table('Paired original-procedure changes relative to conservative speed on the common subset. Distance and duration are mean percentage changes; fleet is an absolute difference. Scheduled duration is each planner\'s own $F_3$. Simulated duration uses the same realized traffic model and planned departures for both configurations.',
         'tab:cost','rllll','$n$ & Distance & Scheduled time & Simulated time & Fleet',costs,'scriptsize'))
-    sections.append('Scheduled driver duration is not identical to realized labour time: '
-        'the conservative planner budgets padded arc times, while the evaluator may traverse those arcs faster. '
-        'Table~\\ref{tab:cost} therefore includes both measures. Absolute distance premiums also carry solver-quality uncertainty: '
-        'the five-second deterministic OR-Tools benchmark remains about 11\\% longer than HGS at $n=200$.')
-    sections.append('The matched data do not support uniform resource dominance: at $n=20$ the original procedure has slightly greater scheduled time and more vehicles; '
-        'at $n=100$ it also uses slightly more vehicles. The simulated-time interval excludes zero only for the increase at $n=20$. '
-        'The service gain is therefore a trade-off against some operating resources.')
+    sections.append('Scheduled driver duration differs from the realized driving, service and waiting time in simulation: '
+        'the conservative planner budgets padded arc times, while in simulation those arcs may be driven faster. '
+        'Table~\\ref{tab:cost} therefore reports both. Absolute distance premiums also depend on solver quality: '
+        'in the five-second deterministic benchmark, OR-Tools routes are about 11\\% longer than HGS routes at $n=200$.')
+    sections.append('The original procedure does not use fewer resources at every size. At $n=20$ it has slightly more scheduled time and more vehicles, '
+        'and at $n=100$ it also uses slightly more vehicles. The simulated-time interval excludes zero only for the increase at $n=20$. '
+        'The service gain is therefore bought with some extra operating resources.')
     sections.append(r'\subsection{Screening a replaceable generator and capping contractions}')
-    sections.append(table('All-instance procedure outcomes. Selected counts admission-bank lower bounds reaching 0.95; retained counts those selections whose fresh validation lower bound also reaches 0.95. Probability includes every fallback, as well as selected plans.',
+    sections.append(table('Procedure outcomes on all instances. Selected counts instances where the lower bound of some candidate on the screening bank reached 0.95; retained counts the selections whose lower bound on the fresh validation bank also reached 0.95. Probability includes fallback plans as well as selected plans.',
         'tab:screen','rllll','$n$ & Procedure & Selected / instances & Retained / selected & Probability (\\%)',procedure_rows,'small'))
     for c in ('procedure','screened_conservative','capped_procedure'):
         selected=sum(summary['sizes'][str(n)]['screening'][c]['selected'] for n in SIZES)
@@ -125,34 +125,34 @@ def main():
         summary[c]={'selected':selected,'retained':retained,'all_probability':ci([val(r,c) for r in rows],100)}
     paired_new={c:ci([val(r,c)-val(r,'procedure') for r in rows],100) for c in ('screened_conservative','capped_procedure')}
     summary['all_paired_vs_original']=paired_new
-    sections.append(f'In Table~\\ref{{tab:screen}}, the screened conservative generator selects on {summary["screened_conservative"]["selected"]}/53 instances; '
-        f'{summary["screened_conservative"]["retained"]} selections retain the target lower bound. '
-        f'Its all-instance paired difference from the original procedure is {fmt(paired_new["screened_conservative"])} points. '
-        f'The capped variant selects on {summary["capped_procedure"]["selected"]}/53, with '
-        f'{summary["capped_procedure"]["retained"]} retained; its corresponding difference is '
-        f'{fmt(paired_new["capped_procedure"])} points. Capping removes only an individual reachability obstruction; '
-        'capacity, sequencing and finite-search limitations remain.')
-    sections.append(table('Operational price of the capped variant relative to the original procedure on all 53 instances. Percentage changes are paired per instance; fleet changes are absolute. Capping can permit different route and resource choices, so its reliability gain is not attributed to schedule structure alone.',
+    sections.append(f'In Table~\\ref{{tab:screen}}, screened conservative speed selects a plan on {summary["screened_conservative"]["selected"]} of 53 instances, '
+        f'and {summary["screened_conservative"]["retained"]} of these selections keep the target lower bound on the fresh bank. '
+        f'Over all instances, its paired difference from the original procedure is {fmt(paired_new["screened_conservative"])} points. '
+        f'The capped variant selects a plan on {summary["capped_procedure"]["selected"]} of 53, with '
+        f'{summary["capped_procedure"]["retained"]} retained, and its paired difference from the original procedure is '
+        f'{fmt(paired_new["capped_procedure"])} points. Capping removes only the reachability obstruction at individual customers; '
+        'limits from capacity, sequencing and finite search remain.')
+    sections.append(table('Operating cost of the capped variant relative to the original procedure on all 53 instances. Percentage changes are paired by instance; fleet changes are absolute. Capping can lead to different routes and resources, so its reliability gain is not attributed to schedule structure alone.',
         'tab:cap-cost','rllll','$n$ & Distance & Scheduled time & Simulated time & Fleet',cap_cost_rows,'scriptsize'))
     summary['capped_resources_all']={
         'distance':ci([metric(r,'capped_procedure','distance')/metric(r,'procedure','distance')-1 for r in rows],100),
         'duration':ci([metric(r,'capped_procedure','driver_duration')/metric(r,'procedure','driver_duration')-1 for r in rows],100),
         'fleet':ci([metric(r,'capped_procedure','fleet')-metric(r,'procedure','fleet') for r in rows]),
     }
-    sections.append(f'Pooled over all instances (Table~\\ref{{tab:cap-cost}}), the capped variant costs {summary["capped_resources_all"]["distance"][0]:.1f}\\% more distance and '
-        f'{summary["capped_resources_all"]["fleet"][0]:.2f} additional vehicles than the original procedure. '
-        'At $n=200$, the additional fleet use is material and should not be obscured by the earlier fleet-matched ablation of the uncontracted objective.')
+    sections.append(f'Over all instances (Table~\\ref{{tab:cap-cost}}), the capped variant uses {summary["capped_resources_all"]["distance"][0]:.1f}\\% more distance and '
+        f'{summary["capped_resources_all"]["fleet"][0]:.2f} more vehicles than the original procedure. '
+        'At $n=200$ the extra fleet is substantial. The earlier fleet-matched ablation concerns the uncontracted objective and does not cover this cost.')
     sections.append(r'\subsection{Clock-aware approximation}')
-    sections.append(table('Clock-aware approximation: identical matched subsets within each row, restricted to an exact deterministic schedule being found by the approximation. Probabilities and paired changes are percentages and percentage points, respectively. The two matrix solves share a five-second search allowance.',
+    sections.append(table('Clock-aware approximation. Each row uses the same instances for every column: those where the approximation found an exact deterministic schedule. Probabilities are percentages, and paired changes are percentage points. The two matrix solves share a five-second search budget.',
         'tab:clock','rrllll','$n$ & Found & Nominal & Clock-aware & Original P & Clock minus N',clock_rows,'scriptsize'))
-    sections.append('The clock-aware rows test a practical departure-time approximation. '
-        'Exact deterministic retiming verifies each reported route, so its success at $\\sigma=0$ is an acceptance condition '
-        'and says nothing about stochastic robustness. Conservative-speed planning likewise guarantees deterministic on-time service '
-        'within the planned horizon by upper-bounding every arc time. Both 100\\% rows hold by construction.')
+    sections.append('The clock-aware rows test a practical approximation that uses departure times. '
+        'Exact deterministic retiming checks every reported route, so its success at $\\sigma=0$ is a condition for acceptance '
+        'and says nothing about robustness to random delay. Conservative-speed planning also guarantees deterministic on-time service '
+        'within the planned horizon, because its planned arc times are never shorter than the deterministic ones. Both 100\\% results hold by construction.')
     clock_gain=[summary['sizes'][str(n)]['clock_pairs']['clock_minus_nominal'][0] for n in SIZES]
-    sections.append(f'In Table~\\ref{{tab:clock}}, the approximation improves on nominal distance by {min(clock_gain):.1f}--{max(clock_gain):.1f} points on its feasible subsets, '
-        'but remains below the original procedure. Its latest-feasible-departure rule and two-pass search are part of this result; '
-        'the comparison does not establish what an optimal time-dependent planner could achieve.')
+    sections.append(f'In Table~\\ref{{tab:clock}}, the approximation exceeds nominal distance by {min(clock_gain):.1f}--{max(clock_gain):.1f} points on the instances where it finds a schedule, '
+        'but stays below the original procedure. The latest-feasible-departure rule and the two-pass search are part of this result, '
+        'and the comparison does not show what an optimal time-dependent planner could achieve.')
     sections.append(r'\subsection{Matched disturbance sensitivity}')
     sens_rows=[]
     for sigma in (.1,.2,.3):
@@ -162,27 +162,27 @@ def main():
             x['procedure_minus_conservative']=ci([r['configurations']['procedure']['sensitivity'][key]['service_level_success']-r['configurations']['conservative']['sensitivity'][key]['service_level_success'] for r in common],100)
             summary['sensitivity'][key]=x
             sens_rows.append(f'{sigma:.2f} & {rho:.1f} & '+ ' & '.join(fmt(x[c]) for c in ('conservative','procedure','screened_conservative','procedure_minus_conservative')))
-    sections.append(table('Fixed-plan sensitivity on the common 46 instances. Each cell uses 1,000 common scenarios from a bank separate from primary validation; plans are not re-screened or reoptimized for each parameter setting. C, P and SC are conservative speed, original procedure and screened conservative.',
+    sections.append(table('Fixed-plan sensitivity on the 46 common instances. Each cell uses 1,000 common scenarios from a bank separate from the main validation bank; plans are not re-screened or re-optimized for each setting. C, P and SC are conservative speed, the original procedure and screened conservative speed.',
         'tab:sensitivity','rrllll','$\\sigma$ & $\\rho$ & C (\\%) & P (\\%) & SC (\\%) & P minus C (points)',sens_rows,'scriptsize'))
-    sections.append('The mechanism comparison of interest is the paired P-minus-C column of Table~\\ref{tab:sensitivity}, '
-        'which Fig.~\\ref{fig:reliability} also plots across the disturbance grid. '
-        'Changes in its sign or magnitude describe fixed-plan performance under each setting. On its own, this column cannot separate '
+    sections.append('The comparison of interest in Table~\\ref{tab:sensitivity} is the paired difference P minus C, '
+        'which Fig.~\\ref{fig:reliability} plots across the disturbance grid. '
+        'It shows how the same fixed plans compare under each setting. This column alone cannot separate '
         'screening from the contracted candidate family, and the nine cells share instances and common random numbers.')
     low=summary['sensitivity']['0.10,0.0']['procedure_minus_conservative']
     high=summary['sensitivity']['0.30,0.0']['procedure_minus_conservative']
-    sections.append(f'For independent disturbances, increasing $\\sigma$ from 0.10 to 0.30 changes the paired contrast from '
-        f'{fmt(low)} to {fmt(high)} points. This supports a growing advantage of the complete screened family in that regime. '
-        'At $\\rho=0.9$ the increase is not monotonic, so the data do not support a universal monotonic relationship between noise scale and screening value.')
+    sections.append(f'For independent disturbances, raising $\\sigma$ from 0.10 to 0.30 moves the paired difference from '
+        f'{fmt(low)} to {fmt(high)} points. This supports a growing advantage of the complete screened procedure in that setting. '
+        'At $\\rho=0.9$ the increase is not monotonic, so the data do not show that the value of screening always rises with the noise scale.')
     sections.append(r'\subsection{Diagnosis of screening failures}')
     failed=[r for r in rows if not r['old_failure_audit']['selected']]
     cert=sum(r['old_failure_audit']['first_reachability_certificate_beta'] is not None for r in failed)
     earlier=sum(r['old_failure_audit']['no_plan_before_certificate'] for r in failed)
     summary['failures']={'instances':len(failed),'certified_somewhere':cert,'no_certificate':len(failed)-cert,'earlier_uncertified':earlier}
-    sections.append(f'Of the {len(failed)} original screening failures, {cert} reach a buffer with an explicit '
-        f'customer-reachability contradiction and {len(failed)-cert} have no such certificate through 60 minutes. '
-        f'{earlier} instances also contain a no-plan outcome before any certificate. Those outcomes remain unresolved: '
-        'failure of a necessary reachability test proves infeasibility, but passing it does not establish a feasible multi-customer routing. '
-        'The per-instance audit appears in Appendix~\\ref{sec:failure-audit}.')
+    sections.append(f'Of the {len(failed)} instances on which the original procedure admitted no plan, {cert} reach a buffer at which some customer '
+        f'is provably unreachable, and {len(failed)-cert} have no such certificate up to 60 minutes. '
+        f'On {earlier} instances the solver also returned no plan at a buffer not covered by a certificate. Those outcomes remain unresolved: '
+        'failing a necessary reachability test proves infeasibility, but passing it does not show that a feasible multi-customer routing exists. '
+        'Appendix~\\ref{sec:failure-audit} gives the audit for each instance.')
     evening=sum(r['configurations'][c]['validation']['arcs_departing_at_or_after_1700'] for r in rows for c in CONFIGS if r['configurations'][c])
     summary['arcs_departing_after_1700_primary']=evening
     summary['fresh_validation_seeds']=[r['validation_seed'] for r in rows]
@@ -194,17 +194,17 @@ def main():
         matched=[r for r in common if r['configurations'][c] is not None]
         customer_rows.append(f'{LABELS[c]} & {len(matched)} & {fmt(ci([val(r,c,"mean_on_time_fraction") for r in matched],100))} & {fmt(ci([val(r,c,"expected_late_customers") for r in matched],1),2)}')
         fullcost.append(f'{LABELS[c]} & {len(matched)} & '+ ' & '.join(fmt(ci([metric(r,c,m) for r in matched]),2 if m=='fleet' else 1) for m in ('distance','driver_duration','fleet')))
-    supplementary.append(table('Customer outcomes on the conservative-feasible subset; the clock approximation is restricted further when needed. Counts make this additional conditioning explicit.','tab:customers','lrll','Configuration & $k$ & On time (\\%) & Expected late',customer_rows,'small'))
-    supplementary.append(table('Absolute planned resource means on the same subset as Table~\\ref{tab:customers}: distance in km, scheduled duration in minutes, and vehicles. These are not optimality claims.','tab:fullcost','lrlll','Configuration & $k$ & Distance & Duration & Fleet',fullcost,'scriptsize'))
+    supplementary.append(table('Customer outcomes on the instances where conservative-speed planning returned a plan. The clock approximation also excludes the instances where it found no schedule, and the counts show this.','tab:customers','lrll','Configuration & $k$ & On time (\\%) & Expected late',customer_rows,'small'))
+    supplementary.append(table('Mean absolute planned resources on the same instances as Table~\\ref{tab:customers}: distance in km, scheduled duration in minutes, and vehicles. These are not claims of optimality.','tab:fullcost','lrlll','Configuration & $k$ & Distance & Duration & Fleet',fullcost,'scriptsize'))
     for k in ('0.90','0.95','0.98','1.00'):
         kappa.append(k+' & '+' & '.join(fmt(ci([r['configurations'][c]['validation']['service_probability_by_kappa'][k] for r in common],100)) for c in ('nominal','conservative','slack','procedure','screened_conservative')))
-    supplementary.append(table('Service-threshold sensitivity on the common 46; columns use the same plans and fresh primary bank. At $n=20/50/100/200$, allowed-late counts are $2/5/10/20$ at $\\kappa=.90$, $1/2/5/10$ at $.95$, $0/1/2/4$ at $.98$, and zero at 1.00.','tab:kappa','rlllll','$\\kappa$ & N & C & S & P & SC',kappa,'scriptsize'))
+    supplementary.append(table('Sensitivity to the service threshold $\\kappa$ on the 46 common instances, with the same plans and the same fresh validation bank in every column. At $n=20/50/100/200$, the number of customers allowed to be late is $2/5/10/20$ at $\\kappa=.90$, $1/2/5/10$ at $.95$, $0/1/2/4$ at $.98$, and zero at 1.00.','tab:kappa','rlllll','$\\kappa$ & N & C & S & P & SC',kappa,'scriptsize'))
     failure_rows=[]
     for r in failed:
         a=r['old_failure_audit'];cv=lambda v:'--' if v is None else str(v)
         failure_rows.append(f'{r["customers"]} & {r["instance_seed"]} & {cv(a["best_beta"])} & {100*a["best_lcb"]:.1f} & {cv(a["first_no_plan_beta"])} & {cv(a["first_reachability_certificate_beta"])} & '+('Yes' if a['no_plan_before_certificate'] else 'No'))
     supplementary.append(r'\subsection{Instance-level failure audit}\label{sec:failure-audit}')
-    supplementary.append(table('Every original screening failure. Best buffer and lower confidence bound (LCB) refer to a returned candidate; first no-plan is an observed solver outcome; first proof is the earliest grid point with a reachability certificate. Unresolved indicates at least one no-plan result without that certificate. A dash means no certificate through 60 minutes.','tab:failure','rrrrrrc','$n$ & Seed & Best $\\beta$ & LCB (\\%) & No-plan $\\beta$ & Proof $\\beta$ & Unresolved',failure_rows,'scriptsize'))
+    supplementary.append(table('Every instance on which the original procedure admitted no plan. Best $\\beta$ and the lower confidence bound (LCB) refer to the best returned candidate; the no-plan $\\beta$ is the first buffer at which the solver returned no plan; the proof $\\beta$ is the first buffer with a reachability certificate. Unresolved marks at least one no-plan result without a certificate. A dash means none up to 60 minutes.','tab:failure','rrrrrrc','$n$ & Seed & Best $\\beta$ & LCB (\\%) & No-plan $\\beta$ & Proof $\\beta$ & Unresolved',failure_rows,'scriptsize'))
     benchmark=[]
     for n in SIZES:
         payload=json.loads((ROOT/f'results/benchmark_v5_n{n}.json').read_text())
@@ -215,7 +215,7 @@ def main():
             values.append(fmt(ci(valid)));counts.append(len(valid))
         benchmark.append(f'{n} & {counts[0]}/{counts[1]} & '+ ' & '.join(values))
         summary.setdefault('benchmark_source_files',[]).append(f'results/benchmark_v5_n{n}.json')
-    supplementary.append(table('Retained equal-budget deterministic-core benchmark: OR-Tools excess distance relative to PyVRP/HGS (\\%). Counts are valid one-second/five-second pairs. There was one missing pair at the one-second budget.','tab:hgs','rrll','$n$ & Valid pairs (1s/5s) & One second & Five seconds',benchmark,'small'))
+    supplementary.append(table('Retained equal-budget benchmark on the deterministic core: excess distance of OR-Tools routes over PyVRP/HGS routes (\\%). Counts are valid pairs at the one-second and five-second budgets; one pair is missing at one second.','tab:hgs','rrll','$n$ & Valid pairs (1s/5s) & One second & Five seconds',benchmark,'small'))
     # An auditable JSON summary includes every analysed mean and interval.
     (ROOT/'results/summary_v7.json').write_text(json.dumps(summary,indent=2))
     (ROOT/'paper/results_summary_v7.tex').write_text('\n\n'.join(sections))

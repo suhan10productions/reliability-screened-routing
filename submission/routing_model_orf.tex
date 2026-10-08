@@ -36,30 +36,29 @@ ORCID: \href{https://orcid.org/0009-0004-5079-7684}{0009-0004-5079-7684}}
 
 \begin{abstract}
 Routes planned on nominal travel times can fail under predictable congestion and
-random delay. This paper audits a two-layer procedure for the capacitated
-vehicle-routing problem with time windows. A replaceable generator proposes
-plans, internal window contraction supplies candidate buffers without changing
-customer promises, and a plan is admitted only when a one-sided 95\% Wilson lower
-bound on the probability that at least 95\% of customers are served on time
-reaches 0.95. Selected plans are assessed once on untouched scenarios. On 53
-seeded synthetic instances with 20 to 200 customers and OR-Tools candidates, the
-screened procedure exceeded uniformly conservative travel-time padding by
-\ProcConsRange{} percentage points, and capping each customer's contraction at its
+random delay. This paper tests a two-layer procedure for the capacitated
+vehicle-routing problem with time windows. A replaceable solver proposes plans,
+and internal window contraction adds time buffers without changing customer
+promises. A plan is admitted only if a one-sided 95\% Wilson lower bound on the
+probability that at least 95\% of customers are served on time reaches 0.95, and
+the selected plan is checked once on fresh scenarios. On 53 synthetic instances
+of 20--200 customers with OR-Tools candidates, the screened procedure
+exceeded uniform travel-time padding by \ProcConsRange{} percentage points. Capping each customer's contraction at its
 direct-reachability limit raised admission from \OriginalSelected{} to
 \CappedSelected{} instances, at \CappedDistanceCost\% more distance. Two
-timestamped confirmatory studies, each on 53 new instances from the same
-generator, followed. The first confirmed all four prespecified hypotheses:
-screening exceeded conservative padding by \ConfHOneMean{} points and capping
-added \ConfHTwoMean{}. The second replaced OR-Tools with hybrid genetic search (HGS).
-With HGS candidates, screening with capping exceeded HGS conservative padding
-by \CtwoGOneMean{} points, and differed from the OR-Tools procedure by \CtwoGFourMean{} points
-(95\% interval \CtwoGFourLo{} to \CtwoGFourHi{}). A conservative-speed fallback,
-suggested post hoc, did not measurably improve the capped
-procedure but helped the uncapped one. These results use the original objective
-weights; with equal weights the advantage is not distinguishable from zero.
-Pooled service probability stays below the 95\% target, mainly through fallback
-plans. Results are conditional on assumed disturbance parameters and synthetic
-geometry.
+confirmatory studies followed, each on 53 new instances from the same instance
+generator under a publicly timestamped protocol. The first confirmed all four prespecified
+hypotheses: screening exceeded conservative padding by \ConfHOneMean{} points,
+and capping added \ConfHTwoMean{}. The second replaced OR-Tools with hybrid
+genetic search (HGS): screening with capping exceeded HGS conservative padding
+by \CtwoGOneMean{} points and differed from the OR-Tools
+procedure by \CtwoGFourMean{} points (95\% interval \CtwoGFourLo{} to
+\CtwoGFourHi{}). A conservative-speed fallback suggested post hoc helped
+the uncapped procedure but did not measurably help the capped one. These
+results use the original objective weights; with equal weights, the advantage
+over padding is not distinguishable from zero. Pooled service stays below the
+95\% target, mainly through fallback plans. Results depend on assumed
+disturbance parameters and synthetic geometry.
 \end{abstract}
 
 {\raggedright\noindent\textbf{Keywords:} vehicle routing; time windows;
@@ -74,62 +73,60 @@ reproducibility\par}
 \section{Introduction}
 
 The vehicle-routing problem with time windows (VRPTW) asks a fleet to serve
-geographically distributed customers subject to capacity and scheduling
-constraints \cite{solomon1987,toth2014}. In practice, a route that is feasible
-under one planning-time matrix may miss promised windows when congestion varies
-or small delays propagate downstream. Minimising nominal distance alone does
-not price that fragility.
+customers within agreed time windows, subject to vehicle capacity and shift
+length \cite{solomon1987,toth2014}. The standard formulation plans with one fixed
+matrix of travel times. In practice, travel times change with the time of day and
+with random delays, and a delay early in a route can push later customers past
+their windows. A plan that minimizes nominal distance takes no account
+of this risk.
 
-This paper asks six questions:
-\begin{enumerate}
-  \item Does the complete screened procedure improve on uniformly
-        conservative planning when both are compared on identical instances?
-  \item Does any remaining reliability gain arise from route structure or
-        simply from using more vehicles?
-  \item How do generator choice, clock-profile information and individual
-        contraction caps change admission success and out-of-sample service?
-  \item How much distance, driver duration, and fleet use are exchanged for the
-        resulting reliability?
-  \item Do the main findings repeat on fresh instances under a prespecified
-        protocol, and how sensitive are they to the objective weights?
-  \item Does screening still improve on conservative planning when candidates
-        come from a state-of-the-art generator, and does a conservative-speed
-        fallback improve the procedure when screening admits nothing?
-\end{enumerate}
+One simple safeguard is to plan with a slower speed than expected, which pads
+every trip. This paper examines another approach. A standard VRPTW solver proposes
+plans with extra internal slack, each plan is tested on simulated days, and a plan
+is admitted only if it meets a statistical reliability target; otherwise a
+prespecified fallback plan is used. The experiments ask
+whether this screened procedure gives more reliable service than uniform padding
+on the same instances, whether any gain comes from route structure or simply from
+using more vehicles, and what it costs in distance, driver time and fleet size.
+They also examine how the choice of candidate generator, knowledge of the daily
+congestion profile and a limit on each customer's buffer change how often a plan
+passes the test and how reliable it is out of sample. Finally, they test whether
+the main findings hold on new instances under prespecified protocols, whether
+they survive a change to a state-of-the-art solver, and whether a
+conservative-speed plan is a better fallback when no plan passes. An exploratory
+analysis examines how sensitive the findings are to the objective weights.
 
-The proposed architecture separates \emph{candidate generation} from
-\emph{stochastic validation}. The optimizer is a
-nominal VRPTW solver and is not presented as an exact solver for a
-time-dependent stochastic program. Candidate routes are stress-tested after
-solving, first on a screening bank and then once on an untouched validation
-bank. The principal reliability event permits a small daily proportion of late
-deliveries, avoiding the mechanical collapse of an all-customers-on-time
-probability as instance size grows.
+The procedure keeps \emph{candidate generation} separate from \emph{stochastic
+validation}. The solver is a nominal VRPTW solver; it is not presented as an
+exact method for a time-dependent stochastic program. Candidate routes are tested
+after they are solved, first on a screening bank of simulated scenarios and then
+once on an untouched validation bank. The main reliability event allows a small
+share of customers to be late on a given day. The probability that every customer
+is on time falls steadily as the number of customers grows, even for good plans,
+so it is a poor target for large instances.
 
-The contribution is integrative. Time-dependent
-speed profiles, multi-criteria routing, chance constraints, Monte Carlo
-evaluation, and Wilson intervals are established ideas. The paper contributes an
-architecture and the evidence for it. The architecture treats the routing solver
-as a replaceable candidate generator and makes every reliability decision after
-it: internal window contraction produces a family of candidates, a statistical
-screen admits or rejects each one, and an independent scenario bank validates the
-choice. Capping each customer's contraction at its direct-reachability limit
-removes a failure mode in which contraction makes individually reachable
-customers unreachable. The evidence consists of a development study with
-ablations of uniform travel-time padding, clock-profile information, fleet
-resources, contracted candidates and screening; two confirmatory studies with
-publicly timestamped protocols; and a test in which the OR-Tools generator is
-replaced by hybrid genetic search. The
-screened family and the statistical selection rule act together; a contrast
-against one uncontracted plan does not identify the selection rule alone.
+The individual components are established: time-dependent speed profiles,
+multi-criteria routing, chance constraints, Monte Carlo evaluation and Wilson
+intervals. The contribution is the way they are combined and the evidence for
+it. The routing solver is treated as a replaceable candidate generator, and every
+reliability decision is made after it. Internal window contraction produces a
+family of candidate plans, a statistical screen admits or rejects each one, and
+an independent scenario bank validates the plan chosen. Capping each customer's
+contraction at its direct-reachability limit removes one cause of failure, in
+which contraction alone makes a customer unreachable even by a direct trip. The
+candidate family and the selection rule work together, so a comparison with a
+single uncontracted plan cannot attribute the gain to the selection rule alone.
 
-The study has three parts. The development study on 53 synthetic instances
-motivated the design, and its findings are exploratory. A first confirmatory study
-then tested four prespecified hypotheses on 53 new instances, and a further
-exploratory analysis varies the objective weights. A second confirmatory study,
-on another 53 new instances, replaced the OR-Tools generator with hybrid genetic
-search \cite{vidal2022,wouda2024} and tested the conservative-speed fallback that
-the first study had suggested post hoc.
+The evidence comes in three parts. A development study on 53 synthetic instances
+shaped the design. It compares the procedure with uniform travel-time padding and
+with ablations that isolate clock-profile information, fleet size, contracted
+candidates and screening, and its findings are exploratory. A first confirmatory
+study then tested four prespecified hypotheses on 53 new instances, and an
+exploratory analysis varied the objective weights. A second confirmatory study,
+on another 53 new instances, replaced OR-Tools with hybrid genetic search
+\cite{vidal2022,wouda2024} and tested the conservative-speed fallback that the
+first study had suggested post hoc. Both confirmatory protocols were publicly
+timestamped before their instances were solved.
 
 \section{Related work}
 
@@ -157,31 +154,31 @@ A second line of work builds the uncertainty model into the optimization. Agra
 et al. solve a robust VRPTW in which travel times range over an uncertainty set
 \cite{agra2013}. Jaillet, Qi and Sim route to minimize a requirements violation
 index, which measures how far arrival times can breach their windows when the
-travel-time distribution is only partly known \cite{jaillet2016}, and Zhang et
-al. develop a riskiness index for time windows under uncertainty together with
-an exact solution algorithm \cite{zhang2019}. Gendreau, Jabali and Rei survey
+travel-time distribution is only partly known \cite{jaillet2016}. Zhang et al.
+develop a riskiness index for time windows under uncertainty, together with an
+exact solution algorithm \cite{zhang2019}. Gendreau, Jabali and Rei survey
 stochastic routing models and the directions that remain open
 \cite{gendreau2016}. These methods require a solver built for their uncertainty
 model, and none of them is compared with the procedure in this paper.
 
-The present method differs from both lines in where the statistical claim is
-made. It does not
-embed a stochastic feasibility approximation inside a specialist route-search
-algorithm. Instead, it accepts routes from a replaceable nominal solver,
-searches an internal-buffer family on one scenario bank, and audits the chosen
-plan once on a held-out bank. Its daily service event constrains the proportion of customers served on time across the whole day; per-customer chance constraints are not used. This solver-agnostic separation is narrower than
-a new stochastic optimizer, but makes selection failure and out-of-sample
-reliability directly observable. Monte Carlo approximations to chance
-constraints require separate assessment of candidate feasibility
-\cite{ahmed2008}; the Wilson bound is used because normal intervals behave
-poorly near probabilities close to one \cite{wilson1927,brown2001}.
+The procedure in this paper differs from both lines of work in where the
+statistical claim is made. It does not build a stochastic feasibility
+approximation into a specialist route-search algorithm. It takes routes from a
+replaceable nominal solver, searches a family of internal buffers on one scenario
+bank, and checks the chosen plan once on a held-out bank. Its service event
+limits the share of customers served late across the whole day, and no
+per-customer chance constraints are used. This solver-agnostic design is narrower
+than a new stochastic optimizer, but it makes selection failures and
+out-of-sample reliability directly visible. Monte Carlo approximations of chance constraints
+need a separate check of candidate feasibility \cite{ahmed2008}. The Wilson bound
+is used because normal-approximation intervals perform poorly for probabilities
+close to one \cite{wilson1927,brown2001}.
 
-The implementation uses Google OR-Tools as a nominal candidate generator
-\cite{ortools}. It is a practical local-search framework and gives no optimality guarantee.
-PyVRP provides a substantially stronger hybrid genetic search (HGS) for
-canonical VRPTW variants \cite{vidal2022,wouda2024}. It is used here as a
-deterministic benchmark and, in the second confirmatory study, as an alternative
-candidate generator.
+The main candidate generator is Google OR-Tools \cite{ortools}, a practical
+local-search framework with no optimality guarantee. PyVRP implements a much
+stronger hybrid genetic search (HGS) for standard VRPTW variants
+\cite{vidal2022,wouda2024}. Here it serves as a deterministic benchmark and, in
+the second confirmatory study, as an alternative candidate generator.
 
 \section{Problem definition}
 
@@ -195,8 +192,8 @@ and $\bar t_{ij}$.
 The planning variables are $x_{ijv}\in\{0,1\}$ for arc use,
 $z_{iv}\in\{0,1\}$ for customer assignment, $y_v\in\{0,1\}$ for vehicle use,
 service-start time $a_{iv}$, depot departure $d_v$, depot return $r_v$, and
-slack deficit $G_{iv}\geq0$. Assignment variables explicitly activate the
-customer--vehicle copies:
+slack deficit $G_{iv}\geq0$. The assignment variables give each customer one
+vehicle and activate the corresponding customer--vehicle copy:
 \begin{align}
  \sum_{v\in V} z_{iv} &= 1 && i\in C, \\
  \sum_{j\in N\setminus\{i\}}x_{ijv}
@@ -205,21 +202,21 @@ customer--vehicle copies:
  \sum_{j\in C}x_{0jv}=\sum_{i\in C}x_{i0v} &= y_v
       && v\in V.                                            \label{eq:flow}
 \end{align}
-For delivery-only demand, route capacity can be stated without cumulative-load
+Because demand is delivery-only, route capacity needs no cumulative-load
 variables:
 \begin{equation}
  \sum_{i\in C}\delta_i z_{iv}\leq Qy_v \qquad v\in V.       \label{eq:capacity}
 \end{equation}
-The time-propagation constraints exclude customer-only subtours: summing them
-around any directed customer cycle would imply
-$0\geq\sum_i(s_i+\bar t_{ij})>0$. Positive demands are not needed for that
-argument. Time windows apply only to assigned copies:
+The time-propagation constraints below rule out customer-only subtours: summing
+them around any directed customer cycle would give
+$0\geq\sum_i(s_i+\bar t_{ij})>0$. The argument does not need positive demands.
+Time windows apply only to assigned copies:
 \begin{equation}
  l_i z_{iv}\leq a_{iv}\leq u_i z_{iv}
  \qquad i\in C,\ v\in V.                                   \label{eq:activate}
 \end{equation}
-Using separate departure and return variables avoids representing two depot
-visits with one time variable. With a valid global deactivation constant
+Separate departure and return variables avoid using one time variable for two
+depot visits. With a valid global deactivation constant
 $M\geq H^{\max}+\max_i s_i+\max_{ij}\bar t_{ij}$,
 \begin{align}
  a_{jv} &\geq d_v+\bar t_{0j}-M(1-x_{0jv}), \\
@@ -227,15 +224,17 @@ $M\geq H^{\max}+\max_i s_i+\max_{ij}\bar t_{ij}$,
  r_v &\geq a_{iv}+s_i+\bar t_{i0}-M(1-x_{i0v}).              \label{eq:time}
 \end{align}
 The bounds $0\leq d_v,r_v\leq H^{\max}y_v$ deactivate unused vehicles, and
-$r_v-d_v\leq H^{\max}y_v$. The implementation enforces these timing relations through OR-Tools Routing dimensions and never builds \eqref{eq:time} explicitly, so no big-$M$ relaxation or big-$M$ diagnostic is claimed for the code.
+$r_v-d_v\leq H^{\max}y_v$. The code enforces these timing relations through
+OR-Tools routing dimensions and never builds \eqref{eq:time} explicitly, so no
+big-$M$ relaxation or big-$M$ diagnostic is claimed for the code.
 
 For target slack $s^*$,
 \begin{align}
  G_{iv} &\geq a_{iv}-(u_i-s^*)z_{iv}, \\
  G_{iv} &\geq 0.                                            \label{eq:slack}
 \end{align}
-This makes $G_{iv}=\max\{0,s^*-(u_i-a_{iv})\}$ when $z_{iv}=1$ and zero when
-the customer is not assigned to vehicle $v$.
+At the optimum, $G_{iv}=\max\{0,s^*-(u_i-a_{iv})\}$ when $z_{iv}=1$, and
+$G_{iv}=0$ when the customer is not assigned to vehicle $v$.
 
 \section{Candidate objectives and scaling}\label{sec:objective-scaling}
 
@@ -246,64 +245,66 @@ The four raw criteria are
  F_3 &= \sum_{v\in V}(r_v-d_v),
  &F_4 &= \sum_{v\in V}y_v.                                 \label{eq:criteria}
 \end{align}
-Thus $F_3$ includes driving, service, and waiting while permitting each vehicle
-to depart when useful. This removes the fixed-departure artifact that charged a
-vehicle for depot waiting before its first feasible service.
+$F_3$ counts driving, service and waiting time, and each vehicle may
+leave the depot when it suits the schedule, so no vehicle is charged for waiting
+at the depot before its first service can start.
 
-Single-criterion heuristic solves provide empirical reference values. For each
-criterion $k$, let $L_k$ and $U_k$ be the smallest and largest values observed
-across these anchor solutions. These values are \emph{scaling ranges}, not
-utopia and nadir points, and they need not contain the Pareto frontier. No value
-is clipped. The normalized score is
+Reference values come from four heuristic solves, each minimizing one criterion.
+For each criterion $k$, $L_k$ and $U_k$ are the smallest and largest values
+among these anchor solutions. They are \emph{scaling ranges}, not utopia and
+nadir points, and need not bound the Pareto frontier. No value is clipped. The
+normalized score is
 \begin{equation}
  Z(\mathbf{x})=\sum_{k=1}^{4}w_k\frac{F_k(\mathbf{x})-L_k}{\max\{U_k-L_k,1\}}. \label{eq:objective}
 \end{equation}
-The unit fallback prevents division by zero when the anchor archive shows no
-variation in a discrete criterion. The baseline weights
-$\mathbf{w}=(0.5693,0.2643,0.1055,0.0609)$ are the principal-eigenvector weights of a
-single Analytic Hierarchy Process (AHP) pairwise-comparison matrix with consistency ratio 0.0254
-\cite{saaty1980}; the matrix and calculation appear in
-Appendix~\ref{sec:ahp-matrix} and in \texttt{code/ahp\_weights.py}. The matrix
-was specified for an earlier criteria set in which the third criterion was
-total distance, and its third row and column were not re-elicited when that
-criterion became driver duration. The weights are therefore a fixed experimental preference vector that defines
-the candidate-selection objective. They were fixed before any experiment reported
-here, were not elicited from a fleet operator, and make no claim about the
-preferences of any industry. Section~\ref{sec:weights} reports a
+The floor of 1 in the denominator avoids division by zero when a discrete
+criterion takes the same value in every anchor solution. The baseline weights
+$\mathbf{w}=(0.5693,0.2643,0.1055,0.0609)$ are the principal-eigenvector weights
+of one Analytic Hierarchy Process (AHP) pairwise-comparison matrix with
+consistency ratio 0.0254 \cite{saaty1980}. Appendix~\ref{sec:ahp-matrix} and
+\texttt{code/ahp\_weights.py} give the matrix and the calculation. The matrix was
+set for an earlier list of criteria in which the third criterion was total
+distance, and its third row and column were not re-elicited when that criterion
+became driver duration. The weights are therefore a fixed experimental preference
+vector that defines the candidate-selection objective. They were fixed before any
+experiment reported here, were not elicited from a fleet operator, and make no
+claim about the preferences of any industry. Section~\ref{sec:weights} reports a
 sensitivity analysis over four weight vectors.
 
-OR-Tools implements the distance term as an arc cost, driver duration as a
-per-vehicle Time-dimension span cost, slack deficit as customer soft upper
-bounds, and fleet use as a fixed vehicle cost. Integer coefficients are scaled
-once at the criterion level. The primary planning matrix is nominal and fixed;
-the original candidate generator does not use clock-dependent costs. The
-\emph{conservative-speed} baseline replaces 40 km/h by 33.3 km/h throughout
-the planning matrix. It pads all trips by 20\%, including off-peak trips; it
-does not isolate knowledge of the peak's timing.
+In OR-Tools, distance is an arc cost, driver duration is a span cost on each
+vehicle's time dimension, slack deficit is a soft upper bound at each customer,
+and fleet use is a fixed cost per vehicle. Integer coefficients are scaled once
+per criterion. The main planning matrix is nominal and fixed, so the original
+candidate generator does not use clock-dependent travel times. The
+\emph{conservative-speed} baseline replaces 40 km/h with 33.3 km/h throughout the
+planning matrix. This pads every trip by 20\%, including off-peak trips, so the
+comparison does not isolate the value of knowing when the peak occurs.
 
 \subsection{Clock-aware approximation and deterministic guarantee}
 
-A separate distance heuristic freezes each origin's estimated departure from
-the preceding schedule, integrates \eqref{eq:fifo} at that time to construct an
-outgoing travel-time row, and re-solves. Two passes receive 2.5 seconds each.
-The first reference is the retained nominal plan, whose separate solve cost
-has already been incurred. Customer departures are
-estimated service start plus service time; for depot arcs, the estimate is the
-preceding departure for the first customer of each route, or the mean of used
-depot departures for other customers. Each resulting sequence is rescheduled
-with the exact deterministic FIFO profile. Binary search finds its latest
-feasible whole-minute depot departure; routes failing at departure zero are
-rejected. The shortest deterministically feasible output is retained, with
-duration breaking ties. This is an approximation with explicit failure
-reporting, not a departure-dependent callback or an exact optimizer for the time-dependent VRPTW.
+A separate distance heuristic uses the time of day. For each origin, it freezes
+the departure time estimated from the previous schedule, integrates
+\eqref{eq:fifo} at that time to build the origin's outgoing travel-time row, and
+solves again. Two passes receive 2.5 seconds each. The first reference schedule is
+the retained nominal plan, whose solve cost has already been incurred
+separately. For a customer, the
+departure estimate is the service start plus the service time. For a depot arc,
+it is the previous departure for the first customer of each route and the mean of
+the used depot departures for other customers. Each resulting route sequence is
+rescheduled with the exact deterministic FIFO profile, and binary search finds its
+latest feasible whole-minute depot departure. Routes that fail even when leaving
+at time zero are rejected. The shortest deterministically feasible output is
+kept, with duration breaking ties. The method is an approximation that reports
+its failures; it is not a departure-dependent callback or an exact optimizer for
+the time-dependent VRPTW.
 
-For a feasible conservative-speed plan, the evaluation speed at $\sigma=0$
-never falls below the planning speed during the planned shift. Starting from
-the same depot departure, FIFO and induction along each route imply that
-evaluated service starts and return occur no later than their planned times.
-Thus deterministic 100\% on-time service is guaranteed by construction.
-The clock-aware approximation's deterministic feasibility is likewise checked
-before acceptance. These properties are not experimental reliability gains.
+For a feasible conservative-speed plan, the evaluation speed at $\sigma=0$ never
+drops below the planning speed during the planned shift. Starting from the same
+depot departure, FIFO and induction along each route show that the evaluated
+service starts and the return happen no later than planned. At $\sigma=0$, such
+a plan serves every customer on time by construction. The deterministic
+feasibility of the clock-aware approximation is also checked before a plan is
+accepted. Neither property is an experimental reliability gain.
 
 \section{Time-dependent stochastic evaluation}
 
@@ -316,8 +317,8 @@ smallest $\Delta\geq0$ satisfying
  \int_{\tau}^{\tau+\Delta}\nu(u)\,du=d_{ij},
  \qquad \nu(u)=\nu_k\text{ for }u\in[T_k,T_{k+1}).           \label{eq:fifo}
 \end{equation}
-Because distance accumulated by time is strictly increasing, the arrival map
-$\tau\mapsto\tau+t_{ij}(\tau)$ is nondecreasing and FIFO holds.
+Because the distance covered grows strictly with time, the arrival map
+$\tau\mapsto\tau+t_{ij}(\tau)$ is nondecreasing, so FIFO holds.
 
 \subsection{Correlated disturbances}
 
@@ -332,19 +333,20 @@ where
  \sqrt{\rho}\,\xi_0(\omega)+\sqrt{1-\rho}\,\xi_{ij}(\omega)\right).
                                                                \label{eq:noise}
 \end{align}
-Here $\rho$ is the correlation between latent Gaussian log-errors. It is not
-the Pearson correlation between multipliers, which equals
+Here $\rho$ is the correlation between the latent Gaussian log-errors. It is
+not the Pearson correlation between the multipliers, which is
 \begin{equation}
  \operatorname{Corr}(\Omega_i,\Omega_j)
  =\frac{\exp(\sigma^2\rho)-1}{\exp(\sigma^2)-1}.
 \end{equation}
-The multiplier has median 1 and mean $\exp(\sigma^2/2)$, so the deterministic profile represents the median travel condition, which lies slightly below the mean.
+The multiplier has median 1 and mean $\exp(\sigma^2/2)$, so the deterministic
+profile gives the median travel time, which is slightly below the mean.
 
-Scenario banks are generated independently of route iteration order. A common
-factor is drawn once per scenario, while each directed arc receives a
-deterministic pseudorandom stream keyed by the bank seed and arc endpoints.
-Plans evaluated on the same bank therefore experience identical disturbances
-on shared arcs.
+Scenario banks do not depend on the order in which routes are evaluated. A common
+factor is drawn once per scenario, and each directed arc gets its own
+pseudorandom stream keyed by the bank seed and the arc's endpoints. Plans
+evaluated on the same bank see identical disturbances on the arcs they
+share.
 
 \section{Screening and independent validation}
 
@@ -363,9 +365,9 @@ and the target is
  \Pr[J_{\kappa}(R,\omega)=1]\geq\alpha,
  \qquad \alpha=0.95.                                       \label{eq:chance}
 \end{equation}
-The stricter zero-lateness fleet-day probability is still reported, but is not
-the sole admission condition because it declines mechanically as the number of
-customers increases.
+The stricter probability that no customer in the fleet is late on a given day
+is also reported. It is not used for admission, because it falls mechanically as
+the number of customers grows.
 
 For $N$ scenarios and empirical success $\hat p$, the one-sided Wilson lower
 bound at confidence $1-\eta$ is
@@ -375,26 +377,26 @@ bound at confidence $1-\eta$ is
  {1+z^2/N},\qquad z=z_{1-\eta}.                             \label{eq:wilson}
 \end{equation}
 
-Candidate generation contracts only the internal planning deadline:
-$[l_i,\max\{l_i,u_i-\beta\}]$. The offered window $[l_i,u_i]$ is unchanged, and every
-scenario is scored against the original $u_i$. Candidate values of $\beta$ are
-generated with the slack-aware objective and assessed on a screening bank. The
-anchor ranges are computed once from the uncontracted ($\beta=0$) instance and
-held fixed over the buffer search. Among candidates whose screening lower bound
-reaches $\alpha$, the one with the smallest normalized planned score
-\eqref{eq:objective} is selected. In simulation, every vehicle departs at its
-planned $d_v$; there is no scenario-dependent departure recourse. The selected
-plan is evaluated once on a larger, untouched validation bank. This separation
-prevents adaptive candidate search from selecting on the evidence used for
-final reporting.
+Candidate generation contracts only the internal planning deadline, to
+$[l_i,\max\{l_i,u_i-\beta\}]$. The offered window $[l_i,u_i]$ does not change,
+and every scenario is scored against the original $u_i$. For each buffer
+$\beta$, a candidate is generated with the slack-aware objective and assessed on
+the screening bank. The anchor ranges come from the uncontracted ($\beta=0$)
+instance and stay fixed across the buffer search. Among the candidates whose
+screening lower bound reaches $\alpha$, the one with the smallest normalized
+planned score \eqref{eq:objective} is selected. In simulation every vehicle
+leaves at its planned $d_v$; departure times do not change with the scenario.
+The selected plan is then evaluated once on a larger, untouched validation bank,
+so the search never selects on the evidence used for the final report.
 
-For procedure-level reporting, a prespecified fallback makes the output defined
-on every instance. If no candidate passes screening, the uncontracted
-slack-aware plan ($\beta=0$) is returned. Validation never changes this choice; it only estimates the performance of the plan already chosen. Selected-only results are shown only when labelled as such; the primary
-procedure comparison includes all instances.
+A prespecified fallback makes the procedure's output defined on every instance.
+If no candidate passes screening, the procedure returns the uncontracted
+slack-aware plan ($\beta=0$). Validation never changes this choice; it only
+estimates the performance of the plan already chosen. Results for selected plans alone are always labelled as such, and
+the main procedure comparison includes all instances.
 
-Three reliability quantities appear in the results, and they answer different
-questions:
+Three reliability quantities appear in the results, and each answers a different
+question:
 \begin{itemize}
   \item[$\bullet$] \textbf{Admission criterion.} The Wilson lower bound \eqref{eq:wilson} on
         the screening bank, computed for each candidate. A candidate is admitted
@@ -406,51 +408,52 @@ questions:
         over all instances, including those on which screening admitted nothing
         and the fallback was returned.
 \end{itemize}
-The chance constraint \eqref{eq:chance} is the requirement that screening tests
-for each admitted plan. The procedure-level average falls below $\alpha$ whenever
-fallback plans are weaker, so the results report admitted plans and the
-procedure as a whole separately.
+The chance constraint \eqref{eq:chance} is what screening tests for each
+admitted plan. The procedure-level average falls below $\alpha$ whenever fallback
+plans are weaker, so the results report admitted plans and the whole procedure
+separately.
 
 \subsection{Generator replacement and reachability-capped contraction}
 
-Screened conservative-speed uses the same buffer grid, admission bank and
-Wilson threshold, but generates distance-minimizing plans with the padded
-matrix. Among passing plans it chooses the shortest distance, breaking ties by
-planned duration and then buffer. Its fallback is the uncontracted
-conservative plan; if that plan was not found, the retained uncontracted
-slack-aware plan is used. This makes the replacement procedure defined on all
-53 instances while preserving the base generator's 46/53 found-plan count.
+Screened conservative speed uses the same buffer grid, admission bank and
+Wilson threshold, but its candidates minimize distance on the padded matrix.
+Among the passing plans it chooses the shortest, breaking ties by planned
+duration and then by buffer. Its fallback is the uncontracted conservative plan,
+or the retained uncontracted slack-aware plan if no conservative plan was found.
+The procedure's output is therefore defined on all 53 instances, while the
+conservative generator itself still finds a plan on 46 of them.
 
-Let $e_i=\max\{l_i,\bar t_{0i}\}$ be earliest direct service under the nominal
-matrix. The capped weighted variant uses the internal upper bound
+Let $e_i=\max\{l_i,\bar t_{0i}\}$ be the earliest direct service time under the
+nominal matrix. The capped weighted variant uses the internal upper bound
 \begin{equation}
  u_i^{\rm cap}(\beta)=\min\{u_i,\max\{l_i,u_i-\beta,e_i\}\}.
 \end{equation}
-This prevents an initially reachable customer from becoming unreachable by a
-direct trip solely because of contraction. It does not imply joint routing
-feasibility or the admission target. Identical contracted models reuse their
-archived candidates; only changed models are re-solved. Selection still uses
-the fixed original scaling ranges and weighted score, with the same fallback.
+This stops contraction alone from making a customer unreachable by a direct
+trip when it was reachable before. It does not guarantee that a joint routing is
+feasible or that the admission target is met. When a contracted model is
+identical to one already solved, its archived candidate is reused; only changed
+models are solved again. Selection still uses the fixed original scaling ranges,
+the weighted score and the same fallback.
 
-For diagnosis, a shortest-path relaxation uses arc cost
-$\bar t_{ij}+s_i$ (with $s_0=0$), allowing intermediate customers without
-capacity or window restrictions. Its depot-to-$i$ distance is a valid lower
-bound even if rounded distances violate a triangle inequality. A contracted
-deadline below this bound certifies infeasibility. Without a certificate, a
-missing solver output is labelled \emph{no feasible plan found}; neither a
-time limit nor passing the reachability test proves feasibility. Solver
-status certificates were not retained in the archived runs and are not
-inferred retrospectively.
+To diagnose failures, a shortest-path relaxation uses arc cost
+$\bar t_{ij}+s_i$ (with $s_0=0$) and allows intermediate customers without
+capacity or window restrictions. Its depot-to-$i$ distance is a valid lower bound
+even if rounded distances violate the triangle inequality. A contracted deadline
+below this bound certifies infeasibility. When there is no certificate, a missing
+solver output is labelled \emph{no feasible plan found}: reaching the time limit
+without a plan does not prove infeasibility, and passing the reachability test
+does not prove feasibility. Solver status information was not
+kept in the archived runs and is not inferred afterwards.
 
 \section{Experimental design}
 
 Synthetic instances place a central depot and uniformly distributed customers
 on a $100\times100$ grid. Demand is uniform on 10--49 units, service time is
 10 minutes, window width is uniform on 90--149 minutes, capacity is 1000, and
-the shift limit is 600 minutes. Time zero is 06:00 local time, so simulated
-clock time is obtained by adding 360 minutes to each relative schedule time.
-The retained design uses the seeded sizes in Table~\ref{tab:design}; all model
-and simulation constants are disclosed in Table~\ref{tab:parameters}.
+the shift limit is 600 minutes. Time zero is 06:00 local time, so clock time is
+the relative schedule time plus 360 minutes. Table~\ref{tab:design} gives the
+seeded instance sizes, and Table~\ref{tab:parameters} lists every model and
+simulation constant.
 
 \begin{table}[ht]
 \centering
@@ -506,10 +509,10 @@ Eight configurations are compared:
   \item \textbf{Conservative-speed distance}: distance minimization with a
         uniform 33.3 km/h planning matrix.
   \item \textbf{Slack-aware}: objective \eqref{eq:objective} with $\beta=0$,
-        isolating the objective from screening.
+        which shows the effect of the objective without screening.
   \item \textbf{Fleet-matched distance}: distance minimization forced to use
-        exactly the fleet count of the slack-aware plan and initialized from
-        its feasible routes.
+        exactly as many vehicles as the slack-aware plan, starting from its
+        feasible routes.
   \item \textbf{Original procedure}: the complete weighted internal-buffer search, with
         selection on 1000 screening scenarios, the prespecified $\beta=0$
         fallback, and assessment on 5000 fresh scenarios.
@@ -517,185 +520,191 @@ Eight configurations are compared:
         with the same admission test and the fallback defined above.
   \item \textbf{Capped procedure}: the original weighted procedure with
         customer-specific reachability caps.
-  \item \textbf{Clock approximation}: two departure-estimate matrix updates
-        and exact deterministic route rescheduling.
+  \item \textbf{Clock approximation}: two matrix updates from estimated
+        departure times, followed by exact deterministic rescheduling.
 \end{enumerate}
 
-The nominal shift ends at 16:00. The full-day speed profile remains defined
-beyond that time because lognormal delays are unbounded and a stochastic
-route can overrun. Evening periods lie outside the planned shift but remain in the evaluator. Fleet-matched distance is initialized from the slack-aware
-routes; because this can in principle transfer their structure, the initialization is treated as part of the comparator's definition.
+The nominal shift ends at 16:00. The full-day speed profile continues past
+that time, because lognormal delays are unbounded and a stochastic route can
+overrun. Evening periods lie outside the planned shift but stay in the evaluator.
+Fleet-matched distance starts from the slack-aware routes. Because this could
+carry over their structure, the starting point is treated as part of that
+comparator's definition.
 
 The screening grid is $\beta\in\{0,5,\ldots,60\}$ minutes. The four
-single-criterion anchor solves use two seconds each to stabilize the scaling
-ranges; reported candidate configurations use a five-second OR-Tools search
-budget for each nominal solve. If a candidate solve
-returns no feasible plan, the same five-second call is attempted at most twice
-more; the first feasible result is kept, and no best-of-several selection is made. Reachability-certified new models need no solver
-attempt. The clock approximation instead divides a total five-second budget
-between its two solves. Six experiment workers ran in parallel; elapsed time
-and software metadata are retained. All configurations use the same fresh
-validation bank within an instance. The reported reliability outcomes
-are service-event probability, zero-lateness fleet-day probability, mean
-on-time fraction, expected number late, mean and 95th-percentile total
-lateness, and mean route success. Operational outcomes are distance, driver
-duration, and fleet use. Simulated duration is additionally reported under the
-common evaluation model, to distinguish actual route time from each generator's
-planned $F_3$. Differences are paired by instance. Confidence
-intervals across instances are distinguished from binomial Monte Carlo
-intervals within an instance. Across-instance intervals use a paired
-nonparametric bootstrap with 20,000 resamples and a fixed analysis seed. Claims
-of distance equivalence require a
-pre-specified equivalence margin; failure to reject a difference is not treated
-as proof of equality.
+single-criterion anchor solves get two seconds each to stabilize the scaling
+ranges, and each candidate solve gets a five-second OR-Tools budget. If a
+candidate solve returns no feasible plan, the same five-second call is repeated
+at most twice more. The first feasible result is kept; there is no best-of-several
+selection. A new model with a reachability certificate is not solved at all. The
+clock approximation splits one five-second budget between its two solves. Six
+experiment workers ran in parallel, and elapsed times and software versions are
+recorded. Within an instance, every configuration uses the same fresh validation
+bank.
+
+The reliability outcomes are service-event probability, zero-lateness fleet-day
+probability, mean on-time fraction, expected number of late customers, mean and
+95th-percentile total lateness, and mean route success. The operational outcomes
+are distance, driver duration and fleet use. Simulated duration under the common
+evaluation model is also reported, to separate actual route time from each
+generator's planned $F_3$. Differences are paired by instance, and intervals
+across instances are kept separate from binomial Monte Carlo intervals within an
+instance. Across-instance intervals use a paired nonparametric bootstrap with
+20,000 resamples and a fixed analysis seed. A claim that distances are equivalent
+would need a prespecified equivalence margin, so failing to reject a difference
+is not treated as proof of equality.
 
 \section{First confirmatory study and weight-sensitivity design}\label{sec:confdesign}
 
-A confirmatory protocol was fixed before any fresh instance was generated or
-solved. It specifies four directional hypotheses, their tests and decision
-rules, a failure policy, and 53 instance seeds equal to the development seeds
-shifted by 60000. The protocol, the code that runs and analyses it, and a SHA-256
-manifest of those files were committed to a public repository (commit
+A confirmatory protocol was fixed before any new instance was generated or
+solved. It sets out four directional hypotheses, their tests and decision rules,
+a failure policy, and 53 instance seeds equal to the development seeds shifted by
+60000. The protocol, the code that runs and analyses it, and a SHA-256 manifest
+of those files were committed to a public repository (commit
 \texttt{41fae67d9520bd5dd01fcac87e680a5a69325d10}) and archived on Zenodo
-\cite{ali2026freeze} before the study was run. The analysis program refuses to
-run unless the complete prescribed study is present and every frozen file matches
+\cite{ali2026freeze} before the study was run. The analysis program will not run
+unless the complete prescribed study is present and every frozen file matches
 the manifest.
 
-The hypotheses concern validated service-event probability on the fresh bank, with
-the instance as the unit. H1 (primary): on instances where conservative-speed
-planning returns a plan, the original procedure exceeds it. H2 (primary): the
-capped procedure exceeds the original procedure on all instances. H3: the capped
-procedure is admitted by screening on more instances than the original procedure,
-tested with an exact McNemar test at 0.05. H4: on the instances of H1, the
-advantage of the original procedure over conservative speed is larger at
-$\sigma=0.30$ than at $\sigma=0.10$ with $\rho=0$. H1 and H2 are decided at the
-97.5\% level, a Bonferroni adjustment for two primary hypotheses, and are
-confirmed only if their paired bootstrap interval lies above zero. H4 uses a 95\%
-interval. The two other hypotheses cannot rescue an unconfirmed primary one. H3 and H4 are
-secondary and carry less evidential weight than H1 and H2, and Holm's procedure in
-place of the Bonferroni adjustment would not change the two primary decisions. H4
-compares fixed plans: each plan is screened under the primary disturbance setting
+Each hypothesis concerns validated service-event probability on the fresh bank,
+with the instance as the unit. H1 (primary): on instances where
+conservative-speed planning returns a plan, the original procedure exceeds it.
+H2 (primary): on all instances, the capped procedure exceeds the original
+procedure. H3: screening admits the capped procedure on more instances than the
+original procedure, tested with an exact McNemar test at the 0.05 level. H4: on
+the instances of H1, the advantage of the original procedure over conservative
+speed is larger at $\sigma=0.30$ than at $\sigma=0.10$ with $\rho=0$. H1 and H2
+use 97.5\% intervals, a Bonferroni adjustment for two primary hypotheses, and
+each is confirmed only if its paired bootstrap interval lies above zero. H4 uses
+a 95\% interval. H3 and H4 are secondary: they carry less weight than H1 and H2
+and cannot rescue an unconfirmed primary hypothesis. Holm's procedure in place
+of the Bonferroni adjustment would not change either primary decision. H4
+compares fixed plans: each plan is screened under the primary setting
 ($\sigma=0.20$, $\rho=0.5$) and then evaluated across the sweep without
-re-screening. A
-configuration without a plan scores zero on that instance, in validation and in
-every sweep cell, so a failure counts against the configuration that failed. A
-software error is recorded with its traceback, is never scored as routing
+re-screening.
+
+A configuration without a plan scores zero on that instance, in validation and
+in every sweep cell, so a failure counts against the configuration that failed.
+A software error is recorded with its traceback, is never scored as routing
 performance, and blocks the analysis.
 
-Parameters, budgets and scenario counts equal those of the development study
+Parameters, budgets and scenario counts are those of the development study
 (Table~\ref{tab:parameters}). The study ran on an Apple M1 Pro laptop with ten
-cores under macOS 26.3.1, with Python 3.12.15, NumPy 2.5.3 and OR-Tools 9.15.6755.
-The development runs used Python 3.12.14 on Linux. Stage 1 launched the four
-instance sizes as four parallel processes where the written protocol lists a
-sequential loop; stage 2 used six workers as specified. These are the deviations
-from the written procedure. The scheduling change affects only the CPU time
-available to each time-limited solve.
+cores under macOS 26.3.1, with Python 3.12.15, NumPy 2.5.3 and OR-Tools
+9.15.6755; the development runs used Python 3.12.14 on Linux. Stage 1 ran the
+four instance sizes as four parallel processes, where the written protocol lists
+a sequential loop, and stage 2 used six workers as specified. These are the
+deviations from the written procedure. The scheduling change affects only the CPU
+time available to each time-limited solve.
 
 The weight analysis is exploratory. The original procedure was rerun on the
-development instances with four weight vectors: the original vector, one that
-swaps its two largest weights, a distance-heavy vector and equal weights
-(Section~\ref{sec:weights}). Each rerun regenerates the candidate family, screens it
-on the same bank and validates the selected plan or fallback on the same fresh
-bank, with the same five-second budget. The vectors were fixed before the runs,
-and each ran once.
+development instances with four weight vectors: the original vector, the original
+with its two largest weights swapped, a distance-heavy vector and equal weights
+(Section~\ref{sec:weights}). Each rerun regenerates the candidate family,
+screens it on the same bank and validates the selected plan or fallback on the
+same fresh bank, with the same five-second budget. The vectors were chosen before
+the runs, and each was run once.
 
 The benchmark check is also exploratory. It uses the eight R1 and RC1 Solomon
-files available in the ML4VRP 2024 competition repository \cite{ml4vrp2024}, which
-hosts Solomon's instances \cite{solomon1987}. The C1 instances are excluded because
-their horizon of 1236 time units exceeds one working shift. Coordinates are read as
-kilometres, with the study's rounded Euclidean distances and a planning speed of
-40~km/h, so that one Solomon time unit equals 1.5 minutes. Ready and due times are
-multiplied by 1.5 and floored, service time becomes 15 minutes, and the capacity
-of 200 and the 25 vehicles are kept. The shift length is the scaled depot due time,
-345 minutes for R1 and 360 minutes for RC1, starting at 06:00 so that the morning
-peak falls inside the shift. Planning times are rounded up to whole minutes as in the
-study. The mapping keeps Solomon's relation between travel time and window width,
-because one distance unit takes one Solomon time unit to drive at the planning
-speed. The C1 instances could be fitted by compressing time, but that would change
-the relative tightness of their windows, so the eight instances form a convenience
-sample of the R1 and RC1 types. The pipeline code is unchanged; only the instance loader and the parameter
-constructor are replaced.
+files available in the ML4VRP 2024 competition repository \cite{ml4vrp2024},
+which hosts Solomon's instances \cite{solomon1987}. The C1 instances are left out
+because their horizon of 1236 time units is longer than one working shift.
+Coordinates are read as kilometres, with the study's rounded Euclidean distances
+and a planning speed of 40~km/h, so one Solomon time unit equals 1.5 minutes.
+Ready and due times are multiplied by 1.5 and rounded down, service time becomes
+15 minutes, and the capacity of 200 and the 25 vehicles are kept. The shift
+length is the scaled depot due time, 345 minutes for R1 and 360 minutes for RC1,
+and the shift starts at 06:00 so that the morning peak falls inside it. Planning
+times are rounded up to whole minutes, as in the main study. This mapping keeps
+Solomon's relation between travel time and window width, because one distance
+unit takes one Solomon time unit to drive at the planning speed. The C1 instances
+could be fitted by compressing time, but that would change how tight their
+windows are relative to travel times, so the eight instances are a convenience
+sample of the R1 and RC1 types. The pipeline code is unchanged; only the instance
+loader and the parameter constructor are replaced.
 
 \section{Second confirmatory study design}\label{sec:conf2design}
 
-The first confirmatory study left two questions open. Its candidate generator is
-below the state of the art in route quality, so the benefit of screening might
-shrink when candidates come from a stronger search. Its post hoc analysis also
+The first confirmatory study left two questions open. Its candidate generator
+produces weaker routes than the state of the art, so the benefit of screening
+might shrink with candidates from a stronger search. Its post hoc analysis also
 suggested that returning the conservative-speed plan when screening admits
-nothing would raise pooled service (Section~\ref{sec:confirmatory}), a rule chosen
-after the results were seen. A second protocol tested both questions on 53 further
-instances whose seeds are the development seeds shifted by 80000.
+nothing would raise pooled service (Section~\ref{sec:confirmatory}), but that
+rule was chosen after the results were seen. A second protocol tested both
+questions on 53 further instances, with seeds equal to the development seeds
+shifted by 80000.
 
 The second generator is the hybrid genetic search of PyVRP
 \cite{vidal2022,wouda2024}, version 0.14.0. It solves the same planning model as
 the OR-Tools generator: the static matrix at the planning speed, hard and possibly
 contracted windows, capacity, shift length and fleet size, with each vehicle
-departing at the latest feasible time. Its weighted objective keeps the distance,
+leaving at the latest feasible time. Its weighted objective keeps the distance,
 driver-duration and fleet terms with the same coefficients. PyVRP cannot express
 the slack-deficit term, so that term is left out of generation and kept in
-candidate selection. Each solve stops after 10,000 iterations with the instance
-seed as its random seed. The scaling ranges come from the unchanged OR-Tools anchor
-solves and are shared by both generators; because those solves are time-limited,
-the HGS half is deterministic given the ranges. The contraction grid, capped
+candidate selection. Each solve stops after 10,000 iterations and uses the
+instance seed as its random seed, so each HGS solve is deterministic for given
+inputs. Both generators share the scaling ranges from the unchanged OR-Tools
+anchor solves. Those solves are time-limited, so the HGS results are deterministic
+only once the ranges are fixed. The contraction grid, capped
 windows, reachability certificates, scenario banks, admission rule and selection
-score are those of the OR-Tools procedure. HGS conservative-speed planning solves
-the distance objective at 33.3~km/h. The OR-Tools half reruns the frozen pipeline
-of the first study unchanged.
+score are the same as in the OR-Tools procedure. HGS conservative-speed planning
+minimizes distance at 33.3~km/h. The OR-Tools half reruns the frozen pipeline of
+the first study unchanged.
 
-Two fallback rules are compared. The slack-aware rule is the one of the first
-study; for HGS it returns the uncontracted weighted plan. The conservative rule
-returns the conservative-speed plan of the same generator when screening admits
-nothing, and the slack-aware plan when no conservative plan exists. Neither rule
+Two fallback rules are compared. The slack-aware rule is the one used in the
+first study; for HGS it returns the uncontracted weighted plan. The conservative
+rule returns the same generator's conservative-speed plan when screening admits
+nothing, or the slack-aware plan when there is no conservative plan. Neither rule
 changes a screening decision or uses a validation outcome.
 
 The protocol fixes four hypotheses on validated service-event probability, with
 the instance as the unit. G1 (primary): on instances where HGS conservative-speed
 planning returns a plan, the HGS capped procedure with conservative fallback
-exceeds it. G2 (primary): on all instances, the conservative fallback improves the
-OR-Tools capped procedure. G3 (secondary): the same holds for the uncapped
+exceeds it. G2 (primary): on all instances, the conservative fallback improves
+the OR-Tools capped procedure. G3 (secondary): the same holds for the uncapped
 OR-Tools procedure. G4: the difference between the HGS and OR-Tools capped
-procedures, both with conservative fallback, is estimated with a 95\% interval and
-no directional decision. G1 and G2 are decided at the 97.5\% level and G3 at 95\%,
-with the bootstrap, failure policy and decision rules of the first study. The
-protocol requires the abstract and conclusion to report an unconfirmed primary
-hypothesis.
+procedures, both with conservative fallback, is estimated with a 95\% interval
+and no directional decision. G1 and G2 use 97.5\% intervals and G3 a 95\%
+interval, with the bootstrap, failure policy and decision rules of the first
+study. The protocol requires the abstract and conclusion to report any
+unconfirmed primary hypothesis.
 
 The protocol, the HGS code, the analysis program and a SHA-256 manifest covering
 them and the frozen files of the first study were committed to the public
 repository (commit \texttt{3ba6b71288a2a51872ab6a877fa86eb28ff7671d}) and archived
-on Zenodo \cite{ali2026freeze2} before any instance of the study was solved. A gate
-script checked the manifest, the pushed commit and tag, and the absence of results
-before the runs began. An earlier draft of the protocol prescribed seeds shifted
-by 70000. The OR-Tools half was run on those seeds before that draft was
-timestamped, and its console output, which lists the instances screening admitted,
-was seen. That seed set was abandoned in full: its records are kept in the archive
-and enter no analysis, the protocol discloses them, and the study used the seeds
-shifted by 80000 with no other change. The HGS generator was built and tested on
-the development instances, so the development HGS results are exploratory. The
-study ran on the machine and software of the first confirmatory study, with PyVRP
-0.14.0, and followed the written procedure without deviation.
+on Zenodo \cite{ali2026freeze2} before any instance of the study was solved.
+Before the runs began, a gate script checked the manifest, the pushed commit and
+tag, and that no results existed yet. An earlier draft of the protocol used seeds
+shifted by 70000. The OR-Tools half was run on those seeds before that draft was
+timestamped, and its console output, which lists the instances that screening
+admitted, was seen. That seed set was abandoned in full. Its records are kept in
+the archive but enter no analysis, the protocol discloses them, and the study used
+the seeds shifted by 80000 with no other change. The HGS generator was built and
+tested on the development instances, so its development results are exploratory.
+The study ran on the same machine and software as the first confirmatory study,
+with PyVRP 0.14.0, and followed the written procedure without deviation.
 
 \section{Results}
 
 \input{results_summary_v7.tex}
 
-An additional exploratory check took the \BudgetDiagCases{} failures whose
-search ended at a no-plan outcome without a reachability certificate and
-re-solved exactly that contracted model with a longer budget: 30~s, then
-120~s for those still without a plan. In \BudgetDiagSearchLimits{} cases a plan
-was found at that contraction level, so the original outcome was a search
-limit. The remaining \BudgetDiagUnresolved{} still have no plan after 120~s,
-which does not prove infeasibility. The script and records are in the
+A further exploratory check took the \BudgetDiagCases{} failures whose search
+ended with no plan and no reachability certificate, and solved exactly that
+contracted model again with a longer budget: 30~s, then 120~s for any still
+without a plan. In \BudgetDiagSearchLimits{} cases a plan was found at that
+contraction level, so the original failure was a search limit. The remaining
+\BudgetDiagUnresolved{} still had no plan after 120~s, which does not prove
+infeasibility. The script and records are in the
 reproducibility archive \cite{ali2026archive}.
 
 \begin{figure}[ht]
  \centering
  \includegraphics[width=0.93\textwidth]{Fig1.pdf}
  \caption{Paired difference in service probability between the original
- procedure (P) and conservative-speed planning (C) on the common 46 instances.
+ procedure (P) and conservative-speed planning (C) on the 46 common instances.
  Circles, squares and triangles mark $\rho=0$, $0.5$ and $0.9$, and the dashed
  line marks zero. Faint vertical lines mark $\sigma=0.10$, $0.20$ and $0.30$;
- markers are offset slightly around them for legibility only. Error bars are
+ markers are offset slightly around them only for legibility. Error bars are
  95\% bootstrap intervals over instances. Plans are fixed across this
  disturbance sweep, and the intervals are not simultaneous across cells}
  \label{fig:reliability}
@@ -716,142 +725,161 @@ PyVRP/HGS (Table~\ref{tab:hgs}).
 
 \section{Reproducibility and implementation checks}\label{sec:reproducibility}
 
-The study archive \cite{ali2026archive} contains the candidate generator, scenario-bank
-implementation, test suite, experiment driver, raw JSON records, and the script
-that produces the manuscript tables and figure. Tests cover FIFO behavior,
-lognormal moments, order-invariant common random numbers, Wilson calculations,
-visit and capacity feasibility, and the requirement that contracted candidates
-are scored against original windows. Runtime metadata record Python, NumPy,
-OR-Tools, operating system, solver budget, seeds, and scenario counts.
+The study archive \cite{ali2026archive} contains the candidate generators, the
+scenario-bank code, the test suite, the experiment drivers, the raw JSON records
+and the scripts that produce the results tables and the figure. The tests cover
+FIFO behaviour, lognormal moments, common random numbers that do not depend on
+evaluation order, Wilson calculations, visit and capacity feasibility, and the
+rule that contracted candidates are scored against the original windows. Each run
+records the Python, NumPy and OR-Tools versions, the operating system, the solver
+budget, the seeds and the scenario counts.
 
-The clock convention is essential for reproduction: relative time zero is
-06:00 and the evaluator adds 360 minutes before entering the full-day speed
-profile. Omitting that offset instead evaluates a 00:00--10:00 shift. The
-vectorized evaluator is checked against the original scalar implementation
+The clock convention matters for reproduction. Relative time zero is 06:00, and
+the evaluator adds 360 minutes before looking up the full-day speed profile;
+leaving out that offset would evaluate a 00:00--10:00 shift instead. The
+vectorized evaluator is checked against the original scalar implementation,
 including period boundaries, customer lateness and shared arc disturbances.
 
-The revision protocol was fixed before running the new candidates. Admission
-uses seed $100000+$ instance seed; all fixed outputs are assessed with 5000
-fresh scenarios from seed $400000+$ instance seed. The 1000-scenario
-disturbance sweep uses seed $500000+$ instance seed. Earlier aggregate results
-motivated these analyses, so they form an exploratory extension on known synthetic instances. They are neither preregistered nor an external replication. The
-fresh draws do not remove reuse of the instance set. Plans in the sweep are
-not re-screened when $\sigma$ or $\rho$ changes. The confirmatory protocol of Section~\ref{sec:confdesign} was
-publicly timestamped with a hash manifest of the code that runs and analyses it
-before the fresh instances were solved, and its results are reported in
-Section~\ref{sec:confirmatory}. One pipeline smoke test, on an instance outside
-the confirmatory set, was run while the protocol was prepared and is disclosed in
-the protocol as pilot data. The confirmatory study used only frozen scripts. The
-weight-sensitivity analysis, run after the freeze, uses a script outside the
-frozen file list. A first run of the
-weight-sensitivity script stopped on a coding error that affected only that
-script, and the corrected script produced the reported results. The second
-confirmatory study (Section~\ref{sec:conf2design}) has its own frozen protocol and
-manifest. Its OR-Tools half uses the frozen scripts of the first study, and its HGS
-half is deterministic given the scaling ranges. The script that writes its tables
-and text stops unless its figures equal the saved output of the frozen analysis.
+Seeds are fixed. Admission uses seed $100000$ plus the instance seed, all
+validation uses 5000 fresh scenarios from seed $400000$ plus the instance seed,
+and the 1000-scenario disturbance sweep uses seed $500000$ plus the instance
+seed. The revision protocol was fixed before the new candidate configurations
+were run, but earlier aggregate results had motivated these analyses, so they are an
+exploratory extension on known synthetic instances. They are neither
+preregistered nor an external replication, and the fresh scenario draws do not
+remove the reuse of the instance set. Plans in the sweep are not re-screened when
+$\sigma$ or $\rho$ changes.
 
-Every reported table and figure is regenerated from retained machine-readable
-records. Internal planning buffers are always evaluated against offered
-windows, candidate selection and final assessment use independent banks, and
-solver-quality comparisons use equal wall-clock budgets and identical
-deterministic instances. These rules prevent implementation diagnostics or
-adaptive within-run selection from using its own validation outcomes.
+The first confirmatory protocol (Section~\ref{sec:confdesign}) was publicly
+timestamped, with a hash manifest of the code that runs and analyses it, before
+its instances were solved; its results are in Section~\ref{sec:confirmatory}. One
+pipeline smoke test, on an instance outside the confirmatory set, was run while
+the protocol was being prepared, and the protocol discloses it as pilot data. The
+confirmatory study used only frozen scripts. The weight-sensitivity analysis was
+run after the freeze with a script outside the frozen file list. Its first run
+stopped on a coding error that affected only that script, and the corrected
+script produced the reported results. The second confirmatory study
+(Section~\ref{sec:conf2design}) has its own frozen protocol and manifest. Its
+OR-Tools half uses the frozen scripts of the first study, and its HGS half is
+deterministic given the scaling ranges. The script that writes its tables and
+text stops unless its figures equal the saved output of the frozen analysis.
 
-\paragraph{Use of generative AI tools.} Generative AI assistants were used for code development,
-experiment implementation, code review, analysis checking, and drafting and
-editing text. The assistants were OpenAI's ChatGPT (Astra 6) and Anthropic's Claude (Opus 5, Opus 5.5 and Sonnet 5). They are not authors. Every experiment was run from the archived
-code, every reported number regenerates from the archived raw records, and the headline
-results were recomputed independently of the analysis scripts. Rerunning the solver can return different routes, because each solve stops at a
-wall-clock limit; Section~\ref{sec:weights} quantifies this run-to-run variation.
-The author reviewed all code and text and takes full responsibility for the
-content.
+All results tables and the figure are regenerated from the retained records. Internal
+planning buffers are always evaluated against the offered windows, candidate
+selection and final assessment use independent banks, and solver-quality
+comparisons use equal wall-clock budgets on identical deterministic instances.
+These rules stop diagnostics and within-run selection from using their own
+validation outcomes.
+
+\paragraph{Use of generative AI tools.} Generative AI assistants were used for
+code development, experiment implementation, code review, analysis checking, and
+drafting and editing text. They were OpenAI's ChatGPT (Astra 6) and Anthropic's
+Claude (Opus 5, Opus 5.5 and Sonnet 5), and they are not authors. Every experiment
+was run from the archived code, every reported number regenerates from the
+archived raw records, and the headline results were recomputed independently of
+the analysis scripts. Rerunning the solver can return different routes, because
+each solve stops at a wall-clock limit; Section~\ref{sec:weights} measures this
+run-to-run variation. The author reviewed all code and text and takes full
+responsibility for the content.
 
 \section{Limitations}
 
-First, the generators use nominal or iteratively frozen matrices, so the
-procedure can miss better stochastic plans. The OR-Tools generator is also
-below the state of the art: under an equal five-second budget, it returns
-routes about 11\% longer than PyVRP/HGS at 200 customers
-(Table~\ref{tab:hgs}). Absolute distance premiums therefore carry solver
-quality, and some of the uncertified screening failures may reflect search
-limits. The second confirmatory study shows that the reliability result does not
-depend on that generator, but its HGS generator omits the slack-deficit term, so
-the two generators do not solve identical objectives. The comparators are
-padding-based: uniform conservative speed and the same screening applied to
-conservative-speed candidates. No robust or chance-constrained VRPTW optimizer
-\cite{agra2013,jaillet2016,zhang2019} is compared. Conservative speed is uniform
-padding, and the clock-aware approximation is not an exact time-dependent
-optimizer. Generator and objective choices also differ between screened
-families; the experiment is not a full factorial decomposition of every design
-decision. Second, the disruption parameters are assumed and have not been calibrated to fleet GPS residuals, so the results hold conditionally on those values and are not operational forecasts. An
-exploratory $\sigma$--$\rho$ grid is reported, but it does not replace local
-calibration. Third,
-the geometry is synthetic. The Solomon check covers only \SolomonN{} instances with 100
-customers, and the generator found plans for \SolomonPlans{} of them. The
-deterministic solver check is not a substitute for Gehring--Homberger benchmarks or a
-real road network.
-The confirmatory instances share the generator and the disturbance model of the
-development study, so they test repeatability within that setting. Fourth, the
-weights come from one preference vector. Under equal weights the advantage over
-conservative speed is not distinguishable from zero (Section~\ref{sec:weights}),
-only four vectors were tried, and the confirmatory study used the original
-vector alone. Fifth,
-Wilson screening addresses binomial sampling uncertainty for a fixed candidate;
-its nominal coverage is not a simultaneous guarantee across an adaptively
-searched grid. Held-out assessment is therefore necessary. It is also not a
-proof of feasibility under distributional misspecification.
-Sixth, breakdown recovery, heterogeneous fleets, new-order insertion, and
-rolling-horizon replanning are excluded from the present evidence. So is
-departure-time recourse: every vehicle leaves at its planned time in every
-scenario, which makes the evaluation stricter than an operator who adjusts
-departures would face. Seventh, the fallback remains weak. The slack-aware plan can be worse
-than conservative padding when screening admits nothing
-(Section~\ref{sec:solomon}), and the conservative-speed fallback improved the
-uncapped procedure in the second confirmatory study but not measurably the capped
-one, which falls back on few instances.
+The study has eight main limitations.
+
+First, the generators plan on nominal or iteratively frozen matrices, so the
+procedure can miss better stochastic plans. The OR-Tools generator is also below
+the state of the art: under an equal five-second budget, its routes are about
+11\% longer than those of PyVRP/HGS at 200 customers (Table~\ref{tab:hgs}).
+Absolute distance premiums therefore include solver quality, and some uncertified
+screening failures may be search limits. The second confirmatory study shows that
+the reliability result does not depend on OR-Tools, but its HGS generator omits
+the slack-deficit term, so the two generators do not solve identical objectives.
+The clock-aware approximation is not an exact time-dependent optimizer. Generator
+and objective choices also differ between screened families, so the experiments
+are not a full factorial decomposition of every design decision.
+
+Second, the reliability baselines are all based on padding:
+uniform conservative speed, and the same screening applied to conservative-speed
+candidates. No robust or
+chance-constrained VRPTW optimizer \cite{agra2013,jaillet2016,zhang2019} is
+compared.
+
+Third, the disturbance parameters are assumed and have not been calibrated to
+fleet GPS residuals. The results hold for those values and are not operational
+forecasts. The exploratory $\sigma$--$\rho$ grid does not replace local
+calibration.
+
+Fourth, the geometry is synthetic. The Solomon check covers only \SolomonN{}
+instances with 100 customers, and the generator found plans for \SolomonPlans{}
+of them. The deterministic solver check does not replace Gehring--Homberger
+benchmarks or a real road network. The confirmatory instances share the generator
+and disturbance model of the development study, so they test repeatability within
+that setting.
+
+Fifth, the weights come from one preference vector. Under equal weights the
+advantage over conservative speed is not distinguishable from zero
+(Section~\ref{sec:weights}), only four vectors were tried, and neither
+confirmatory study varied the weights.
+
+Sixth, Wilson screening accounts for binomial sampling error for a fixed
+candidate. Its nominal coverage is not a simultaneous guarantee across an
+adaptively searched grid, which is why held-out assessment is needed. It also
+does not prove feasibility if the disturbance distribution is misspecified.
+
+Seventh, the evidence excludes breakdown recovery, heterogeneous fleets, insertion
+of new orders, rolling-horizon replanning and departure-time recourse. Every
+vehicle leaves at its planned time in every scenario, which makes the evaluation
+stricter than an operator who adjusts departures would face.
+
+Eighth, the fallback remains weak. The slack-aware plan can be worse than
+conservative padding when screening admits nothing (Section~\ref{sec:solomon}).
+In the second confirmatory study, the conservative-speed fallback improved the
+uncapped procedure but did not measurably improve the capped one, which falls
+back on few instances.
 
 \section{Conclusion}
 
-The evidence separates three mechanisms. Uniformly conservative travel times
-protect against predictable congestion by construction, padding every trip
-including off-peak ones. On matched development instances the complete screened
+The development study separates three mechanisms. Uniformly conservative travel
+times protect against predictable congestion by construction, but they pad every
+trip, including off-peak ones. On matched instances the complete screened
 procedure exceeded them by \ProcConsRange{} percentage points on average,
-although the interval at 200 customers includes zero, and for independent
+although the interval at 200 customers includes zero. For independent
 disturbances its advantage grew with noise, from $\SweepLowIndep$ to
-\SweepHighIndep{} points. The unscreened slack-aware objective alone falls
-below conservative padding. The advantage comes from the complete procedure, in
+\SweepHighIndep{} points. The slack-aware objective without screening fell below
+conservative padding, so the advantage comes from the complete procedure, in
 which the contracted candidate family and statistical selection act together.
-Screening also lifts conservative padding: applied to conservative-speed
+Screening also improves conservative padding: applied to conservative-speed
 candidates, it performed about as well as the original procedure, and the capped
 procedure had the highest service probability of the three
-(Table~\ref{tab:screen}; exploratory). The fixed
-20\% pad is therefore the weaker of the two padding comparators.
+(Table~\ref{tab:screen}; exploratory). The fixed 20\% pad is therefore the weaker
+of the two padding comparators.
 
-A first confirmatory study on \ConfInstances{} fresh instances, with hypotheses fixed in
-a timestamped protocol before any of them was solved, confirmed all four
-prespecified hypotheses with the original weight vector. The screened procedure exceeded conservative speed by
-\ConfHOneMean{} points (97.5\% interval \ConfHOneLo{} to \ConfHOneHi{}), capping
-exceeded the original procedure by \ConfHTwoMean{} points (\ConfHTwoLo{} to
-\ConfHTwoHi{}), capping admitted \ConfHThreeK{} instances against \ConfHThreeP{}
-with none lost, and the advantage over conservative speed grew with independent
-noise. These instances share the generator and the assumed disturbance model
-with the development study, so the result shows repeatability within that
-setting.
+The first confirmatory study, on \ConfInstances{} new instances with hypotheses
+fixed in a timestamped protocol before any of them was solved, confirmed all four
+prespecified hypotheses with the original weight vector. The screened procedure
+exceeded conservative speed by \ConfHOneMean{} points (97.5\% interval
+\ConfHOneLo{} to \ConfHOneHi{}). Capping added \ConfHTwoMean{} points
+(\ConfHTwoLo{} to \ConfHTwoHi{}) and admitted \ConfHThreeK{} instances against
+\ConfHThreeP{}, losing none. The advantage over conservative speed grew with
+independent noise. These instances share the generator and the assumed
+disturbance model of the development study, so the result shows repeatability
+within that setting.
 
 The advantage depends on the objective weights. Swapping the two largest weights
 changed nothing beyond run-to-run variation, and a distance-heavy vector kept a
 clearly positive advantage. With equal weights, fewer instances were admitted
-(\WtEqualAdmitted{} against \WtBaseAdmitted{}) and the advantage over conservative
-speed fell to \WtEqualPCMean{} points with an interval from \WtEqualPCLo{} to
-\WtEqualPCHi{}. The confirmatory study used the original weights only.
+(\WtEqualAdmitted{} against \WtBaseAdmitted{}), and the advantage over
+conservative speed fell to \WtEqualPCMean{} points, with an interval from
+\WtEqualPCLo{} to \WtEqualPCHi{}. Neither confirmatory study varied the
+weights.
 
 On \SolomonN{} Solomon instances with the same overlay, OR-Tools found a plan for
-\SolomonPlans{} (PyVRP/HGS finds feasible plans for the other \SolomonNoPlan{}), and
-screening admitted \SolomonAdmitted{} of those \SolomonPlans{}. The admitted plans reached
-service probabilities near 98\%, and the fallback plans stayed below 46\%. This
-check was exploratory, covers a small set of instances, and shows that the
-candidate generator limits what the pipeline can do on harder benchmarks.
+\SolomonPlans{}, and PyVRP/HGS found feasible plans for the other
+\SolomonNoPlan{}. Screening admitted \SolomonAdmitted{} of the \SolomonPlans{}.
+The admitted plans reached service probabilities near 98\%, and the fallback
+plans stayed below 46\%. This exploratory check covers few instances, and it
+shows that the candidate generator limits what the pipeline can do on harder
+benchmarks.
 
 The second confirmatory study replaced OR-Tools with hybrid genetic search. With
 that generator, screening with capped contraction exceeded conservative-speed
@@ -859,53 +887,57 @@ planning by \CtwoGOneMean{} points (97.5\% interval \CtwoGOneLo{} to
 \CtwoGOneHi{}), and pooled service reached \CtwoPooledHGSK\% against
 \CtwoPooledHGSCons\% for conservative speed. The HGS and OR-Tools procedures
 differed by \CtwoGFourMean{} points, with a 95\% interval from \CtwoGFourLo{} to
-\CtwoGFourHi{}; no equivalence margin was set, so the interval bounds the
-difference without showing equivalence. The reliability gain is therefore not an
-artefact of a weak generator. Capping mattered more with HGS: at 100 and 200
-customers its uncapped family was admitted on \CtwoHGSPAdmittedLarge{} of
+\CtwoGFourHi{}. No equivalence margin was set, so this interval bounds the
+difference but does not show equivalence. The reliability gain is therefore not
+an artefact of a weak generator. Capping mattered more with HGS: at 100 and 200
+customers, its uncapped family was admitted on \CtwoHGSPAdmittedLarge{} of
 \CtwoLarge{} instances and its capped family on \CtwoHGSKAdmittedLarge{}.
 
 The fallback is the weakest part of the procedure. When screening admits nothing,
-the original protocol returns the uncontracted slack-aware plan, which on RC106 was
-far worse than conservative speed (Section~\ref{sec:solomon}). A conservative-speed
-fallback, examined post hoc, would have raised pooled service in the first
-confirmatory study to \PostHocP\% for the original procedure and \PostHocK\% for
-the capped procedure. Tested prospectively in the second study, it did not
-measurably improve the capped procedure (G2, \CtwoGTwoMean{} points, interval
-\CtwoGTwoLo{} to \CtwoGTwoHi{}): that procedure fell back on only
-\CtwoORTKFallbacks{} instances, and on \CtwoFallbacksChanged{} of them the rule
-changed the plan, with mixed effects. It did improve the uncapped procedure, by
-\CtwoGThreeMean{} points (95\% interval \CtwoGThreeLo{} to \CtwoGThreeHi{}).
+the original protocol returns the uncontracted slack-aware plan, which on RC106
+was far worse than conservative speed (Section~\ref{sec:solomon}). In the first
+confirmatory study, a conservative-speed fallback examined post hoc would have
+raised pooled service to \PostHocP\% for the original procedure and \PostHocK\%
+for the capped procedure. Tested prospectively in the second study, this rule did
+not measurably improve the capped procedure (G2, \CtwoGTwoMean{} points, interval
+\CtwoGTwoLo{} to \CtwoGTwoHi{}). That procedure fell back on only
+\CtwoORTKFallbacks{} instances, the rule changed the plan on
+\CtwoFallbacksChanged{} of them, and the effects went both ways. The rule did
+improve the uncapped procedure, by \CtwoGThreeMean{} points (95\% interval
+\CtwoGThreeLo{} to \CtwoGThreeHi{}).
 
-Screening failures can be diagnosed. Among the
-\FailureCount{} development instances without an admitted plan, \CertifiedFailures{}
-encounter a certified reachability obstruction at one or more tested
-contraction levels. A certificate proves that a particular contracted model is
-infeasible; it does not show that reachability alone caused the procedure to
-miss its target. Capping each customer's contraction at its
-direct-reachability limit raised admission from \OriginalSelected{} to
+Screening failures can be diagnosed. Of the \FailureCount{} development instances
+without an admitted plan, \CertifiedFailures{} meet a certified reachability
+obstruction at one or more tested contraction levels. A certificate proves that
+one particular contracted model is infeasible; it does not show that reachability
+alone made the procedure miss its target. Capping each customer's contraction at
+its direct-reachability limit raised admission from \OriginalSelected{} to
 \CappedSelected{} instances. Of the instances with 100 or 200 customers,
-\CappedLargeSelected{} were admitted and \CappedLargeRetained{} retained the
-target lower bound under fresh validation, with mean service probability
-\CappedLargeRange\%. The gain costs \CappedDistanceCost\% more
-distance and \CappedFleetCost{} more vehicles on average, rising to
-\CappedFleetLarge{} more vehicles at 200 customers. The earlier fleet-matched
-experiment concerns the uncontracted objective and does not isolate the
-capped variant's mechanism. At 20 customers capping changes nothing; only two of the six failures there encounter a certificate. Of the other four, a longer search budget finds a plan for two, and two remain unresolved.
+\CappedLargeSelected{} were admitted and \CappedLargeRetained{} kept the target
+lower bound under fresh validation, with mean service probability
+\CappedLargeRange\%. The gain costs \CappedDistanceCost\% more distance and
+\CappedFleetCost{} more vehicles on average, rising to \CappedFleetLarge{} more
+vehicles at 200 customers. The earlier fleet-matched experiment concerns the
+uncontracted objective and does not isolate the mechanism of the capped variant.
+At 20 customers capping changes nothing. Only two of the six failures there meet
+a certificate; of the other four, a longer search budget finds a plan for two,
+and two remain unresolved.
 
-Pooled over all instances, no procedure reaches the 95\% target, so procedure
-averages and selected-plan compliance must both be reported. In the development
-study, plans admitted by screening average \OriginalSelectedMean\% for the
-original procedure and \CappedSelectedMean\% for the capped procedure, while the
-fallback plans used elsewhere average \OriginalFallbackMean\% and
-\CappedFallbackMean\%. All \CappedFallbackCount{} capped-procedure fallbacks occur
-at 20 or 50 customers, so closing the remaining gap depends on admitting plans
-for small instances. In the confirmatory study the capped procedure reached
-\ConfPooledK\% pooled, against \ConfPooledP\% for the original procedure. These
-results are conditional on assumed disruption parameters and synthetic geometry.
+Averaged over all instances, no procedure reaches the 95\% target, so both the
+procedure averages and the compliance of selected plans must be reported. In the
+development study, plans admitted by screening averaged \OriginalSelectedMean\%
+for the original procedure and \CappedSelectedMean\% for the capped procedure,
+while the fallback plans used on the other instances averaged
+\OriginalFallbackMean\% and \CappedFallbackMean\%. All \CappedFallbackCount{}
+capped-procedure fallbacks occur at 20 or 50 customers, so closing the remaining
+gap depends on admitting plans for small instances. In the first confirmatory
+study the capped procedure reached \ConfPooledK\% pooled, against \ConfPooledP\%
+for the original procedure.
+
+These results depend on assumed disturbance parameters and synthetic geometry.
 The development findings were exploratory, and the two confirmatory studies
-support the main ones. Evidence from real road networks, other benchmark families and
-calibrated disturbance parameters remains outstanding.
+support the main ones. Evidence from real road networks, other benchmark families
+and calibrated disturbance parameters is still needed.
 
 \section*{Acknowledgements}
 The author thanks the researchers who answered methodological questions by
@@ -976,5 +1008,6 @@ and were not re-elicited for driver duration.
 
 \bibliographystyle{sn-basic}
 \bibliography{sn-bibliography}
+\endgroup
 
 \end{document}

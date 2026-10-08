@@ -85,33 +85,33 @@ def main():
     ]
     text = [
         r"\subsection{Second confirmatory study}\label{sec:confirmatory2}", "",
-        "In the exploratory development run on the 53 development instances"
+        "In the exploratory run on the 53 development instances"
         f", the HGS capped procedure with conservative fallback exceeded HGS conservative-speed planning by "
-        f"{f1(dev['G1']['mean_pp'])} points and pooled {f1(dev['pooled_mean_pp']['hgs_capped_cons'])}\\%. "
-        r"Table~\ref{tab:confirmatory2} gives the prespecified results on the 53 fresh instances of the second study.",
+        f"{f1(dev['G1']['mean_pp'])} points, with pooled service of {f1(dev['pooled_mean_pp']['hgs_capped_cons'])}\\%. "
+        r"Table~\ref{tab:confirmatory2} gives the prespecified results on the 53 new instances of the second study.",
         "",
-        table("Second confirmatory study on 53 fresh instances. Differences are in percentage points of validated "
+        table("Second confirmatory study on 53 new instances. Differences are in percentage points of validated "
               "service-event probability; intervals are paired bootstrap intervals over instances. G1 uses the "
               f"{g['G1']['k']} instances where HGS conservative-speed planning returned a plan.",
               "tab:confirmatory2", r"@{}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{4.4cm}"
               r">{\raggedright\arraybackslash}p{3.3cm}cc@{}",
               r"Hypothesis & Quantity & Estimate [interval] & Level & Decision", rows, size="footnotesize"),
-        f"G1 was confirmed: with the HGS generator, screening with capped contraction exceeded conservative padding by "
+        f"G1 was confirmed. With the HGS generator, screening with capped contraction exceeded conservative padding by "
         f"{f1(g['G1']['mean_pp'])} points, and pooled service probability reached {f1(pooled['hgs_capped_cons'])}\\% "
         f"against {f1(pooled['hgs_conservative'])}\\% for HGS conservative speed. Capping was essential with this "
         f"generator: at 100 and 200 customers the HGS capped family was admitted on "
-        f"{sum(u['hgs_capped_selected'] for u in large)} of {len(large)} instances and the uncapped family on "
+        f"{sum(u['hgs_capped_selected'] for u in large)} of {len(large)} instances, and the uncapped family on "
         f"{sum(u['hgs_uncapped_selected'] for u in large)}.", "",
         f"G2 was not confirmed. The OR-Tools capped procedure admitted a plan on {53 - len(fb)} of 53 instances and fell "
         f"back on {len(fb)}. On {len(fb) - len(changed)} of those no conservative-speed plan existed, "
         f"so both rules returned the same plan. On the remaining {len(changed)} the conservative fallback changed "
         f"service probability by " + (lambda xs: ", ".join(xs[:-1]) + " and " + xs[-1])(
-            [f"{c:+.1f}".replace("-", "$-$") for c in changes]) + " points. The post hoc gain reported for the capped procedure in the first study did not replicate. "
-        f"For the uncapped procedure, which falls back more often, the conservative fallback helped (G3, "
-        f"{f1(g['G3']['mean_pp'])} points).", "",
-        f"The difference between the two generators under the capped procedure with conservative fallback (G4) was "
-        f"{f1(g['G4']['mean_pp'])} points with a 95\\% interval from {f1(g['G4']['lo_pp'])} to {f1(g['G4']['hi_pp'])}. "
-        "No equivalence margin was prespecified, so this interval bounds the difference without establishing "
+            [f"{c:+.1f}".replace("-", "$-$") for c in changes]) + " points. The post hoc gain seen for the capped procedure "
+        f"in the first study did not replicate. For the uncapped procedure, which falls back more often, the conservative "
+        f"fallback helped (G3, {f1(g['G3']['mean_pp'])} points).", "",
+        f"Under the capped procedure with conservative fallback, the two generators differed by "
+        f"{f1(g['G4']['mean_pp'])} points (G4), with a 95\\% interval from {f1(g['G4']['lo_pp'])} to {f1(g['G4']['hi_pp'])}. "
+        "No equivalence margin was prespecified, so this interval bounds the difference but does not establish "
         "equivalence. The HGS $\\beta=0$ plan, which lacks the slack term, was a weak fallback: the uncapped HGS procedure "
         f"pooled {f1(pooled['hgs_procedure_slack'])}\\% with it and {f1(pooled['hgs_procedure_cons'])}\\% with the "
         "conservative fallback (descriptive).", "",
@@ -125,7 +125,7 @@ def main():
                      f"{f1(d['ort_capped_cons'])} & {d['hgs_capped_admitted']} & {f1(d['hgs_conservative'])} & "
                      f"{f1(d['hgs_capped_cons'])}")
     (ROOT / "paper/study2_appendix.tex").write_text(table(
-        "Second confirmatory study by size (descriptive): instances admitted by the capped procedure and mean "
+        "Second confirmatory study by size (descriptive): instances admitted by the capped procedure, and mean "
         "validated service-event probability (\\%) over all instances, including fallbacks.",
         "tab:study2-size", r"@{}rrrrrrrr@{}",
         r"$n$ & Inst. & \multicolumn{3}{c}{OR-Tools capped} & \multicolumn{3}{c}{HGS} \\"

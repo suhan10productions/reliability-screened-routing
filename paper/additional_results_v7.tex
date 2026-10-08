@@ -1,7 +1,7 @@
 \begin{table}[H]
 \centering
 \small
-\caption{Customer outcomes on the conservative-feasible subset; the clock approximation is restricted further when needed. Counts make this additional conditioning explicit.}
+\caption{Customer outcomes on the instances where conservative-speed planning returned a plan. The clock approximation also excludes the instances where it found no schedule, and the counts show this.}
 \label{tab:customers}
 \begin{tabular}{lrll}
 \toprule
@@ -23,7 +23,7 @@ Clock approximation & 44 & 88.0 [87.2, 88.7] & 6.73 [5.39, 8.23]\\
 \begin{table}[H]
 \centering
 \scriptsize
-\caption{Absolute planned resource means on the same subset as Table~\ref{tab:customers}: distance in km, scheduled duration in minutes, and vehicles. These are not optimality claims.}
+\caption{Mean absolute planned resources on the same instances as Table~\ref{tab:customers}: distance in km, scheduled duration in minutes, and vehicles. These are not claims of optimality.}
 \label{tab:fullcost}
 \begin{tabular}{lrlll}
 \toprule
@@ -45,7 +45,7 @@ Clock approximation & 44 & 1137.2 [955.5, 1330.9] & 2868.3 [2335.0, 3456.8] & 7.
 \begin{table}[H]
 \centering
 \scriptsize
-\caption{Service-threshold sensitivity on the common 46; columns use the same plans and fresh primary bank. At $n=20/50/100/200$, allowed-late counts are $2/5/10/20$ at $\kappa=.90$, $1/2/5/10$ at $.95$, $0/1/2/4$ at $.98$, and zero at 1.00.}
+\caption{Sensitivity to the service threshold $\kappa$ on the 46 common instances, with the same plans and the same fresh validation bank in every column. At $n=20/50/100/200$, the number of customers allowed to be late is $2/5/10/20$ at $\kappa=.90$, $1/2/5/10$ at $.95$, $0/1/2/4$ at $.98$, and zero at 1.00.}
 \label{tab:kappa}
 \begin{tabular}{rlllll}
 \toprule
@@ -65,7 +65,7 @@ $\kappa$ & N & C & S & P & SC\\
 \begin{table}[H]
 \centering
 \scriptsize
-\caption{Every original screening failure. Best buffer and lower confidence bound (LCB) refer to a returned candidate; first no-plan is an observed solver outcome; first proof is the earliest grid point with a reachability certificate. Unresolved indicates at least one no-plan result without that certificate. A dash means no certificate through 60 minutes.}
+\caption{Every instance on which the original procedure admitted no plan. Best $\beta$ and the lower confidence bound (LCB) refer to the best returned candidate; the no-plan $\beta$ is the first buffer at which the solver returned no plan; the proof $\beta$ is the first buffer with a reachability certificate. Unresolved marks at least one no-plan result without a certificate. A dash means none up to 60 minutes.}
 \label{tab:failure}
 \begin{tabular}{rrrrrrc}
 \toprule
@@ -100,7 +100,7 @@ $n$ & Seed & Best $\beta$ & LCB (\%) & No-plan $\beta$ & Proof $\beta$ & Unresol
 \begin{table}[H]
 \centering
 \small
-\caption{Retained equal-budget deterministic-core benchmark: OR-Tools excess distance relative to PyVRP/HGS (\%). Counts are valid one-second/five-second pairs. There was one missing pair at the one-second budget.}
+\caption{Retained equal-budget benchmark on the deterministic core: excess distance of OR-Tools routes over PyVRP/HGS routes (\%). Counts are valid pairs at the one-second and five-second budgets; one pair is missing at one second.}
 \label{tab:hgs}
 \begin{tabular}{rrll}
 \toprule
