@@ -65,3 +65,21 @@ class RobustSafeguardTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BestScreenedFallbackTests(unittest.TestCase):
+    def test_highest_screening_success_wins_then_score_then_beta(self):
+        import confirm_analysis_fallback as caf
+        from relscreen_v6 import ModelParams
+        r = json.loads((ROOT / "results/v7").glob("instance_*.json").__next__().read_text())
+        cands = [c for c in r["capped_procedure"]["candidates"] if c.get("plan") and c.get("screening")]
+        s1 = {}
+        for n in (20, 50, 100, 200):
+            for x in json.loads((ROOT / f"results/study_v6_n{n}.json").read_text())["records"]:
+                s1[x["instance_seed"]] = x
+        rr = s1[r["instance_seed"]]["reference_ranges"]
+        b = caf.best_screened(cands, (rr["lower"], rr["upper"]), ModelParams())
+        top = max(c["screening"]["service_level_success"] for c in cands)
+        self.assertEqual(b["screening"]["service_level_success"], top)
+        self.assertIsNone(caf.best_screened([{"beta": 0, "plan": None, "screening": None}], (rr["lower"], rr["upper"]),
+                                            ModelParams()))

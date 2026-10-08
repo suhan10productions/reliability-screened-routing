@@ -204,16 +204,23 @@ The frozen confirmatory analyses round their figures to two decimals.
 `analyse_v8.py` and `analyse_v9.py` round exact values to one decimal; both
 scripts still stop unless the results match the saved confirmatory output.
 
-## Confirmatory study 3 (proposed): robust comparison on new instances
+## Confirmatory study 3 (proposed): robust comparison and fallback rule
 
-`CONFIRMATORY_PROTOCOL_3.md` turns the exploratory robust comparison into a
-prespecified test on the 90 confirmatory instances with up to 100 customers
-(studies 1 and 2). It fixes four hypotheses (R1-R4), the decision rules and the
-analysis (`code/confirm_analysis_robust.py`), and is frozen by
-`FROZEN_MANIFEST_3.json` (`code/freeze_manifest_robust.py`). No robust plan is
-computed for these instances before the protocol and manifest are publicly
-timestamped. `tests/test_confirm_analysis_robust.py` checks the safeguards, and
-the analysis's `descriptive` mode reproduces the exploratory development
+`CONFIRMATORY_PROTOCOL_3.md` has two parts, frozen together by
+`FROZEN_MANIFEST_3.json` (`code/freeze_manifest_robust.py`).
+
+- Part A turns the exploratory robust comparison into a prespecified test on
+  the 90 confirmatory instances with up to 100 customers (studies 1 and 2):
+  hypotheses R1-R4, analysis `code/confirm_analysis_robust.py`.
+- Part B tests the best-screened fallback (return the family's candidate with
+  the highest screening success when nothing is admitted) on 53 new instances
+  (seeds + 120000), with the frozen OR-Tools and HGS pipelines: hypotheses
+  F1-F4, analysis `code/confirm_analysis_fallback.py`. The rule came from the
+  post hoc analysis `code/fallback_policy.py` (`results/fallback_policy.json`).
+
+Nothing is run on these instances before the protocol and manifest are
+publicly timestamped. `tests/test_confirm_analysis_robust.py` checks the
+safeguards; the `descriptive` modes of both analyses reproduce the exploratory
 results.
 
 Exploratory runs with 200 customers use `study_robust.py --reduced-grid`

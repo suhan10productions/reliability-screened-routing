@@ -48,10 +48,13 @@ from study_robust import DESIGN, GRID, ITERATIONS, SCHEMA, key
 
 ROOT = Path(__file__).resolve().parents[1]
 B, BOOT_SEED = 20_000, 20260930
-MANIFEST_FILES = [
-    "CONFIRMATORY_PROTOCOL_3.md", "requirements.txt",
+MANIFEST_FILES = [  # protocol 3, both parts
+    "CONFIRMATORY_PROTOCOL_3.md", "requirements.txt", "FROZEN_MANIFEST_2.json",
     "code/relscreen_v6.py", "code/relscreen_v7.py", "code/robust_generator.py",
     "code/study_robust.py", "code/analyse_robust.py", "code/confirm_analysis_robust.py",
+    "code/study_v6.py", "code/study_v7.py", "code/confirm_analysis.py",
+    "code/hgs_generator.py", "code/study_hgs.py", "code/confirm_analysis_hgs.py",
+    "code/confirm_analysis_fallback.py",
 ]
 SIZES = (20, 50, 100)
 CAPPED_GRID = [key(g, d) for g, d in GRID if g != 0]
