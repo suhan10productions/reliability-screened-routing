@@ -144,3 +144,29 @@ halves against `FROZEN_MANIFEST_2.json` before computing anything, reusing the
 frozen validator of study 1 for the OR-Tools half;
 `code/check_hgs_safeguards.py` demonstrates its checks. Run sheet:
 `NEXT_RUNS_2.md`.
+
+## Robust optimization comparator (exploratory)
+
+`code/robust_generator.py` implements a budgeted-uncertainty robust VRPTW
+(Bertsimas and Sim; Agra et al.): at most Gamma arcs per route run slow by
+ceil(delta * t). Route feasibility is checked exactly by the dynamic programme of
+Agra et al. (forward and backward arrays, O(Gamma) insertion and join checks);
+`gamma=None` is box uncertainty. `CappedRobustModel` adds reachability relief,
+the analogue of capped contraction. The search is a large
+neighbourhood search with a fixed iteration count and seed, so plans are
+deterministic. `tests/test_robust_generator.py` checks every feasibility routine
+against brute-force enumeration of deviation sets.
+
+`code/study_robust.py` runs the grid (Gamma 1, 2, 3, 5, box; delta 0.2, 0.4,
+0.6; plus Gamma = 0) on the development instances with 20, 50 and 100
+customers and validates every plan on the same 5000-scenario bank as the
+OR-Tools and HGS configurations:
+
+```bash
+PYTHONPATH=code python code/study_robust.py --sizes 100 50 20 --output results/robust_dev --workers 2
+PYTHONPATH=code python code/study_robust.py --sizes 100 50 20 --capped --output results/robust_capped_dev --workers 2
+PYTHONPATH=code python code/analyse_v10.py      # paper/robust_*.tex, macros, Fig2
+```
+
+The comparison was run after both confirmatory studies with code outside the
+frozen file lists, and is reported as exploratory.

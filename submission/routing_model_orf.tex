@@ -21,6 +21,7 @@
 \input{result_macros_v7.tex}
 \input{result_macros_v8.tex}
 \input{result_macros_v9.tex}
+\input{result_macros_v10.tex}
 
 \title{Reliability-Screened Routing Under Predictable and Stochastic Travel
 Variation: Matched Comparisons of Conservative Planning and Statistical
@@ -37,28 +38,28 @@ ORCID: \href{https://orcid.org/0009-0004-5079-7684}{0009-0004-5079-7684}}
 \begin{abstract}
 Routes planned on nominal travel times can fail under predictable congestion and
 random delay. This paper tests a two-layer procedure for the capacitated
-vehicle-routing problem with time windows. A replaceable solver proposes plans,
-and internal window contraction adds time buffers without changing customer
+vehicle-routing problem with time windows. A replaceable solver proposes plans;
+internal window contraction adds buffers without changing customer
 promises. A plan is admitted only if a one-sided 95\% Wilson lower bound on the
 probability that at least 95\% of customers are served on time reaches 0.95, and
-the selected plan is checked once on fresh scenarios. On 53 synthetic instances
-of 20--200 customers with OR-Tools candidates, the screened procedure
-exceeded uniform travel-time padding by \ProcConsRange{} percentage points. Capping each customer's contraction at its
-direct-reachability limit raised admission from \OriginalSelected{} to
-\CappedSelected{} instances, at \CappedDistanceCost\% more distance. Two
-confirmatory studies followed, each on 53 new instances from the same instance
-generator under a publicly timestamped protocol. The first confirmed all four prespecified
-hypotheses: screening exceeded conservative padding by \ConfHOneMean{} points,
-and capping added \ConfHTwoMean{}. The second replaced OR-Tools with hybrid
-genetic search (HGS): screening with capping exceeded HGS conservative padding
-by \CtwoGOneMean{} points and differed from the OR-Tools
-procedure by \CtwoGFourMean{} points (95\% interval \CtwoGFourLo{} to
-\CtwoGFourHi{}). A conservative-speed fallback suggested post hoc helped
-the uncapped procedure but did not measurably help the capped one. These
-results use the original objective weights; with equal weights, the advantage
-over padding is not distinguishable from zero. Pooled service stays below the
-95\% target, mainly through fallback plans. Results depend on assumed
-disturbance parameters and synthetic geometry.
+the selected plan is checked once on fresh scenarios. Capping each customer's
+contraction at its direct-reachability limit removes one failure mode. On 53
+instances of 20--200 customers, the screened procedure exceeded 20\%
+travel-time padding by \ProcConsRange{} percentage points. Two confirmatory
+studies followed, each on 53 new instances under a publicly timestamped protocol.
+The first confirmed all four prespecified hypotheses. The second replaced
+OR-Tools with hybrid genetic search (HGS): screening with capping exceeded HGS
+conservative padding by \CtwoGOneMean{} points, and a conservative-speed fallback
+suggested post hoc did not measurably improve the OR-Tools capped procedure. In
+exploratory runs on up to 100 customers, a budgeted-robust VRPTW often had
+no plan on larger instances. With analogous reachability relief it competed with
+the screened procedures; its most protective settings and its screened plans
+(\RobScreenedCapP\% against \RobHgsCappedP\% for the HGS procedure) were more
+reliable but used more vehicles. The OR-Tools and HGS procedures pool below
+the 95\% target, mainly through fallbacks.
+With equal objective weights the advantage over padding is not distinguishable
+from zero. Results depend on assumed disturbance parameters and synthetic
+geometry.
 \end{abstract}
 
 {\raggedright\noindent\textbf{Keywords:} vehicle routing; time windows;
@@ -93,8 +94,9 @@ congestion profile and a limit on each customer's buffer change how often a plan
 passes the test and how reliable it is out of sample. Finally, they test whether
 the main findings hold on new instances under prespecified protocols, whether
 they survive a change to a state-of-the-art solver, and whether a
-conservative-speed plan is a better fallback when no plan passes. An exploratory
-analysis examines how sensitive the findings are to the objective weights.
+conservative-speed plan is a better fallback when no plan passes. Exploratory
+analyses examine how sensitive the findings are to the objective weights and how
+the procedure compares with a robust VRPTW optimizer.
 
 The procedure keeps \emph{candidate generation} separate from \emph{stochastic
 validation}. The solver is a nominal VRPTW solver; it is not presented as an
@@ -116,8 +118,12 @@ contraction at its direct-reachability limit removes one cause of failure, in
 which contraction alone makes a customer unreachable even by a direct trip. The
 candidate family and the selection rule work together, so a comparison with a
 single uncontracted plan cannot attribute the gain to the selection rule alone.
+Two of the procedure's elements, statistical screening and reachability relief,
+do not depend on the generator: the experiments apply screening to OR-Tools, hybrid
+genetic search and robust VRPTW candidates, and an analogous relief to the robust
+model.
 
-The evidence comes in three parts. A development study on 53 synthetic instances
+The evidence comes in four parts. A development study on 53 synthetic instances
 shaped the design. It compares the procedure with uniform travel-time padding and
 with ablations that isolate clock-profile information, fleet size, contracted
 candidates and screening, and its findings are exploratory. A first confirmatory
@@ -126,7 +132,9 @@ exploratory analysis varied the objective weights. A second confirmatory study,
 on another 53 new instances, replaced OR-Tools with hybrid genetic search
 \cite{vidal2022,wouda2024} and tested the conservative-speed fallback that the
 first study had suggested post hoc. Both confirmatory protocols were publicly
-timestamped before their instances were solved.
+timestamped before their instances were solved. A fourth, exploratory comparison
+on the development instances sets the procedures against a budgeted-robust VRPTW
+optimizer, with and without reachability relief.
 
 \section{Related work}
 
@@ -159,7 +167,10 @@ develop a riskiness index for time windows under uncertainty, together with an
 exact solution algorithm \cite{zhang2019}. Gendreau, Jabali and Rei survey
 stochastic routing models and the directions that remain open
 \cite{gendreau2016}. These methods require a solver built for their uncertainty
-model, and none of them is compared with the procedure in this paper.
+model. The budgeted model of Agra et al., which applies the uncertainty set of
+Bertsimas and Sim \cite{bertsimas2004} to routing, is implemented here as a
+comparator (Section~\ref{sec:robust-design}); the distributionally robust and
+riskiness-index methods \cite{jaillet2016,zhang2019} are not compared.
 
 The procedure in this paper differs from both lines of work in where the
 statistical claim is made. It does not build a stochastic feasibility
@@ -413,7 +424,7 @@ admitted plan. The procedure-level average falls below $\alpha$ whenever fallbac
 plans are weaker, so the results report admitted plans and the whole procedure
 separately.
 
-\subsection{Generator replacement and reachability-capped contraction}
+\subsection{Generator replacement and reachability-capped contraction}\label{sec:capping}
 
 Screened conservative speed uses the same buffer grid, admission bank and
 Wilson threshold, but its candidates minimize distance on the padded matrix.
@@ -684,6 +695,75 @@ tested on the development instances, so its development results are exploratory.
 The study ran on the same machine and software as the first confirmatory study,
 with PyVRP 0.14.0, and followed the written procedure without deviation.
 
+\section{Robust optimization comparator design}\label{sec:robust-design}
+
+The reliability baselines in the main studies are all based on padding. To
+compare the procedure with a method that plans against travel-time uncertainty
+inside the optimization, a robust VRPTW with budgeted uncertainty was implemented
+\cite{bertsimas2004,agra2013}. On arc $(i,j)$ the travel time lies between the
+nominal planning time $\bar t_{ij}$ and $\bar t_{ij}+\hat t_{ij}$, with
+$\hat t_{ij}=\lceil\theta\,\bar t_{ij}\rceil$ minutes for a protection level
+$\theta$. A route must stay feasible, with every service start inside its window
+and the return inside the shift, whenever at most $\Gamma$ of its arcs take their
+upper value. Because vehicles may wait, the worst case is computed exactly by the
+dynamic programme of Agra et al.~\cite{agra2013}. For a route with stops
+$1,\ldots,m$, let $A_k(g)$ be the latest possible service start at stop $k$ when at
+most $g$ deviations have occurred, with $A_0(g)$ the depot departure and
+$A_{k}(-1)=-\infty$:
+\begin{equation}
+ A_k(g)=\max\bigl\{l_k,\;A_{k-1}(g)+s_{k-1}+\bar t_{k-1,k},\;
+ A_{k-1}(g-1)+s_{k-1}+\bar t_{k-1,k}+\hat t_{k-1,k}\bigr\},
+\end{equation}
+with $s_0=0$. The route is robust feasible if $A_k(\Gamma)\leq u_k$ for every stop
+and the worst-case return, computed in the same way, is at most $H^{\max}$. A
+backward recursion gives the latest start from which the rest of a route remains
+feasible, so a prefix and a suffix can be joined, and a customer inserted, with an
+exact check in $O(\Gamma)$ time. Box uncertainty, in which every arc takes its
+upper value, is the case where $\Gamma$ is at least the number of arcs. It amounts
+to planning on the padded matrix $\bar t_{ij}+\hat t_{ij}$, so the
+conservative-speed baseline, which plans at $1/1.2$ of the nominal speed, is close
+to box uncertainty with $\theta=0.2$. The two differ slightly because of rounding.
+
+Robust models of this kind meet the same obstruction as internal contraction.
+Under box uncertainty, a customer that cannot be served on time even by a direct
+trip at its upper travel time makes every plan infeasible, whatever the fleet.
+With a smaller budget a detour can be faster in the worst case, so the
+obstruction is not certain, but in these runs every smaller budget failed on
+exactly the instances that box uncertainty failed on (Section~\ref{sec:robust}). A second variant therefore applies reachability
+relief, the robust analogue of capped contraction. The robust deadline of each
+customer is raised to its worst-case direct start when that start is later than
+$u_i$, and every original window must still hold under nominal travel times, so
+no promise is extended.
+
+Both variants were solved by a large neighbourhood search written for this
+study. It uses random, worst and related removal, greedy and regret insertion,
+granular relocate, exchange and 2-opt$^*$ moves, and simulated-annealing
+acceptance, and every move is checked exactly for robust feasibility. The
+objective is total distance, and the fleet is limited to the available vehicles.
+Each solve stops after a fixed number of iterations (\RobItersSmall{} at 20 and
+50 customers, \RobItersHundred{} at 100) with the instance seed, so it is
+deterministic. With $\Gamma=0$ the search is a nominal VRPTW heuristic. On the
+development instances it then matched the PyVRP/HGS distance on
+\RobBenchEqualTwenty{} of the \RobBenchCountTwenty{} instances with 20 customers,
+and was \RobBenchGapFifty\% and \RobBenchGapHundred\% longer on average at 50 and
+100 customers, with HGS run for 10,000 iterations. The feasibility checks agree
+with brute-force enumeration of deviation sets in the test suite, and every route
+of every plan is checked again after the search.
+
+Fifteen robust settings were run in each variant on the development instances
+with 20, 50 and 100 customers: $\Gamma\in\{1,2,3,5\}$ and box uncertainty, each
+with $\theta\in\{0.2,0.4,0.6\}$. The standard variant was also run with
+$\Gamma=0$. The instances with 200 customers were not run, because of the search time. Each vehicle departs at the latest time that keeps its route robust
+feasible. Each plan is validated on the same 5000-scenario bank as every other
+configuration of its instance, so all comparisons are paired, and a setting
+without a robust plan scores zero, as under the failure policy. A further
+configuration, screened robust, passes all plans of one variant for an instance
+through the screening layer (for the standard variant, including $\Gamma=0$). It
+selects the shortest plan whose Wilson lower bound on the screening bank reaches
+0.95 and otherwise returns the plan with the highest screening success. The
+settings were fixed before the runs, but no hypothesis was fixed in advance, so
+this comparison is exploratory.
+
 \section{Results}
 
 \input{results_summary_v7.tex}
@@ -714,9 +794,11 @@ reproducibility archive \cite{ali2026archive}.
 \input{weight_results.tex}
 \input{solomon_results.tex}
 \input{study2_results.tex}
+\input{robust_results.tex}
 
 Appendix~\ref{sec:additional} reports the results of both confirmatory studies by
-size (Tables~\ref{tab:conf-size} and~\ref{tab:study2-size}, descriptive only), customer outcomes on the matched
+size (Tables~\ref{tab:conf-size} and~\ref{tab:study2-size}, descriptive only), every robust setting
+(Table~\ref{tab:robust-grid}), customer outcomes on the matched
 subset (Table~\ref{tab:customers}), absolute planned resources
 (Table~\ref{tab:fullcost}), service-threshold sensitivity
 (Table~\ref{tab:kappa}), the instance-level failure audit
@@ -727,10 +809,12 @@ PyVRP/HGS (Table~\ref{tab:hgs}).
 
 The study archive \cite{ali2026archive} contains the candidate generators, the
 scenario-bank code, the test suite, the experiment drivers, the raw JSON records
-and the scripts that produce the results tables and the figure. The tests cover
+and the scripts that produce the results tables and the figures. The tests cover
 FIFO behaviour, lognormal moments, common random numbers that do not depend on
-evaluation order, Wilson calculations, visit and capacity feasibility, and the
-rule that contracted candidates are scored against the original windows. Each run
+evaluation order, Wilson calculations, visit and capacity feasibility, the rule
+that contracted candidates are scored against the original windows, and the
+robust feasibility checks, which are compared with brute-force enumeration of
+deviation sets. Each run
 records the Python, NumPy and OR-Tools versions, the operating system, the solver
 budget, the seeds and the scenario counts.
 
@@ -762,14 +846,19 @@ script produced the reported results. The second confirmatory study
 (Section~\ref{sec:conf2design}) has its own frozen protocol and manifest. Its
 OR-Tools half uses the frozen scripts of the first study, and its HGS half is
 deterministic given the scaling ranges. The script that writes its tables and
-text stops unless its figures equal the saved output of the frozen analysis.
+text stops unless its figures equal the saved output of the frozen analysis. The
+robust comparison (Section~\ref{sec:robust-design}) was run after both studies
+with code outside the frozen file lists. Its search stops after a fixed number of
+iterations with a fixed seed, so its plans are deterministic, and the script that
+writes its tables and figure checks that every record is present and complete.
 
-All results tables and the figure are regenerated from the retained records. Internal
+All results tables and both figures are regenerated from the retained records. Internal
 planning buffers are always evaluated against the offered windows, candidate
 selection and final assessment use independent banks, and solver-quality
-comparisons use equal wall-clock budgets on identical deterministic instances.
-These rules stop diagnostics and within-run selection from using their own
-validation outcomes.
+comparisons between OR-Tools and HGS use equal wall-clock budgets on identical
+deterministic instances. These rules stop diagnostics and within-run selection
+from using their own validation outcomes. The robust search is compared with HGS
+at fixed iteration counts.
 
 \paragraph{Use of generative AI tools.} Generative AI assistants were used for
 code development, experiment implementation, code review, analysis checking, and
@@ -798,11 +887,13 @@ The clock-aware approximation is not an exact time-dependent optimizer. Generato
 and objective choices also differ between screened families, so the experiments
 are not a full factorial decomposition of every design decision.
 
-Second, the reliability baselines are all based on padding:
-uniform conservative speed, and the same screening applied to conservative-speed
-candidates. No robust or
-chance-constrained VRPTW optimizer \cite{agra2013,jaillet2016,zhang2019} is
-compared.
+Second, the comparison with robust optimization is exploratory and limited to
+budgeted uncertainty on the development instances with up to 100 customers. Its
+settings were fixed before the runs, but no hypothesis was, and the
+configurations discussed are chosen from a grid reported in full. The robust
+plans minimize distance alone, so they differ from the screened procedures in
+objective as well as in method. The distributionally robust and riskiness-index
+methods \cite{jaillet2016,zhang2019} are not compared.
 
 Third, the disturbance parameters are assumed and have not been calibrated to
 fleet GPS residuals. The results hold for those values and are not operational
@@ -923,8 +1014,10 @@ At 20 customers capping changes nothing. Only two of the six failures there meet
 a certificate; of the other four, a longer search budget finds a plan for two,
 and two remain unresolved.
 
-Averaged over all instances, no procedure reaches the 95\% target, so both the
-procedure averages and the compliance of selected plans must be reported. In the
+Averaged over all instances, neither the original nor the capped procedure reaches
+the 95\% target,
+so both the procedure averages and the compliance of selected plans must be
+reported. In the
 development study, plans admitted by screening averaged \OriginalSelectedMean\%
 for the original procedure and \CappedSelectedMean\% for the capped procedure,
 while the fallback plans used on the other instances averaged
@@ -934,9 +1027,33 @@ gap depends on admitting plans for small instances. In the first confirmatory
 study the capped procedure reached \ConfPooledK\% pooled, against \ConfPooledP\%
 for the original procedure.
 
+The robust comparison changes how the procedure should be read. A budgeted-robust
+optimizer without relief had no plan on \RobNoPlanBoxSix{} of \RobInstances{}
+development instances at its most protective setting, every time because some
+customer could not be protected even on a direct trip. With the reachability
+relief, the robust analogue of capped contraction, every setting had a plan, and
+the relieved robust plans competed with the screened procedures. With $\Gamma=3$
+and $\theta=0.4$ they were \RobCapGThreeFourMinusOrt{} points more reliable than
+the OR-Tools capped procedure on average, with an interval from
+\RobCapGThreeFourMinusOrtLo{} to \RobCapGThreeFourMinusOrtHi{}, and used
+\RobCapGThreeFourMinusOrtFleet{} more vehicles per instance. With $\Gamma=3$ and
+$\theta=0.6$ they pooled \RobCapGThreeSixP\%, against \RobHgsCappedP\% for the HGS
+capped procedure (difference \RobCapGThreeSixMinusHgs{} points, interval
+\RobCapGThreeSixMinusHgsLo{} to \RobCapGThreeSixMinusHgsHi{}), using
+\RobCapGThreeSixMinusHgsFleet{} more vehicles per instance. The screened procedures are therefore not the most reliable planners
+on these instances. Their contribution lies in two elements. Reachability relief
+made the robust optimizer usable on every instance. Statistical screening carried
+over as well: the screened relieved robust plans were admitted on
+\RobScreenedCapAdm{} of \RobInstances{} instances and pooled \RobScreenedCapP\%,
+\RobScreenedCapMinusHgs{} points above the HGS capped procedure with
+\RobScreenedCapMinusHgsFleet{} more vehicles, because screening selects the
+shortest robust plan that passes. Against the most protective fixed setting this
+gives up a little reliability for less distance. This comparison was
+not prespecified and should be confirmed on new instances.
+
 These results depend on assumed disturbance parameters and synthetic geometry.
-The development findings were exploratory, and the two confirmatory studies
-support the main ones. Evidence from real road networks, other benchmark families
+The development findings and the robust comparison were exploratory, and the two
+confirmatory studies support the main findings of the screened procedures. Evidence from real road networks, other benchmark families
 and calibrated disturbance parameters is still needed.
 
 \section*{Acknowledgements}
@@ -1000,6 +1117,7 @@ and were not re-elicited for driver duration.
 \section{Additional outcomes and failure records}\label{sec:additional}
 \input{confirmatory_appendix.tex}
 \input{study2_appendix.tex}
+\input{robust_appendix.tex}
 \input{additional_results_v7.tex}
 \clearpage
 
