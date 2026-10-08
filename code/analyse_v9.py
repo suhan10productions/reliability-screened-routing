@@ -17,6 +17,7 @@ import json
 from pathlib import Path
 
 import confirm_analysis_hgs as c2
+from exact_display import check_against, exact_analysis
 from analyse_v8 import f1, interval, table
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +31,8 @@ def confirmatory():
     out = {"mode": "CONFIRMATORY (validated against the frozen protocol 2)", **c2.analyse(units, True)}
     saved = json.loads((CONF / "analysis_output.txt").read_text())
     assert json.loads(json.dumps(out)) == saved, "study-2 output differs from the saved confirmatory run"
+    out = {"mode": out["mode"], **exact_analysis(c2, units, True)}   # display values, see exact_display.py
+    check_against(out, saved)
     fb = [u for u in units if not u["ort_capped_selected"]]
     changed = [u for u in fb if ort[u["seed"]]["configurations"]["conservative"] is not None]
     return out, units, fb, changed
@@ -41,7 +44,7 @@ def development():
     ort, hgs = load(ROOT / "results" / "v7"), load(ROOT / "results" / "hgs_dev")
     assert len(hgs) == 53 and set(hgs) <= set(ort)
     units = [c2.unit(s, ort[s], hgs[s]) for s in sorted(hgs)]
-    return c2.analyse(units, False)
+    return exact_analysis(c2, units, False)
 
 
 def main():

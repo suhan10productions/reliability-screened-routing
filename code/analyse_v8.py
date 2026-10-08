@@ -19,6 +19,7 @@ from pathlib import Path
 import numpy as np
 
 import confirm_analysis as ca
+from exact_display import check_against, exact_analysis
 
 ROOT = Path(__file__).resolve().parents[1]
 CONF = ROOT / "results" / "confirm"
@@ -84,6 +85,8 @@ def confirmatory():
     assert (h3["K_selected"], h3["P_selected"], h3["K_only"], h3["P_only"]) == \
         (s3["K_selected"], s3["P_selected"], s3["K_only"], s3["P_only"])
     assert abs(h3["exact_p"] - s3["exact_p"]) < 1e-5 and h3["verdict"] == s3["verdict"]
+    out = exact_analysis(ca, units, confirmatory=True)   # display values, see exact_display.py
+    check_against(out, saved, ignore=("mode", "configurations_without_plan"))
     no_plan = {c: sum(1 for r in stage2.values() if r["configuration_status"][c] != "ok")
                for c in ("conservative", "clock_aware", "nominal", "slack", "fleet_matched")}
     sel = {k: sum(v[k]["selected"] for v in out["descriptive_by_size"].values())
@@ -279,7 +282,7 @@ def main():
               " instances, and H1 and H4 use those instances, as the protocol specifies.",
               "tab:confirmatory", r"@{}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{3.5cm}cc@{}",
               r"Hypothesis & Quantity & Estimate [interval] & Level & Decision", hyp_rows, size="footnotesize"),
-        f"All four hypotheses were confirmed. The original procedure exceeded conservative speed by "
+        f"All four hypotheses met their protocol-defined decision criteria. The original procedure exceeded conservative speed by "
         f"{f1(h1['mean_pp'])} points, and capping added {f1(h2['mean_pp'])} points. "
         f"Capping admitted {h3['K_selected']} instances against {h3['P_selected']} and lost none that the "
         f"original procedure admitted ({h3['K_only']} gained, {h3['P_only']} lost). For independent disturbances, the advantage "

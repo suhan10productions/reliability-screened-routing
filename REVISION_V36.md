@@ -1,7 +1,7 @@
 # Revision v36: robust optimization comparator (exploratory)
 
 - New: `code/robust_generator.py` (budgeted-uncertainty robust VRPTW, exact
-  robust feasibility, ALNS; box uncertainty; reachability-relief variant),
+  robust feasibility, large neighbourhood search; box uncertainty; reachability-relief variant),
   `code/study_robust.py`, `code/analyse_robust.py`, `code/analyse_v10.py`,
   `tests/test_robust_generator.py`.
 - New records: `results/robust_dev` (45 instances, 16 settings each) and

@@ -1,0 +1,77 @@
+\subsection{Family-wise screening}\label{sec:familywise}
+
+The three checks in this and the next two subsections were added after both confirmatory studies and are exploratory. The first reuses the stored screening counts, the second times screening and one HGS solve on each development instance and counts the selected buffers, and the third evaluates the stored plans on new scenarios.
+
+The admission bound holds for each candidate separately, while the procedure searches 13 buffer levels per instance. To check whether this matters, every stored candidate family was screened again with the Wilson bound at $\eta/13$, a Bonferroni adjustment that makes the 95\% bound hold simultaneously over the grid. Selection and fallback were otherwise unchanged, and any newly selected plan was validated on the original fresh bank (Table~\ref{tab:familywise}). Over the 8 combinations of study and procedure, the adjustment reduced the admitted instances from 318 to 306, at most 2 per combination, and selected a different plan on 79 of the instances it still admitted. Admitted plans whose validation lower bound fell below 0.95 went from 11 of 318 to 1 of 306. Pooled service changed by between $-$1.8 and 0.2 points. Admitted plans averaged 97.3 to 98.0\% on the fresh bank under the per-candidate bound, depending on study and procedure, and 97.7 to 98.3\% under the family-wise bound. The stricter bound thus removed all 11 admitted plans whose validation bound fell below 0.95, while one plan it newly selected fell below it, at the cost of a few admissions and up to 1.8 points of pooled service.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Family-wise screening (exploratory). Adm.: instances with an admitted plan. Kept: admitted plans whose validation lower bound was at least 0.95. Pooled: validated service-event probability (\%) of the procedure over all instances, fallbacks included. Columns marked FW use the Bonferroni bound over the 13 buffer levels.}
+\label{tab:familywise}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{3.1cm}rrrrrr@{}}
+\toprule
+Study & Procedure & Adm. & Kept & Pooled & Adm.\ FW & Kept FW & Pooled FW\\
+\midrule
+Development & Original (OR-Tools) & 32 & 30 & 78.9 & 30 & 30 & 77.1\\
+Development & Capped (OR-Tools) & 42 & 40 & 86.6 & 40 & 40 & 85.0\\
+Development & HGS capped, conservative fallback & 48 & 46 & 94.2 & 46 & 46 & 93.2\\
+Confirmatory 1 & Original (OR-Tools) & 32 & 31 & 79.4 & 30 & 30 & 77.8\\
+Confirmatory 1 & Capped (OR-Tools) & 46 & 45 & 91.0 & 45 & 45 & 90.7\\
+Confirmatory 2 & Original (OR-Tools) & 28 & 28 & 77.1 & 27 & 27 & 76.2\\
+Confirmatory 2 & Capped (OR-Tools) & 45 & 45 & 91.4 & 45 & 44 & 91.6\\
+Confirmatory 2 & HGS capped, conservative fallback & 45 & 42 & 91.6 & 43 & 43 & 90.6\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Computation time and buffer choice}\label{sec:time}
+
+Screening is cheap relative to generation. On one x86-64 Linux machine, evaluating one candidate on the 1000-scenario screening bank took a median of 3~ms at 20 customers and 24~ms at 200. A candidate solve has a fixed five-second OR-Tools budget, and a median HGS solve took 2.2~s at 20 customers and 9.3~s at 200. The procedure's cost therefore lies in up to 13 candidate solves ($\beta=0$ to 60 minutes), each of which OR-Tools repeats at most twice if it returns no plan. Absolute times depend on the machine.
+
+Among admitted selections, the buffer grid was rarely binding for OR-Tools. Over the three studies, 191 of the 225 OR-Tools selections used a buffer between 25 and 45 minutes, and 4 used the largest buffer of 60 minutes; the median selected buffer was 35 minutes. HGS selected larger buffers (median 50 minutes), and 11 of its 93 selections were at 60 minutes, so a wider grid could change some HGS selections. On instances where nothing was admitted, no buffer up to 60 minutes passed, and the grid cannot show whether a larger one would have.
+
+\subsection{Misspecified delay models}\label{sec:misspec}
+
+The plans were screened under one assumed disturbance model. To test how much the conclusions depend on it, the stored plans of the development and both confirmatory studies were evaluated, without re-screening or re-optimization, on 5000 new scenarios per instance under four other models. The models were chosen before the run, but they were not registered. The heavy-tail model replaces the normal common and local log-errors by Student-$t$ errors with three degrees of freedom, scaled to the same variance. At equal variance these errors are more peaked near zero and have heavier tails, so the model changes the shape of the distribution more than its spread; the multipliers then have infinite mean, although every simulated value is finite. The incident model adds, on each arc traversal, an independent 3\% chance that the travel time doubles. The time-of-day model uses $\sigma=0.30$ and $\rho=0.8$ for departures in the morning peak (07:00--09:00) and $\sigma=0.15$ and $\rho=0.3$ at other times, in place of $\sigma=0.20$ and $\rho=0.5$ throughout. (The code also raises the noise in the evening peak, which begins after every time window has closed and so has no effect.) The stronger-peak model divides speed by 1.4 between 07:00 and 09:00, where the plans assumed 1.2. Tables~\ref{tab:misspec} and~\ref{tab:misspec-contrasts} pool the 159 OR-Tools instances, the 106 HGS instances and the 45 instances of the robust comparison.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Misspecified delay models (exploratory): pooled service-event probability (\%) of fixed plans on 5000 new scenarios per instance. OR-Tools columns use 159 instances, HGS columns 106 and screened robust with relief 45; because the instance sets differ, configurations are compared in Table~\ref{tab:misspec-contrasts}. Cons.: conservative speed. Original and Capped: the OR-Tools procedures. HGS capped: the HGS capped procedure with conservative fallback. A missing plan scores zero.}
+\label{tab:misspec}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Delay model & Cons. & Original & Capped & HGS cons. & HGS capped & Scr.\ robust\\
+\midrule
+Paper's model (new scenarios) & 57.8 & 78.5 & 89.7 & 59.6 & 92.9 & 97.2\\
+Heavy tails & 64.0 & 79.8 & 89.9 & 65.8 & 93.6 & 97.3\\
+Incidents & 49.6 & 71.7 & 84.6 & 51.1 & 87.5 & 92.2\\
+Time-of-day noise & 56.4 & 77.6 & 88.4 & 58.3 & 91.3 & 93.5\\
+Stronger morning peak & 36.8 & 67.1 & 82.9 & 38.4 & 86.0 & 90.8\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Misspecified delay models (exploratory): paired differences in service probability (percentage points) with 95\% bootstrap intervals over instances. Cons.: conservative speed.}
+\label{tab:misspec-contrasts}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.4cm}@{}}
+\toprule
+Delay model & Original minus cons. & Capped minus cons. & HGS capped minus HGS cons. & Scr.\ robust minus HGS capped\\
+\midrule
+Paper's model (new scenarios) & 20.7 [16.7, 24.7] & 31.9 [28.3, 35.6] & 33.3 [29.0, 38.0] & 3.6 [0.7, 7.0]\\
+Heavy tails & 15.8 [11.5, 20.0] & 25.8 [21.9, 29.8] & 27.8 [23.3, 32.7] & 3.1 [0.8, 5.7]\\
+Incidents & 22.1 [18.1, 26.1] & 35.0 [31.5, 38.5] & 36.4 [32.3, 40.7] & 4.5 [1.2, 8.4]\\
+Time-of-day noise & 21.2 [17.4, 25.0] & 32.0 [28.5, 35.5] & 32.9 [28.7, 37.5] & 1.7 [$-$1.0, 5.1]\\
+Stronger morning peak & 30.3 [25.5, 35.1] & 46.1 [42.0, 50.1] & 47.7 [43.0, 52.3] & 3.6 [$-$1.0, 9.1]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Heavy tails did not lower service. Conservative speed gained most, from 57.8 to 64.0\% for OR-Tools, and the capped procedures and screened robust changed by less than one point. The other three models lowered service for every configuration, most of all the stronger peak and then incidents. The stronger peak reduced the capped procedures by up to 6.9 points and conservative speed by up to 21.2 points: travel in the morning peak now takes 40\% longer than at nominal speed, which the 20\% pad no longer covers. The advantage over conservative speed held under every model, with lower interval limits of at least 11.5 points for the original procedure, 21.9 for the capped procedure and 23.3 for the HGS capped procedure. On its 45 instances, screened robust with relief stayed ahead of the HGS capped procedure under every model, but its lead fell from 3.6 to 1.7 points under time-of-day noise, and the intervals include zero under time-of-day noise and the stronger peak. The plans were not re-screened under the new models, so these results show how fixed plans degrade. What screening under a correctly specified model would achieve is a separate question.

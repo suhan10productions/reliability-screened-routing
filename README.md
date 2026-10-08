@@ -170,3 +170,36 @@ PYTHONPATH=code python code/analyse_v10.py      # paper/robust_*.tex, macros, Fi
 
 The comparison was run after both confirmatory studies with code outside the
 frozen file lists, and is reported as exploratory.
+
+## Further exploratory checks
+
+Three checks were added after both confirmatory studies, with code outside the
+frozen file lists:
+
+- `code/analyse_family_wise.py` repeats every stored selection with the Wilson
+  bound at eta/13 (Bonferroni over the 13 buffer levels). It first re-selects
+  with the original bound and stops unless every stored selection is
+  reproduced. Output: `results/family_wise_summary.json`.
+- `code/time_components.py` times screening of one candidate (1000 scenarios)
+  and one HGS solve on each development instance. Output:
+  `results/timing_components.json`. Times depend on the machine.
+- `code/misspecification.py` evaluates the stored plans, without re-screening,
+  on 5000 new scenarios (seed 700000 + instance seed) under the paper's model
+  and four alternatives fixed before the run: Student-t(3) log-errors with unit
+  variance, incidents (probability 0.03 per arc, travel time doubled),
+  time-of-day noise (sigma 0.30 and rho 0.8 in the peaks, 0.15 and 0.3
+  otherwise) and a stronger morning peak (divisor 1.4). Output:
+  `results/misspecification.json`. `tests/test_misspecification.py` checks that
+  the evaluator reproduces the stored validation under the paper's model.
+
+```bash
+PYTHONPATH=code python code/analyse_family_wise.py --output results/family_wise_summary.json
+PYTHONPATH=code python code/time_components.py      # writes results/timing_components.json
+PYTHONPATH=code python code/misspecification.py --output results/misspecification.json
+PYTHONPATH=code python code/analyse_v11.py      # paper/checks_results.tex, macros
+```
+
+The frozen confirmatory analyses round their figures to two decimals.
+`code/exact_display.py` reruns them with that display rounding switched off, so
+`analyse_v8.py` and `analyse_v9.py` round exact values to one decimal; both
+scripts still stop unless the results match the saved confirmatory output.
