@@ -1,5 +1,9 @@
 # Reliability-screened routing: research code and evidence archive
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23265196.svg)](https://doi.org/10.5281/zenodo.23265196)
+
+Archived version for the submitted manuscript: v3.0, DOI 10.5281/zenodo.23265196.
+
 **Naming note.** The project's earlier working name was "routeops". The code
 modules are now named `relscreen_v5`, `relscreen_v6` and `relscreen_v7`. The
 `"schema"` identifiers inside result files (for example
