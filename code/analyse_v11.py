@@ -58,6 +58,61 @@ def selected_betas(s1dir, v7dir, hgsdir):
     return ort, hgs
 
 
+def rescreen_section(labels):
+    """Paragraph and table for re-screening under each alternative model (misspecification_rescreen.py)."""
+    path = ROOT / "results/misspecification_rescreen.json"
+    if not path.exists():
+        return [], {}
+    rs = json.loads(path.read_text())["summary"]
+    models = list(rs)
+    m = lambda model, k: rs[model][k]["mean"]
+    rows = [f"{labels[x]} & " + " & ".join(f1(m(x, k)) for k in (
+        "ort_capped", "ort_rescreened", "ort_rescreened_best", "hgs_capped_cons", "hgs_rescreened",
+        "hgs_rescreened_best")) for x in models]
+    # the sentences rely on these patterns
+    harsh = ("incidents", "strong_peak")
+    assert rs["peak_noise"]["hgs_rescreened_minus_fixed"][2] < 0
+    for x in harsh:
+        assert rs[x]["ort_rescreened_minus_fixed"][2] < 0 and rs[x]["hgs_rescreened_minus_fixed"][2] < 0, x
+    for x in models:
+        for t in ("ort", "hgs"):
+            assert rs[x][f"{t}_rescreened_best_minus_fixed"][1] > 0, (x, t)
+    assert rs["baseline"]["ort_rescreened_minus_fixed"][0] == 0 and rs["baseline"]["hgs_rescreened_minus_fixed"][0] == 0
+    worst_drop = max(-rs[x][f"{t}_rescreened_minus_fixed"][0] for x in harsh for t in ("ort", "hgs"))
+    lo_ort = min(m(x, "ort_rescreened_best") for x in models)
+    hi_ort = max(m(x, "ort_rescreened_best") for x in models)
+    lo_hgs = min(m(x, "hgs_rescreened_best") for x in models)
+    hi_hgs = max(m(x, "hgs_rescreened_best") for x in models)
+    adm = {x: (rs[x]["ort_admitted"], rs[x]["hgs_admitted"]) for x in models}
+    k_ort = rs["baseline"]["ort_capped"]["instances"]
+    k_hgs = rs["baseline"]["hgs_capped_cons"]["instances"]
+    text = [
+        "Re-screening asks what the procedure itself would do under each model. Every stored candidate "
+        "of the capped families was screened again on 1000 scenarios drawn from that model (seed 100000 plus the "
+        "instance seed), the selection rule was applied unchanged, and the selected plan was validated on the same "
+        "5000 scenarios of that model. The candidate families were not regenerated. Under the paper's model this "
+        "reproduces every stored selection, which the script checks. Table~\\ref{tab:rescreen} reports two "
+        "fallbacks for instances where nothing is admitted: the procedure's stored fallback, and the candidate "
+        "with the highest screening success (Section~\\ref{sec:fallback}).", "",
+        tab("Re-screening under each delay model (exploratory): pooled service-event probability (\\%) of the "
+            f"capped procedures over {k_ort} OR-Tools and {k_hgs} HGS instances. Fixed: the stored plans. "
+            "Re-screened: the stored candidates screened again under the model, with the stored fallback. Best: "
+            "the same, with the best-screened fallback.",
+            "tab:rescreen", r"@{}lrrrrrr@{}",
+            r"Delay model & \multicolumn{3}{c}{OR-Tools capped} & \multicolumn{3}{c}{HGS capped}\\" "\n"
+            r" & Fixed & Re-screened & Best & Fixed & Re-screened & Best", rows),
+        "With the stored fallback, re-screening did worse than keeping the fixed plans under incidents and the "
+        f"stronger peak, by up to {f1(worst_drop)} points, and for HGS also under time-of-day noise. Fewer candidates passed under these models (OR-Tools "
+        f"{adm['incidents'][0]} and {adm['strong_peak'][0]} admissions against {adm['baseline'][0]} under the "
+        "paper's model), and the instances that failed received the weak stored fallback. With the best-screened "
+        "fallback, re-screening exceeded the fixed plans under every model, and pooled service stayed between "
+        f"{f1(lo_ort)} and {f1(hi_ort)}\\% for OR-Tools and between {f1(lo_hgs)} and {f1(hi_hgs)}\\% for HGS.", "",
+    ]
+    macros = {"ResLoOrt": f1(lo_ort), "ResHiOrt": f1(hi_ort), "ResLoHgs": f1(lo_hgs), "ResHiHgs": f1(hi_hgs),
+              "ResWorstDrop": f1(worst_drop)}
+    return text, macros
+
+
 def main():
     fw = json.loads((ROOT / "results/family_wise_summary.json").read_text())
     tm = json.loads((ROOT / "results/timing_components.json").read_text())
@@ -159,6 +214,7 @@ def main():
     assert rob_zero == ["peak_noise", "strong_peak"], rob_zero
     assert all(contrasts[m][xy][0][1] > 0 for m in models for xy in pairs[:3])
 
+    rescreen_text, rescreen_macros = rescreen_section(labels)
     macros = {
         "FwAdmittedOrig": str(tot["adm"]), "FwAdmittedTotal": str(tot["adm_fw"]),
         "FwMissOrig": str(tot["adm"] - tot["kept"]), "FwMissFw": str(tot["adm_fw"] - tot["kept_fw"]),
@@ -173,16 +229,18 @@ def main():
         "MisMinOrig": f1(min_orig), "MisMinOrt": f1(min_ort), "MisMinHgs": f1(min_hgs),
         "MisCappedDrop": f1(capped_drop), "MisConsDrop": f1(cons_drop),
         "MisKOrt": str(k_ort), "MisKHgs": str(k_hgs), "MisKRob": str(k_rob),
+        **rescreen_macros,
     }
     (ROOT / "paper/result_macros_v11.tex").write_text(
         "\n".join("\\newcommand{\\" + k + "}{" + v + "}" for k, v in macros.items()) + "\n")
 
     text = [
-        r"\subsection{Family-wise screening}\label{sec:familywise}", "",
-        "The three checks in this and the next two subsections were added after both confirmatory studies and are "
+        r"\section{Further exploratory checks}\label{sec:checks}", "",
+        "The three checks in this appendix were added after both confirmatory studies and are "
         "exploratory. The first reuses the stored screening counts, the second times screening and one HGS solve on "
         "each development instance and counts the selected buffers, and the third evaluates the stored plans on new "
-        "scenarios.", "",
+        "scenarios. The misspecification check also reruns the selection under each alternative model.", "",
+        r"\subsection{Family-wise screening}\label{sec:familywise}", "",
         "The admission bound holds for each candidate separately, while the procedure searches 13 buffer levels per "
         "instance. To check whether this matters, every stored candidate family was screened again with the Wilson "
         "bound at $\\eta/13$, a Bonferroni adjustment that makes the 95\\% bound hold simultaneously over the grid. "
@@ -263,11 +321,26 @@ def main():
         f"{f1(min_hgs)} for the HGS capped procedure. On its {k_rob} instances, screened robust with relief stayed "
         f"ahead of the HGS capped procedure under every model, but its lead fell from {f1(rob('baseline')[0])} "
         f"to {f1(rob('peak_noise')[0])} points under time-of-day noise, and the intervals include zero under "
-        "time-of-day noise and the stronger peak. The plans were not re-screened under the new models, so these "
-        "results show how fixed plans degrade. What screening under a correctly specified model would achieve is a "
-        "separate question.", "",
+        "time-of-day noise and the stronger peak. These results concern fixed plans.", "",
+        *rescreen_text,
     ]
     (ROOT / "paper/checks_results.tex").write_text("\n".join(text))
+    summary = [
+        r"\subsection{Further checks}\label{sec:checks-summary}", "",
+        "Appendix~\\ref{sec:checks} reports three further exploratory checks. Repeating the selection with a "
+        "Bonferroni bound over the 13 buffer levels removed all "
+        f"{tot['adm'] - tot['kept']} admitted plans that later missed the validation bound, while "
+        f"{words.get(tot['new_miss'], tot['new_miss'])} newly selected plan fell below it, at the cost of "
+        f"{tot['adm'] - tot['adm_fw']} admissions and at most {f1(-min(changed_pts))} points of pooled service. "
+        f"Screening a candidate took {1000 * med['20']['screen_median']:.0f} to "
+        f"{1000 * med['200']['screen_median']:.0f}~ms, against seconds for generating it. Under four other delay "
+        "models, the advantage of the capped procedures over conservative speed held for fixed plans. When the "
+        "stored candidates were screened again under each model, the procedure with its stored fallback fell up to "
+        f"{rescreen_macros.get('ResWorstDrop', '?')} points below the fixed plans, while with the best-screened "
+        "fallback of "
+        f"Section~\\ref{{sec:fallback}} it pooled between {rescreen_macros.get('ResLoOrt', '?')} and "
+        f"{rescreen_macros.get('ResHiHgs', '?')}\\% (Appendix~\\ref{{sec:misspec}}).", ""]
+    (ROOT / "paper/checks_summary.tex").write_text("\n".join(summary))
     print(json.dumps(macros, indent=1))
 
 

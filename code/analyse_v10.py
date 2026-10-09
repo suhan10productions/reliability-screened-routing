@@ -298,15 +298,18 @@ def main():
         f"{f1(-C('screened_cap', 'cap:box_d0.6', 'distance'))}\\% of distance, because it selects the shortest plan "
         f"that passes the screen. Without relief, screening admitted a robust plan on {adm_rob} instances and pooled "
         f"{f1(T('screened')['service'])}\\%.", "",
-        "This comparison is exploratory. It uses the development instances, the grid was fixed before the runs, and "
-        "the configurations in Table~\\ref{tab:robust} are highlighted from that grid, which is reported in full. "
+        "These development results are exploratory, and part A of the third protocol tests them below. The settings "
+        "in Table~\\ref{tab:robust} were picked after the grid was run, to show the trade-off: $\\Gamma=3$, a middle "
+        "budget, and box uncertainty, the most protective, each at two protection levels; the appendix reports "
+        "every setting. "
         "The robust plans minimize distance alone, without the slack, duration and fleet terms of the screened "
         "procedures, so differences in vehicles are part of the comparison.", "",
         r"\begin{figure}[ht]", r" \centering", r" \includegraphics[width=0.93\textwidth]{Fig2.pdf}",
         r" \caption{Pooled validated service-event probability against mean distance relative to the nominal plan of "
         f"the robust search, on the {len(seeds)} development instances. Lines join the relieved robust settings for "
         f"each ${th}$, from $\\Gamma=1$ to box uncertainty. The screened procedures (OR-Tools, HGS), screened robust "
-        r"with relief and conservative speed are shown separately. The dashed line marks the 95\% target}",
+        r"with relief and conservative speed are shown separately, with 95\% bootstrap intervals over instances for "
+        r"their service probability. The dashed line marks the 95\% target}",
         r" \label{fig:robust}", r"\end{figure}", "",
     ]
     (ROOT / "paper/robust_results.tex").write_text("\n".join(text))
@@ -352,6 +355,8 @@ def main():
                "ort:conservative": (6, -4)}
     for label, c, marker in pts:
         x, y = T(c)["distance"], T(c)["service"]
+        _, lo, hi = boot([serv(cfg(s, c)) for s in seeds])      # 95% bootstrap interval of pooled service
+        ax.errorbar([x], [y], yerr=[[y - lo], [hi - y]], fmt="none", ecolor="black", elinewidth=0.8, capsize=2.5)
         ax.plot([x], [y], linestyle="none", marker=marker, markersize=8 if marker != "*" else 11,
                 color="black", markerfacecolor="white" if marker in "DX" else "black")
         ax.annotate(label, (x, y), textcoords="offset points", xytext=offsets[c], fontsize=8)

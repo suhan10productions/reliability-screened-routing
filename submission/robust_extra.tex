@@ -1,0 +1,27 @@
+With 200 customers, the relieved model was run on the 8 development instances with a reduced grid: $\Gamma=3$ and box uncertainty, each at $\theta=0.4$ and $0.6$, with 2000 iterations (median 114~s per solve). At $\theta=0.4$ the two budgets pooled 93.2\% and 96.1\%. At $\theta=0.6$ they pooled 86.8\% and 87.2\%, because the search found no plan for one instance under either budget; at this size relief does not guarantee a plan, and the search alone does not show whether that model is infeasible. Screened robust over the four settings admitted a plan on 7 instances and pooled 97.8\% with 20.6 vehicles on average, against 97.2\% with 17.0 vehicles for the HGS capped procedure and 97.6\% with 19.1 for the OR-Tools capped procedure on the same instances. With eight instances these figures are descriptive only.
+
+\subsection{Robust comparison on the confirmatory instances}\label{sec:parta}
+
+Part A of the third protocol \cite{ali2026freeze3} tested the development findings on the 90 confirmatory instances with up to 100 customers. Table~\ref{tab:parta} gives the prespecified results.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Third protocol, part A: prespecified results on the confirmatory instances with up to 100 customers. R1 and R4 use all instances of both studies; R2 and R3 use the second study, where HGS plans exist.}
+\label{tab:parta}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{5.6cm}lll@{}}
+\toprule
+Hypothesis & Quantity & Mean [interval] & Level & Decision\\
+\midrule
+R1 (primary) & Screened robust with relief minus OR-Tools capped, service & 6.7 [3.0, 11.1] & 97.5\% & confirmed\\
+R2 (primary) & Screened robust with relief minus HGS capped, service & 6.7 [2.2, 12.2] & 97.5\% & confirmed\\
+R3 & Screened robust with relief minus HGS capped, vehicles & 0.42 [0.20, 0.67] & 95\% & confirmed\\
+R4 & Screened robust with relief vs. relief box $\theta=0.6$, distance (\%) & $-$1.3 [$-$1.7, $-$0.9] & 95\% & confirmed\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All four hypotheses met their decision criteria. Screened robust with relief pooled 97.2\%, against 90.5\% for the OR-Tools capped procedure and 98.4\% for the most protective relieved setting; on the second study the HGS capped procedure pooled 90.6\%. Screening admitted a robust plan on 86 of 90 instances.
+
+Restricting the robust plans to the comparator's fleet removed much of their advantage. For each instance, the relieved settings were limited to plans that use no more vehicles than the comparator's plan, and the screened-robust rule was applied within that limit (\texttt{code/robust\_fleet\_matched.py}; exploratory, not part of the protocol). The limit also removes the most protective settings on many instances, so the comparison is not a pure fleet effect. On the development instances the restricted plans differed from the HGS capped procedure by $-$1.9 [$-$5.1, 1.5] points in service, with 3.8\% less distance, and from the OR-Tools capped procedure by 2.5 [$-$2.7, 8.1] points on the 43 instances with such a plan; screening admitted a restricted plan on 20 and 15 instances. On the confirmatory instances of part A the differences were 3.2 [$-$1.1, 8.1] points against the HGS capped procedure (45 instances, 28 admitted) and $-$0.7 [$-$3.9, 2.7] against the OR-Tools capped procedure (87 instances, 41 admitted). Every interval includes zero, so with no larger fleet than the comparator the robust plans were not measurably more reliable.

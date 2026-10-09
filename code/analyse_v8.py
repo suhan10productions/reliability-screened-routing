@@ -369,9 +369,8 @@ def main():
         f"adjusted threshold for three comparisons is 0.017).",
         "",
         "This analysis is exploratory. It uses the development instances and four vectors, chosen without searching for the "
-        "point at which the advantage disappears, and each vector was run once. The records do not store route structure, so "
-        "the reason equal weights do worse is not tested here. Equal weights give fleet size and driver duration "
-        "0.25 each, against 0.06 and 0.11 in the original vector.",
+        "point at which the advantage disappears, and each vector was run once; the original and equal vectors were rerun later, below. Equal weights give fleet size and driver "
+        "duration 0.25 each, against 0.06 and 0.11 in the original vector; the run below separates the two.",
         "",
     ]
     (ROOT / "paper/weight_results.tex").write_text("\n".join(wt_tex))

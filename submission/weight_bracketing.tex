@@ -1,0 +1,21 @@
+To find what breaks under equal weights, two further vectors were fixed before a new run on the same instances: the original vector with the fleet-use weight raised to 0.25, and the original vector with the driver-duration weight raised to 0.25, the other weights scaled in proportion (\texttt{code/weight\_bracketing.py}). Equal weights change both at once. The original and equal vectors were rerun on the same machine, so the four rows of Table~\ref{tab:bracket} are comparable with each other; the run also stored every candidate, which the earlier run did not.
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\caption{Weight bracketing on the 53 development instances (exploratory). Advantage over conservative speed on the instances where it has a plan, paired difference in service from the original vector rerun on the same machine (percentage points), and, averaged over instances, the share of candidates whose screening lower bound reached 0.95 and the mean vehicles per candidate.}
+\label{tab:bracket}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{2.9cm}rrllrr@{}}
+\toprule
+Vector & Weights & Adm. & Pooled & Advantage [95\%] & Diff.\ from original & Pass (\%) & Veh.\\
+\midrule
+Original (rerun here) & (0.5693, 0.2643, 0.1055, 0.0609) & 32 & 78.7 & 17.5 [10.8, 23.9] & -- & 17.3 & 7.88\\
+Equal (rerun here) & (0.25, 0.25, 0.25, 0.25) & 24 & 70.2 & 8.1 [1.1, 15.1] & $-$8.5 [$-$13.0, $-$4.5] & 9.0 & 7.24\\
+Fleet weight raised & (0.4546, 0.2111, 0.0843, 0.25) & 27 & 73.2 & 11.7 [4.7, 18.6] & $-$5.6 [$-$10.1, $-$1.4] & 13.5 & 7.58\\
+Duration weight raised & (0.4773, 0.2216, 0.25, 0.0511) & 25 & 69.9 & 7.4 [$-$0.6, 15.4] & $-$8.9 [$-$14.1, $-$4.2] & 11.8 & 7.71\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Rerun on the same machine, the original vector admitted 32 instances and the equal vector 24, and the advantage over conservative speed fell from 17.5 [10.8, 23.9] to 8.1 [1.1, 15.1] points. The earlier run (Table~\ref{tab:weights}) gave \WtEqualPCMean{} points with an interval from \WtEqualPCLo{} to \WtEqualPCHi{}, so in both runs equal weights cut the advantage by more than half, but whether its interval reaches zero differs between runs. Raising the driver-duration weight to 0.25, with the other weights scaled down, lowered service about as much as equal weights did ($-$8.9 [$-$14.1, $-$4.2] against $-$8.5 [$-$13.0, $-$4.5] points from the original vector), and raising the fleet weight cost $-$5.6 [$-$10.1, $-$1.4] points. The run cannot separate the two effects: the duration-raised vector minus the fleet-raised one was $-$3.3 [$-$10.2, 3.4] points. The stored candidates suggest why the duration weight matters. Compared at the same instance and buffer, the duration-heavy candidates used only 0.18 fewer vehicles, against 0.29 for the fleet-heavy ones, yet their success on the screening bank fell more (2.5 against 1.1 points): they shortened driver duration by 85 minutes per plan on average and raised the slack deficit, so less waiting time was left to absorb delays. A heavier duration weight thus appears to remove slack that screening relies on. Of the 53 runs with the original vector, 39 ran on the first day while other analyses were also running on the machine, and the other runs of the bracketing ran later with the machine otherwise idle; because OR-Tools stops at a wall-clock limit, this may affect the comparison slightly.

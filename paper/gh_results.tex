@@ -1,0 +1,19 @@
+\subsection{Gehring--Homberger instances}\label{sec:gh}
+
+As a harder external check, the HGS pipeline of the second study was run on the 20 Gehring--Homberger instances of classes R1 and RC1 with 200 customers \cite{gehring1999} (\texttt{code/gh\_benchmark.py}; exploratory). The mapping follows the Solomon check, except that the depot horizon of 634 time units is scaled to the 600-minute shift and the coordinates are scaled so that the benchmark's unit-speed travel corresponds to 40~km/h; capacity and fleet are kept. On R1\_2\_1 and R1\_2\_2, where all or most windows are only 10 time units wide, neither the OR-Tools anchor solves nor HGS at conservative speed found a plan, so the procedure could not run there. Screening admitted a plan on 17 of the other 18 instances (Table~\ref{tab:gh}). Where conservative speed had a plan, the HGS capped procedure exceeded it by 15.1 [11.0, 19.1] points (18 instances), and over all 20 instances it pooled 87.2\% against 73.6\% for conservative speed and 34.9\% for the nominal plan.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Gehring--Homberger instances with 200 customers (exploratory, HGS pipeline): instances, instances where the anchor solves found a plan, instances admitted by screening, and pooled validated service-event probability (\%) of the HGS nominal plan, HGS conservative speed and the HGS capped procedure with conservative fallback. A missing plan scores zero.}
+\label{tab:gh}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Class & Inst. & Anchors & Admitted & Nominal & Conservative & Capped\\
+\midrule
+R1 & 10 & 8 & 7 & 42.1 & 68.0 & 77.0\\
+RC1 & 10 & 10 & 10 & 27.6 & 79.3 & 97.4\\
+\bottomrule
+\end{tabular}
+\end{table}

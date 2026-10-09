@@ -1,0 +1,49 @@
+\subsection{Fallback rule}\label{sec:fallback}
+
+When screening admits no candidate, each procedure returns a fixed fallback: the uncontracted slack-aware plan for the OR-Tools procedures and the conservative-speed plan for the HGS procedure. These fallbacks are the main reason the procedures pool below the 95\% target. After the development study and both confirmatory studies, a third fallback rule was examined: return the candidate of the procedure's own family with the highest screening success (ties by the normalized score, then the smaller buffer). The rule uses only the screening evidence already computed, so the validation bank still judges the returned plan independently, and it changes nothing on instances where a plan was admitted. Table~\ref{tab:fallback} compares the rules on the stored records (\texttt{code/fallback\_policy.py}).
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Fallback rules on the stored records (exploratory, post hoc): instances where screening admitted nothing, pooled validated service-event probability (\%) over all instances under the stored fallback, the conservative-speed plan and the best-screened candidate, and the paired difference best-screened minus stored with a 95\% bootstrap interval (percentage points).}
+\label{tab:fallback}
+\begin{tabular}{@{}ll>{\raggedleft\arraybackslash}p{1.2cm}rrrl@{}}
+\toprule
+Study & Procedure & Fallback inst. & Stored & Cons. & Best & Best minus stored\\
+\midrule
+Development & Original (OR-Tools) & 21 & 78.9 & 82.7 & 91.6 & 12.7 [7.9, 17.9]\\
+Development & Capped (OR-Tools) & 11 & 86.6 & 88.7 & 95.1 & 8.5 [4.0, 13.7]\\
+Development & HGS capped & 5 & 94.2 & 94.2 & 97.2 & 3.0 [0.6, 5.7]\\
+Confirmatory 1 & Original (OR-Tools) & 21 & 79.4 & 85.0 & 93.2 & 13.9 [9.0, 19.1]\\
+Confirmatory 1 & Capped (OR-Tools) & 7 & 91.0 & 93.0 & 96.6 & 5.6 [1.9, 9.9]\\
+Confirmatory 2 & Original (OR-Tools) & 25 & 77.1 & 80.9 & 92.7 & 15.6 [10.7, 20.8]\\
+Confirmatory 2 & Capped (OR-Tools) & 8 & 91.4 & 91.7 & 96.2 & 4.9 [1.8, 8.5]\\
+Confirmatory 2 & HGS capped & 8 & 91.6 & 91.6 & 96.1 & 4.6 [1.6, 8.1]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The best-screened rule raised pooled service for every study and procedure, by 3.0 to 15.6 points, and every interval lies above zero. With it the capped procedures pooled 95.1 to 97.2\%. On the fallback instances themselves its plans averaged 83.0 to 95.0\%, against 45.2 to 62.9\% for the stored fallbacks. The conservative-speed fallback helped less. Because the rule was chosen after these results were known, part B of the third protocol tested it on new instances.
+
+Part B ran the frozen OR-Tools and HGS pipelines on 53 new instances (development seeds plus 120000) under the third protocol \cite{ali2026freeze3}. Table~\ref{tab:partb} gives the prespecified results.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Third protocol, part B: prespecified results on the new instances. Differences and pooled service are in percentage points and percent; intervals are paired bootstrap intervals over instances.}
+\label{tab:partb}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{5.6cm}lll@{}}
+\toprule
+Hypothesis & Quantity & Mean [interval] & Level & Decision\\
+\midrule
+F1 (primary) & OR-Tools capped, best-screened minus slack-aware fallback & 7.3 [2.3, 13.2] & 97.5\% & confirmed\\
+F2 (primary) & HGS capped, best-screened minus conservative fallback & 4.2 [1.2, 8.0] & 97.5\% & confirmed\\
+F3 (estimate) & Pooled service, OR-Tools capped with best-screened fallback & 94.4 [90.1, 97.1] & 95\% & --\\
+F4 (estimate) & Pooled service, HGS capped with best-screened fallback & 94.9 [91.0, 97.1] & 95\% & --\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Screening admitted nothing on 9 instances for the OR-Tools capped procedure and on 8 for the HGS capped procedure. With their stored fallbacks the two procedures pooled 87.1\% and 90.7\%; with the best-screened fallback they pooled 94.4\% and 94.9\%. Both primary hypotheses met their decision criteria. The pooled estimates stay just below 95\%. One instance cost more than the whole shortfall: there the OR-Tools anchor solves that fix the scaling ranges found no plan, so neither procedure could run and the instance scores zero, as the failure policy requires. On the other 52 instances the two procedures with the best-screened fallback pooled 96.3\% and 96.7\%; these figures are descriptive and were not prespecified. Both halves ran on a two-core Linux machine (Section~\ref{sec:conf3design}). The first stage was interrupted once by a restart of that machine; the frozen drivers resume from the records already written, so the completed instances were kept and the rest were run afterwards.

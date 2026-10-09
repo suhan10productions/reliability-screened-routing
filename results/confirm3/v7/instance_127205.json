@@ -1,0 +1,4827 @@
+{
+  "schema": "routeops-v7-instance-1",
+  "instance_seed": 127205,
+  "customers": 20,
+  "vehicles_available": 6,
+  "environment": {
+    "python": "3.13.16",
+    "numpy": "2.5.3",
+    "ortools": "9.15.6755",
+    "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+    "processor": "x86_64"
+  },
+  "candidate_seconds": 5.0,
+  "screening_seed": 227205,
+  "validation_seed": 527205,
+  "sensitivity_seed": 627205,
+  "old_failure_audit": {
+    "selected": false,
+    "best_beta": 35,
+    "best_lcb": 0.881168512399485,
+    "first_no_plan_beta": 40,
+    "first_reachability_certificate_beta": 40,
+    "no_plan_before_certificate": false,
+    "certified_no_plan_betas": [
+      40,
+      45,
+      50,
+      55,
+      60
+    ],
+    "uncertified_no_plan_betas": [],
+    "certificates": {
+      "0": [],
+      "5": [],
+      "10": [],
+      "15": [],
+      "20": [],
+      "25": [],
+      "30": [],
+      "35": [],
+      "40": [
+        {
+          "customer": 16,
+          "upper": 60,
+          "earliest_lower_bound": 62
+        }
+      ],
+      "45": [
+        {
+          "customer": 16,
+          "upper": 55,
+          "earliest_lower_bound": 62
+        }
+      ],
+      "50": [
+        {
+          "customer": 16,
+          "upper": 50,
+          "earliest_lower_bound": 62
+        }
+      ],
+      "55": [
+        {
+          "customer": 16,
+          "upper": 45,
+          "earliest_lower_bound": 62
+        }
+      ],
+      "60": [
+        {
+          "customer": 16,
+          "upper": 40,
+          "earliest_lower_bound": 62
+        }
+      ]
+    }
+  },
+  "screened_conservative": {
+    "candidates": [
+      {
+        "beta": 0,
+        "source": "archived conservative base",
+        "attempts": 0,
+        "solve_seconds": 0.003065108000100736,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              16,
+              6,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              19,
+              3,
+              10,
+              9,
+              13,
+              4,
+              14,
+              2,
+              15,
+              0
+            ],
+            [
+              0,
+              5,
+              7,
+              17,
+              0
+            ],
+            [
+              0,
+              11,
+              1,
+              8,
+              12,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            26.0,
+            600.0,
+            95.0,
+            156.0,
+            6.0,
+            600.0
+          ],
+          "service_starts": {
+            "16": 100.0,
+            "6": 260.0,
+            "19": 167.0,
+            "3": 190.0,
+            "10": 215.0,
+            "9": 278.0,
+            "13": 297.0,
+            "4": 344.0,
+            "14": 396.0,
+            "2": 441.0,
+            "15": 480.0,
+            "5": 241.0,
+            "7": 353.0,
+            "17": 421.0,
+            "11": 95.0,
+            "1": 217.0,
+            "8": 278.0,
+            "12": 326.0,
+            "20": 374.0,
+            "18": 437.0
+          },
+          "metrics": {
+            "fuel": 9570.0,
+            "tightness": 68.0,
+            "driver_duration": 1594.0,
+            "fleet": 4.0,
+            "distance": 638.0
+          },
+          "objective": "peak-aware distance",
+          "beta": 0,
+          "solver_objective": 638
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.707,
+          "service_level_lcb": 0.6827928753392123,
+          "mean_on_time_fraction": 0.9342999999999999,
+          "expected_late_customers": 1.314,
+          "mean_total_lateness": 19.049881241828945,
+          "mean_simulated_driver_duration": 1508.571037404308,
+          "fleet_day_success": 0.506,
+          "mean_route_success": 0.75175,
+          "service_probability_by_kappa": {
+            "0.90": 0.817,
+            "0.95": 0.707,
+            "0.98": 0.506,
+            "1.00": 0.506
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 5,
+        "source": "new solve",
+        "attempts": 1,
+        "solve_seconds": 5.0035443369997665,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              16,
+              6,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              19,
+              3,
+              10,
+              9,
+              13,
+              4,
+              14,
+              2,
+              15,
+              0
+            ],
+            [
+              0,
+              5,
+              7,
+              17,
+              0
+            ],
+            [
+              0,
+              11,
+              1,
+              8,
+              12,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            21.0,
+            600.0,
+            90.0,
+            151.0,
+            1.0,
+            600.0
+          ],
+          "service_starts": {
+            "16": 95.0,
+            "6": 260.0,
+            "19": 162.0,
+            "3": 185.0,
+            "10": 210.0,
+            "9": 273.0,
+            "13": 292.0,
+            "4": 344.0,
+            "14": 396.0,
+            "2": 441.0,
+            "15": 480.0,
+            "5": 236.0,
+            "7": 353.0,
+            "17": 421.0,
+            "11": 90.0,
+            "1": 212.0,
+            "8": 273.0,
+            "12": 321.0,
+            "20": 369.0,
+            "18": 432.0
+          },
+          "metrics": {
+            "fuel": 9570.0,
+            "tightness": 78.0,
+            "driver_duration": 1609.0,
+            "fleet": 4.0,
+            "distance": 638.0
+          },
+          "objective": "distance",
+          "beta": 5,
+          "solver_objective": 638
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.795,
+          "service_level_lcb": 0.7732187909772077,
+          "mean_on_time_fraction": 0.95345,
+          "expected_late_customers": 0.931,
+          "mean_total_lateness": 13.439725901458353,
+          "mean_simulated_driver_duration": 1526.2640863017093,
+          "fleet_day_success": 0.616,
+          "mean_route_success": 0.82725,
+          "service_probability_by_kappa": {
+            "0.90": 0.876,
+            "0.95": 0.795,
+            "0.98": 0.616,
+            "1.00": 0.616
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 10,
+        "source": "new solve",
+        "attempts": 1,
+        "solve_seconds": 5.003739795000001,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              11,
+              6,
+              0
+            ],
+            [
+              0,
+              19,
+              3,
+              10,
+              9,
+              13,
+              4,
+              17,
+              2,
+              0
+            ],
+            [
+              0,
+              1,
+              8,
+              12,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              7,
+              14,
+              15,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            37.0,
+            85.0,
+            97.0,
+            16.0,
+            600.0,
+            600.0
+          ],
+          "service_starts": {
+            "11": 126.0,
+            "6": 260.0,
+            "19": 157.0,
+            "3": 180.0,
+            "10": 205.0,
+            "9": 268.0,
+            "13": 287.0,
+            "4": 344.0,
+            "17": 416.0,
+            "2": 443.0,
+            "1": 207.0,
+            "8": 268.0,
+            "12": 316.0,
+            "20": 364.0,
+            "18": 427.0,
+            "16": 90.0,
+            "5": 190.0,
+            "7": 353.0,
+            "14": 414.0,
+            "15": 469.0
+          },
+          "metrics": {
+            "fuel": 9975.0,
+            "tightness": 72.0,
+            "driver_duration": 1659.0,
+            "fleet": 4.0,
+            "distance": 665.0
+          },
+          "objective": "distance",
+          "beta": 10,
+          "solver_objective": 665
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.822,
+          "service_level_lcb": 0.8012427012597454,
+          "mean_on_time_fraction": 0.9578499999999999,
+          "expected_late_customers": 0.843,
+          "mean_total_lateness": 12.570541161346908,
+          "mean_simulated_driver_duration": 1572.8529528671297,
+          "fleet_day_success": 0.649,
+          "mean_route_success": 0.8515,
+          "service_probability_by_kappa": {
+            "0.90": 0.895,
+            "0.95": 0.822,
+            "0.98": 0.649,
+            "1.00": 0.649
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 15,
+        "source": "new solve",
+        "attempts": 1,
+        "solve_seconds": 5.003709512000114,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              1,
+              8,
+              12,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              11,
+              6,
+              17,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              7,
+              2,
+              0
+            ],
+            [
+              0,
+              3,
+              19,
+              10,
+              9,
+              13,
+              4,
+              14,
+              15,
+              0
+            ]
+          ],
+          "departures": [
+            92.0,
+            600.0,
+            32.0,
+            600.0,
+            11.0,
+            73.0
+          ],
+          "service_starts": {
+            "1": 202.0,
+            "8": 263.0,
+            "12": 311.0,
+            "20": 359.0,
+            "18": 422.0,
+            "11": 121.0,
+            "6": 260.0,
+            "17": 346.0,
+            "16": 85.0,
+            "5": 185.0,
+            "7": 353.0,
+            "2": 416.0,
+            "3": 145.0,
+            "19": 168.0,
+            "10": 200.0,
+            "9": 263.0,
+            "13": 282.0,
+            "4": 344.0,
+            "14": 396.0,
+            "15": 451.0
+          },
+          "metrics": {
+            "fuel": 10110.0,
+            "tightness": 60.0,
+            "driver_duration": 1706.0,
+            "fleet": 4.0,
+            "distance": 674.0
+          },
+          "objective": "distance",
+          "beta": 15,
+          "solver_objective": 674
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.874,
+          "service_level_lcb": 0.8557235556423033,
+          "mean_on_time_fraction": 0.97085,
+          "expected_late_customers": 0.583,
+          "mean_total_lateness": 9.144904112263387,
+          "mean_simulated_driver_duration": 1634.2303211354292,
+          "fleet_day_success": 0.732,
+          "mean_route_success": 0.89675,
+          "service_probability_by_kappa": {
+            "0.90": 0.924,
+            "0.95": 0.874,
+            "0.98": 0.732,
+            "1.00": 0.732
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 20,
+        "source": "new solve",
+        "attempts": 1,
+        "solve_seconds": 5.004049773000133,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              3,
+              19,
+              10,
+              9,
+              13,
+              4,
+              14,
+              15,
+              0
+            ],
+            [
+              0,
+              11,
+              6,
+              17,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              7,
+              2,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              8,
+              12,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            68.0,
+            27.0,
+            6.0,
+            600.0,
+            87.0,
+            600.0
+          ],
+          "service_starts": {
+            "3": 140.0,
+            "19": 163.0,
+            "10": 195.0,
+            "9": 258.0,
+            "13": 277.0,
+            "4": 344.0,
+            "14": 396.0,
+            "15": 451.0,
+            "11": 116.0,
+            "6": 260.0,
+            "17": 346.0,
+            "16": 80.0,
+            "5": 180.0,
+            "7": 353.0,
+            "2": 416.0,
+            "1": 197.0,
+            "8": 258.0,
+            "12": 306.0,
+            "20": 354.0,
+            "18": 417.0
+          },
+          "metrics": {
+            "fuel": 10110.0,
+            "tightness": 60.0,
+            "driver_duration": 1721.0,
+            "fleet": 4.0,
+            "distance": 674.0
+          },
+          "objective": "distance",
+          "beta": 20,
+          "solver_objective": 674
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.9,
+          "service_level_lcb": 0.8832999868076771,
+          "mean_on_time_fraction": 0.97775,
+          "expected_late_customers": 0.445,
+          "mean_total_lateness": 6.827509724651616,
+          "mean_simulated_driver_duration": 1652.48915805873,
+          "fleet_day_success": 0.788,
+          "mean_route_success": 0.92425,
+          "service_probability_by_kappa": {
+            "0.90": 0.946,
+            "0.95": 0.9,
+            "0.98": 0.788,
+            "1.00": 0.788
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 25,
+        "source": "new solve",
+        "attempts": 3,
+        "solve_seconds": 15.00398670300001,
+        "certificate": [],
+        "plan": null,
+        "screening": null
+      },
+      {
+        "beta": 30,
+        "source": "reachability certificate; solve skipped",
+        "attempts": 0,
+        "solve_seconds": 0.00029529699986596825,
+        "certificate": [
+          {
+            "customer": 16,
+            "upper": 70,
+            "earliest_lower_bound": 74
+          }
+        ],
+        "plan": null,
+        "screening": null
+      },
+      {
+        "beta": 35,
+        "source": "reachability certificate; solve skipped",
+        "attempts": 0,
+        "solve_seconds": 0.00019105100000160746,
+        "certificate": [
+          {
+            "customer": 16,
+            "upper": 65,
+            "earliest_lower_bound": 74
+          }
+        ],
+        "plan": null,
+        "screening": null
+      },
+      {
+        "beta": 40,
+        "source": "reachability certificate; solve skipped",
+        "attempts": 0,
+        "solve_seconds": 0.00016941600006248336,
+        "certificate": [
+          {
+            "customer": 16,
+            "upper": 60,
+            "earliest_lower_bound": 74
+          }
+        ],
+        "plan": null,
+        "screening": null
+      },
+      {
+        "beta": 45,
+        "source": "reachability certificate; solve skipped",
+        "attempts": 0,
+        "solve_seconds": 0.00013783600024908083,
+        "certificate": [
+          {
+            "customer": 16,
+            "upper": 55,
+            "earliest_lower_bound": 74
+          }
+        ],
+        "plan": null,
+        "screening": null
+      },
+      {
+        "beta": 50,
+        "source": "reachability certificate; solve skipped",
+        "attempts": 0,
+        "solve_seconds": 0.00014043900000615395,
+        "certificate": [
+          {
+            "customer": 11,
+            "upper": 86,
+            "earliest_lower_bound": 89
+          },
+          {
+            "customer": 16,
+            "upper": 50,
+            "earliest_lower_bound": 74
+          }
+        ],
+        "plan": null,
+        "screening": null
+      },
+      {
+        "beta": 55,
+        "source": "reachability certificate; solve skipped",
+        "attempts": 0,
+        "solve_seconds": 0.00013577700019595795,
+        "certificate": [
+          {
+            "customer": 11,
+            "upper": 81,
+            "earliest_lower_bound": 89
+          },
+          {
+            "customer": 16,
+            "upper": 45,
+            "earliest_lower_bound": 74
+          }
+        ],
+        "plan": null,
+        "screening": null
+      },
+      {
+        "beta": 60,
+        "source": "reachability certificate; solve skipped",
+        "attempts": 0,
+        "solve_seconds": 0.00014341300038722693,
+        "certificate": [
+          {
+            "customer": 11,
+            "upper": 76,
+            "earliest_lower_bound": 89
+          },
+          {
+            "customer": 16,
+            "upper": 40,
+            "earliest_lower_bound": 74
+          }
+        ],
+        "plan": null,
+        "screening": null
+      }
+    ],
+    "selected_plan": null,
+    "procedure_plan": {
+      "routes": [
+        [
+          0,
+          16,
+          6,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          19,
+          3,
+          10,
+          9,
+          13,
+          4,
+          14,
+          2,
+          15,
+          0
+        ],
+        [
+          0,
+          5,
+          7,
+          17,
+          0
+        ],
+        [
+          0,
+          11,
+          1,
+          8,
+          12,
+          20,
+          18,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "departures": [
+        26.0,
+        600.0,
+        95.0,
+        156.0,
+        6.0,
+        600.0
+      ],
+      "service_starts": {
+        "16": 100.0,
+        "6": 260.0,
+        "19": 167.0,
+        "3": 190.0,
+        "10": 215.0,
+        "9": 278.0,
+        "13": 297.0,
+        "4": 344.0,
+        "14": 396.0,
+        "2": 441.0,
+        "15": 480.0,
+        "5": 241.0,
+        "7": 353.0,
+        "17": 421.0,
+        "11": 95.0,
+        "1": 217.0,
+        "8": 278.0,
+        "12": 326.0,
+        "20": 374.0,
+        "18": 437.0
+      },
+      "metrics": {
+        "fuel": 9570.0,
+        "tightness": 68.0,
+        "driver_duration": 1594.0,
+        "fleet": 4.0,
+        "distance": 638.0
+      },
+      "objective": "peak-aware distance",
+      "beta": 0,
+      "solver_objective": 638
+    },
+    "procedure_source": "conservative base",
+    "best_beta": 20,
+    "best_lcb": 0.8832999868076771
+  },
+  "capped_procedure": {
+    "candidates": [
+      {
+        "beta": 0,
+        "source": "archived identical uniform model",
+        "attempts": 0,
+        "solve_seconds": 0.002786139999898296,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              6,
+              12,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              7,
+              17,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              19,
+              3,
+              10,
+              9,
+              13,
+              4,
+              14,
+              2,
+              15,
+              0
+            ],
+            [
+              0,
+              11,
+              8,
+              1,
+              18,
+              20,
+              0
+            ]
+          ],
+          "departures": [
+            226.0,
+            0.0,
+            23.0,
+            0.0,
+            107.0,
+            27.0
+          ],
+          "service_starts": {
+            "6": 267.0,
+            "12": 328.0,
+            "16": 85.0,
+            "5": 170.0,
+            "7": 353.0,
+            "17": 411.0,
+            "19": 167.0,
+            "3": 188.0,
+            "10": 210.0,
+            "9": 264.0,
+            "13": 282.0,
+            "4": 344.0,
+            "14": 396.0,
+            "2": 435.0,
+            "15": 469.0,
+            "11": 101.0,
+            "8": 164.0,
+            "1": 216.0,
+            "18": 378.0,
+            "20": 432.0
+          },
+          "metrics": {
+            "fuel": 8730.0,
+            "tightness": 28.0,
+            "driver_duration": 1454.0,
+            "fleet": 4.0,
+            "distance": 582.0
+          },
+          "objective": "weighted",
+          "beta": 0,
+          "solver_objective": 376990
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.428,
+          "service_level_lcb": 0.40249192268852146,
+          "mean_on_time_fraction": 0.8883499999999999,
+          "expected_late_customers": 2.233,
+          "mean_total_lateness": 38.527942478546436,
+          "mean_simulated_driver_duration": 1460.5118885291204,
+          "fleet_day_success": 0.2,
+          "mean_route_success": 0.6035,
+          "service_probability_by_kappa": {
+            "0.90": 0.637,
+            "0.95": 0.428,
+            "0.98": 0.2,
+            "1.00": 0.2
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 5,
+        "source": "archived identical uniform model",
+        "attempts": 0,
+        "solve_seconds": 0.0022517259999403905,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              7,
+              17,
+              0
+            ],
+            [
+              0,
+              1,
+              19,
+              3,
+              10,
+              9,
+              13,
+              4,
+              14,
+              2,
+              15,
+              0
+            ],
+            [
+              0,
+              11,
+              8,
+              6,
+              12,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            0.0,
+            18.0,
+            4.0,
+            42.0,
+            0.0,
+            0.0
+          ],
+          "service_starts": {
+            "16": 80.0,
+            "5": 165.0,
+            "7": 353.0,
+            "17": 411.0,
+            "1": 96.0,
+            "19": 166.0,
+            "3": 187.0,
+            "10": 209.0,
+            "9": 263.0,
+            "13": 281.0,
+            "4": 365.0,
+            "14": 396.0,
+            "2": 435.0,
+            "15": 469.0,
+            "11": 116.0,
+            "8": 179.0,
+            "6": 260.0,
+            "12": 321.0,
+            "20": 363.0,
+            "18": 417.0
+          },
+          "metrics": {
+            "fuel": 9705.0,
+            "tightness": 5.0,
+            "driver_duration": 1421.0,
+            "fleet": 3.0,
+            "distance": 647.0
+          },
+          "objective": "weighted",
+          "beta": 5,
+          "solver_objective": 390733
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.599,
+          "service_level_lcb": 0.5732733636596536,
+          "mean_on_time_fraction": 0.9030499999999999,
+          "expected_late_customers": 1.939,
+          "mean_total_lateness": 45.4695453721951,
+          "mean_simulated_driver_duration": 1448.3406535018296,
+          "fleet_day_success": 0.423,
+          "mean_route_success": 0.6613333333333333,
+          "service_probability_by_kappa": {
+            "0.90": 0.715,
+            "0.95": 0.599,
+            "0.98": 0.423,
+            "1.00": 0.423
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 10,
+        "source": "archived identical uniform model",
+        "attempts": 0,
+        "solve_seconds": 0.002141079000011814,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              7,
+              17,
+              0
+            ],
+            [
+              0,
+              6,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              11,
+              1,
+              8,
+              12,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              19,
+              3,
+              10,
+              9,
+              13,
+              4,
+              14,
+              2,
+              15,
+              0
+            ]
+          ],
+          "departures": [
+            0.0,
+            13.0,
+            219.0,
+            0.0,
+            15.0,
+            97.0
+          ],
+          "service_starts": {
+            "16": 75.0,
+            "5": 160.0,
+            "7": 353.0,
+            "17": 411.0,
+            "6": 260.0,
+            "11": 89.0,
+            "1": 192.0,
+            "8": 244.0,
+            "12": 286.0,
+            "20": 339.0,
+            "18": 393.0,
+            "19": 157.0,
+            "3": 178.0,
+            "10": 200.0,
+            "9": 254.0,
+            "13": 272.0,
+            "4": 344.0,
+            "14": 396.0,
+            "2": 435.0,
+            "15": 469.0
+          },
+          "metrics": {
+            "fuel": 9585.0,
+            "tightness": 7.0,
+            "driver_duration": 1428.0,
+            "fleet": 4.0,
+            "distance": 639.0
+          },
+          "objective": "weighted",
+          "beta": 10,
+          "solver_objective": 394282
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.762,
+          "service_level_lcb": 0.7391606779384559,
+          "mean_on_time_fraction": 0.9435,
+          "expected_late_customers": 1.13,
+          "mean_total_lateness": 20.95949156092393,
+          "mean_simulated_driver_duration": 1455.7202478379027,
+          "fleet_day_success": 0.555,
+          "mean_route_success": 0.82525,
+          "service_probability_by_kappa": {
+            "0.90": 0.848,
+            "0.95": 0.762,
+            "0.98": 0.555,
+            "1.00": 0.555
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 15,
+        "source": "archived identical uniform model",
+        "attempts": 0,
+        "solve_seconds": 0.002248704999601614,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              7,
+              17,
+              0
+            ],
+            [
+              0,
+              6,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              11,
+              1,
+              8,
+              12,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              19,
+              3,
+              10,
+              9,
+              13,
+              4,
+              14,
+              2,
+              15,
+              0
+            ]
+          ],
+          "departures": [
+            0.0,
+            8.0,
+            219.0,
+            0.0,
+            10.0,
+            95.0
+          ],
+          "service_starts": {
+            "16": 70.0,
+            "5": 155.0,
+            "7": 353.0,
+            "17": 411.0,
+            "6": 260.0,
+            "11": 84.0,
+            "1": 187.0,
+            "8": 239.0,
+            "12": 281.0,
+            "20": 339.0,
+            "18": 393.0,
+            "19": 155.0,
+            "3": 176.0,
+            "10": 198.0,
+            "9": 252.0,
+            "13": 270.0,
+            "4": 365.0,
+            "14": 396.0,
+            "2": 435.0,
+            "15": 469.0
+          },
+          "metrics": {
+            "fuel": 9585.0,
+            "tightness": 20.0,
+            "driver_duration": 1440.0,
+            "fleet": 4.0,
+            "distance": 639.0
+          },
+          "objective": "weighted",
+          "beta": 15,
+          "solver_objective": 399152
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.809,
+          "service_level_lcb": 0.787730367927796,
+          "mean_on_time_fraction": 0.9535,
+          "expected_late_customers": 0.93,
+          "mean_total_lateness": 16.78461422075304,
+          "mean_simulated_driver_duration": 1464.9299371054472,
+          "fleet_day_success": 0.608,
+          "mean_route_success": 0.85075,
+          "service_probability_by_kappa": {
+            "0.90": 0.87,
+            "0.95": 0.809,
+            "0.98": 0.608,
+            "1.00": 0.608
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 20,
+        "source": "archived identical uniform model",
+        "attempts": 0,
+        "solve_seconds": 0.0025363199997627817,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              11,
+              1,
+              8,
+              12,
+              6,
+              17,
+              2,
+              15,
+              0
+            ],
+            [
+              0,
+              3,
+              10,
+              19,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              9,
+              13,
+              4,
+              14,
+              7,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            0.0,
+            145.0,
+            3.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service_starts": {
+            "11": 74.0,
+            "1": 177.0,
+            "8": 229.0,
+            "12": 271.0,
+            "6": 332.0,
+            "17": 405.0,
+            "2": 429.0,
+            "15": 463.0,
+            "3": 205.0,
+            "10": 227.0,
+            "19": 255.0,
+            "20": 339.0,
+            "18": 393.0,
+            "16": 65.0,
+            "5": 150.0,
+            "9": 231.0,
+            "13": 249.0,
+            "4": 365.0,
+            "14": 396.0,
+            "7": 448.0
+          },
+          "metrics": {
+            "fuel": 10305.0,
+            "tightness": 15.0,
+            "driver_duration": 1386.0,
+            "fleet": 3.0,
+            "distance": 687.0
+          },
+          "objective": "weighted",
+          "beta": 20,
+          "solver_objective": 409878
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.619,
+          "service_level_lcb": 0.5934508678010619,
+          "mean_on_time_fraction": 0.9082,
+          "expected_late_customers": 1.836,
+          "mean_total_lateness": 63.629393179253206,
+          "mean_simulated_driver_duration": 1409.598991430414,
+          "fleet_day_success": 0.573,
+          "mean_route_success": 0.7916666666666666,
+          "service_probability_by_kappa": {
+            "0.90": 0.671,
+            "0.95": 0.619,
+            "0.98": 0.573,
+            "1.00": 0.573
+          },
+          "arcs_departing_at_or_after_1700": 5
+        }
+      },
+      {
+        "beta": 25,
+        "source": "archived identical uniform model",
+        "attempts": 0,
+        "solve_seconds": 0.002182572000037908,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              6,
+              17,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              7,
+              2,
+              0
+            ],
+            [
+              0,
+              3,
+              19,
+              10,
+              9,
+              13,
+              4,
+              14,
+              15,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              11,
+              1,
+              8,
+              12,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            226.0,
+            0.0,
+            76.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service_starts": {
+            "6": 267.0,
+            "17": 340.0,
+            "16": 62.0,
+            "5": 147.0,
+            "7": 353.0,
+            "2": 407.0,
+            "3": 136.0,
+            "19": 157.0,
+            "10": 185.0,
+            "9": 239.0,
+            "13": 257.0,
+            "4": 365.0,
+            "14": 396.0,
+            "15": 444.0,
+            "11": 74.0,
+            "1": 177.0,
+            "8": 229.0,
+            "12": 271.0,
+            "20": 339.0,
+            "18": 393.0
+          },
+          "metrics": {
+            "fuel": 10080.0,
+            "tightness": 2.0,
+            "driver_duration": 1521.0,
+            "fleet": 4.0,
+            "distance": 672.0
+          },
+          "objective": "weighted",
+          "beta": 25,
+          "solver_objective": 412757
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.888,
+          "service_level_lcb": 0.8705380730096232,
+          "mean_on_time_fraction": 0.9745999999999999,
+          "expected_late_customers": 0.508,
+          "mean_total_lateness": 8.986858441042605,
+          "mean_simulated_driver_duration": 1544.6004203368568,
+          "fleet_day_success": 0.756,
+          "mean_route_success": 0.91575,
+          "service_probability_by_kappa": {
+            "0.90": 0.933,
+            "0.95": 0.888,
+            "0.98": 0.756,
+            "1.00": 0.756
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 30,
+        "source": "archived identical uniform model",
+        "attempts": 0,
+        "solve_seconds": 0.002267844000016339,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              1,
+              10,
+              3,
+              19,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              11,
+              8,
+              12,
+              6,
+              17,
+              2,
+              15,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              9,
+              13,
+              4,
+              14,
+              7,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            10.0,
+            17.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "service_starts": {
+            "1": 102.0,
+            "10": 186.0,
+            "3": 208.0,
+            "19": 229.0,
+            "20": 339.0,
+            "18": 393.0,
+            "11": 91.0,
+            "8": 164.0,
+            "12": 227.0,
+            "6": 288.0,
+            "17": 361.0,
+            "2": 385.0,
+            "15": 419.0,
+            "16": 62.0,
+            "5": 147.0,
+            "9": 228.0,
+            "13": 246.0,
+            "4": 365.0,
+            "14": 396.0,
+            "7": 448.0
+          },
+          "metrics": {
+            "fuel": 10455.0,
+            "tightness": 17.0,
+            "driver_duration": 1463.0,
+            "fleet": 3.0,
+            "distance": 697.0
+          },
+          "objective": "weighted",
+          "beta": 30,
+          "solver_objective": 419391
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.88,
+          "service_level_lcb": 0.8620635534069384,
+          "mean_on_time_fraction": 0.9725499999999999,
+          "expected_late_customers": 0.549,
+          "mean_total_lateness": 10.68611884678137,
+          "mean_simulated_driver_duration": 1476.701264771748,
+          "fleet_day_success": 0.77,
+          "mean_route_success": 0.886,
+          "service_probability_by_kappa": {
+            "0.90": 0.93,
+            "0.95": 0.88,
+            "0.98": 0.77,
+            "1.00": 0.77
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 35,
+        "source": "archived identical uniform model",
+        "attempts": 0,
+        "solve_seconds": 0.002037560000189842,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              11,
+              8,
+              12,
+              6,
+              17,
+              2,
+              15,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              9,
+              13,
+              4,
+              14,
+              7,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              10,
+              3,
+              19,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            12.0,
+            0.0,
+            0.0,
+            0.0,
+            5.0,
+            0.0
+          ],
+          "service_starts": {
+            "11": 86.0,
+            "8": 164.0,
+            "12": 227.0,
+            "6": 288.0,
+            "17": 361.0,
+            "2": 385.0,
+            "15": 419.0,
+            "16": 62.0,
+            "5": 147.0,
+            "9": 228.0,
+            "13": 246.0,
+            "4": 365.0,
+            "14": 396.0,
+            "7": 448.0,
+            "1": 97.0,
+            "10": 181.0,
+            "3": 203.0,
+            "19": 224.0,
+            "20": 339.0,
+            "18": 393.0
+          },
+          "metrics": {
+            "fuel": 10455.0,
+            "tightness": 27.0,
+            "driver_duration": 1473.0,
+            "fleet": 3.0,
+            "distance": 697.0
+          },
+          "objective": "weighted",
+          "beta": 35,
+          "solver_objective": 423181
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.898,
+          "service_level_lcb": 0.881168512399485,
+          "mean_on_time_fraction": 0.9763,
+          "expected_late_customers": 0.474,
+          "mean_total_lateness": 8.917964070718504,
+          "mean_simulated_driver_duration": 1485.2093086400064,
+          "fleet_day_success": 0.791,
+          "mean_route_success": 0.902,
+          "service_probability_by_kappa": {
+            "0.90": 0.941,
+            "0.95": 0.898,
+            "0.98": 0.791,
+            "1.00": 0.791
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 40,
+        "source": "new solve",
+        "attempts": 1,
+        "solve_seconds": 5.005201016999763,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              11,
+              1,
+              8,
+              12,
+              6,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              13,
+              9,
+              4,
+              14,
+              15,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              10,
+              19,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              17,
+              2,
+              7,
+              0
+            ]
+          ],
+          "departures": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            125.0,
+            323.0
+          ],
+          "service_starts": {
+            "11": 74.0,
+            "1": 177.0,
+            "8": 229.0,
+            "12": 271.0,
+            "6": 332.0,
+            "16": 62.0,
+            "5": 147.0,
+            "13": 225.0,
+            "9": 243.0,
+            "4": 344.0,
+            "14": 396.0,
+            "15": 444.0,
+            "3": 185.0,
+            "10": 207.0,
+            "19": 235.0,
+            "20": 339.0,
+            "18": 393.0,
+            "17": 350.0,
+            "2": 374.0,
+            "7": 428.0
+          },
+          "metrics": {
+            "fuel": 10530.0,
+            "tightness": 36.0,
+            "driver_duration": 1430.0,
+            "fleet": 4.0,
+            "distance": 702.0
+          },
+          "objective": "weighted",
+          "beta": 40,
+          "solver_objective": 431958
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.851,
+          "service_level_lcb": 0.8315318070692895,
+          "mean_on_time_fraction": 0.9698,
+          "expected_late_customers": 0.604,
+          "mean_total_lateness": 12.344740649126267,
+          "mean_simulated_driver_duration": 1450.9149263626948,
+          "fleet_day_success": 0.778,
+          "mean_route_success": 0.9245,
+          "service_probability_by_kappa": {
+            "0.90": 0.904,
+            "0.95": 0.851,
+            "0.98": 0.778,
+            "1.00": 0.778
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 45,
+        "source": "new solve",
+        "attempts": 3,
+        "solve_seconds": 15.004944833999616,
+        "certificate": [],
+        "plan": null,
+        "screening": null
+      },
+      {
+        "beta": 50,
+        "source": "new solve",
+        "attempts": 3,
+        "solve_seconds": 15.004318151999996,
+        "certificate": [],
+        "plan": null,
+        "screening": null
+      },
+      {
+        "beta": 55,
+        "source": "new solve",
+        "attempts": 1,
+        "solve_seconds": 5.004508585000167,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              11,
+              8,
+              12,
+              6,
+              17,
+              2,
+              0
+            ],
+            [
+              0,
+              3,
+              10,
+              9,
+              13,
+              4,
+              15,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              7,
+              14,
+              0
+            ],
+            [
+              0,
+              1,
+              19,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            0.0,
+            73.0,
+            0.0,
+            55.0,
+            0.0,
+            0.0
+          ],
+          "service_starts": {
+            "11": 74.0,
+            "8": 185.0,
+            "12": 227.0,
+            "6": 288.0,
+            "17": 361.0,
+            "2": 385.0,
+            "3": 133.0,
+            "10": 155.0,
+            "9": 209.0,
+            "13": 227.0,
+            "4": 344.0,
+            "15": 387.0,
+            "16": 62.0,
+            "5": 147.0,
+            "7": 353.0,
+            "14": 405.0,
+            "1": 147.0,
+            "19": 217.0,
+            "20": 339.0,
+            "18": 393.0
+          },
+          "metrics": {
+            "fuel": 10890.0,
+            "tightness": 24.0,
+            "driver_duration": 1725.0,
+            "fleet": 4.0,
+            "distance": 726.0
+          },
+          "objective": "weighted",
+          "beta": 55,
+          "solver_objective": 455661
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.961,
+          "service_level_lcb": 0.9496232565261122,
+          "mean_on_time_fraction": 0.9937999999999999,
+          "expected_late_customers": 0.124,
+          "mean_total_lateness": 1.9379086075374772,
+          "mean_simulated_driver_duration": 1735.1712939173856,
+          "fleet_day_success": 0.937,
+          "mean_route_success": 0.979,
+          "service_probability_by_kappa": {
+            "0.90": 0.99,
+            "0.95": 0.961,
+            "0.98": 0.937,
+            "1.00": 0.937
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      },
+      {
+        "beta": 60,
+        "source": "new solve",
+        "attempts": 1,
+        "solve_seconds": 5.005126311999902,
+        "certificate": [],
+        "plan": {
+          "routes": [
+            [
+              0,
+              3,
+              10,
+              19,
+              15,
+              2,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              16,
+              5,
+              13,
+              9,
+              4,
+              14,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              8,
+              12,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              11,
+              6,
+              17,
+              7,
+              0
+            ]
+          ],
+          "departures": [
+            105.0,
+            0.0,
+            0.0,
+            0.0,
+            50.0,
+            0.0
+          ],
+          "service_starts": {
+            "3": 165.0,
+            "10": 187.0,
+            "19": 215.0,
+            "15": 358.0,
+            "2": 392.0,
+            "16": 62.0,
+            "5": 147.0,
+            "13": 225.0,
+            "9": 243.0,
+            "4": 344.0,
+            "14": 396.0,
+            "1": 142.0,
+            "8": 194.0,
+            "12": 236.0,
+            "20": 339.0,
+            "18": 393.0,
+            "11": 74.0,
+            "6": 267.0,
+            "17": 340.0,
+            "7": 398.0
+          },
+          "metrics": {
+            "fuel": 11355.0,
+            "tightness": 44.0,
+            "driver_duration": 1729.0,
+            "fleet": 4.0,
+            "distance": 757.0
+          },
+          "objective": "weighted",
+          "beta": 60,
+          "solver_objective": 476217
+        },
+        "screening": {
+          "scenarios": 1000,
+          "service_level_success": 0.942,
+          "service_level_lcb": 0.9286072304796054,
+          "mean_on_time_fraction": 0.9905999999999999,
+          "expected_late_customers": 0.188,
+          "mean_total_lateness": 3.3747432442427736,
+          "mean_simulated_driver_duration": 1741.2051856867051,
+          "fleet_day_success": 0.895,
+          "mean_route_success": 0.97125,
+          "service_probability_by_kappa": {
+            "0.90": 0.987,
+            "0.95": 0.942,
+            "0.98": 0.895,
+            "1.00": 0.895
+          },
+          "arcs_departing_at_or_after_1700": 0
+        }
+      }
+    ],
+    "selected_plan": null,
+    "procedure_plan": {
+      "routes": [
+        [
+          0,
+          6,
+          12,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          16,
+          5,
+          7,
+          17,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          19,
+          3,
+          10,
+          9,
+          13,
+          4,
+          14,
+          2,
+          15,
+          0
+        ],
+        [
+          0,
+          11,
+          8,
+          1,
+          18,
+          20,
+          0
+        ]
+      ],
+      "departures": [
+        226.0,
+        0.0,
+        23.0,
+        0.0,
+        107.0,
+        27.0
+      ],
+      "service_starts": {
+        "6": 267.0,
+        "12": 328.0,
+        "16": 85.0,
+        "5": 170.0,
+        "7": 353.0,
+        "17": 411.0,
+        "19": 167.0,
+        "3": 188.0,
+        "10": 210.0,
+        "9": 264.0,
+        "13": 282.0,
+        "4": 344.0,
+        "14": 396.0,
+        "2": 435.0,
+        "15": 469.0,
+        "11": 101.0,
+        "8": 164.0,
+        "1": 216.0,
+        "18": 378.0,
+        "20": 432.0
+      },
+      "metrics": {
+        "fuel": 8730.0,
+        "tightness": 28.0,
+        "driver_duration": 1454.0,
+        "fleet": 4.0,
+        "distance": 582.0
+      },
+      "objective": "weighted",
+      "beta": 0,
+      "solver_objective": 376990
+    },
+    "procedure_source": "slack-aware base",
+    "best_beta": 55,
+    "best_lcb": 0.9496232565261122
+  },
+  "clock_aware": {
+    "plan": {
+      "routes": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          11,
+          8,
+          1,
+          18,
+          20,
+          0
+        ],
+        [
+          0,
+          19,
+          3,
+          10,
+          9,
+          13,
+          4,
+          14,
+          2,
+          15,
+          0
+        ],
+        [
+          0,
+          16,
+          6,
+          12,
+          0
+        ],
+        [
+          0,
+          5,
+          7,
+          17,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "departures": [
+        0.0,
+        17.0,
+        112.0,
+        34.0,
+        168.0,
+        0.0
+      ],
+      "service_starts": {
+        "11": 90.86666666666667,
+        "8": 164,
+        "1": 217.0,
+        "18": 378,
+        "20": 431.5,
+        "19": 183.33333333333337,
+        "3": 203.83333333333337,
+        "10": 225.83333333333337,
+        "9": 279.33333333333337,
+        "13": 296.83333333333337,
+        "4": 344,
+        "14": 396,
+        "2": 434.5,
+        "15": 468.5,
+        "16": 99.13333333333333,
+        "6": 260,
+        "12": 321.0,
+        "5": 240.5,
+        "7": 353,
+        "17": 411.0
+      },
+      "metrics": {
+        "fuel": 8715.0,
+        "tightness": 71.9666666666667,
+        "driver_duration": 1497.0,
+        "fleet": 4.0,
+        "distance": 581.0
+      },
+      "objective": "clock-profile-aware distance approximation",
+      "beta": 0,
+      "solver_objective": null
+    },
+    "iterations": [
+      {
+        "iteration": 0,
+        "plan": {
+          "routes": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              11,
+              8,
+              1,
+              18,
+              20,
+              0
+            ],
+            [
+              0,
+              19,
+              3,
+              10,
+              9,
+              13,
+              4,
+              14,
+              2,
+              15,
+              0
+            ],
+            [
+              0,
+              16,
+              6,
+              12,
+              0
+            ],
+            [
+              0,
+              5,
+              7,
+              17,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            600.0,
+            13.0,
+            112.0,
+            33.0,
+            168.0,
+            600.0
+          ],
+          "service_starts": {
+            "11": 91.0,
+            "8": 164.0,
+            "1": 217.0,
+            "18": 378.0,
+            "20": 432.0,
+            "19": 182.0,
+            "3": 203.0,
+            "10": 225.0,
+            "9": 279.0,
+            "13": 297.0,
+            "4": 344.0,
+            "14": 396.0,
+            "2": 435.0,
+            "15": 469.0,
+            "16": 100.0,
+            "6": 260.0,
+            "12": 321.0,
+            "5": 241.0,
+            "7": 353.0,
+            "17": 411.0
+          },
+          "metrics": {
+            "fuel": 8715.0,
+            "tightness": 74.0,
+            "driver_duration": 1504.0,
+            "fleet": 4.0,
+            "distance": 581.0
+          },
+          "objective": "distance",
+          "beta": 0,
+          "solver_objective": 581
+        },
+        "deterministic_feasible": true
+      },
+      {
+        "iteration": 1,
+        "plan": {
+          "routes": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              11,
+              8,
+              1,
+              18,
+              20,
+              0
+            ],
+            [
+              0,
+              19,
+              3,
+              10,
+              9,
+              13,
+              4,
+              14,
+              2,
+              15,
+              0
+            ],
+            [
+              0,
+              16,
+              6,
+              12,
+              0
+            ],
+            [
+              0,
+              5,
+              7,
+              17,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "departures": [
+            600.0,
+            17.0,
+            110.0,
+            34.0,
+            168.0,
+            600.0
+          ],
+          "service_starts": {
+            "11": 91.0,
+            "8": 164.0,
+            "1": 217.0,
+            "18": 378.0,
+            "20": 432.0,
+            "19": 182.0,
+            "3": 203.0,
+            "10": 225.0,
+            "9": 279.0,
+            "13": 297.0,
+            "4": 344.0,
+            "14": 396.0,
+            "2": 435.0,
+            "15": 469.0,
+            "16": 100.0,
+            "6": 260.0,
+            "12": 321.0,
+            "5": 241.0,
+            "7": 353.0,
+            "17": 411.0
+          },
+          "metrics": {
+            "fuel": 8715.0,
+            "tightness": 74.0,
+            "driver_duration": 1501.0,
+            "fleet": 4.0,
+            "distance": 581.0
+          },
+          "objective": "distance",
+          "beta": 0,
+          "solver_objective": 581
+        },
+        "deterministic_feasible": true
+      }
+    ],
+    "solve_seconds": 5.006568464999873,
+    "total_search_budget_seconds": 5.0
+  },
+  "configurations": {
+    "nominal": {
+      "plan": {
+        "routes": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            11,
+            8,
+            1,
+            18,
+            20,
+            0
+          ],
+          [
+            0,
+            19,
+            3,
+            10,
+            9,
+            13,
+            4,
+            14,
+            2,
+            15,
+            0
+          ],
+          [
+            0,
+            16,
+            6,
+            12,
+            0
+          ],
+          [
+            0,
+            5,
+            7,
+            17,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "departures": [
+          600.0,
+          28.0,
+          122.0,
+          38.0,
+          170.0,
+          600.0
+        ],
+        "service_starts": {
+          "11": 102.0,
+          "8": 165.0,
+          "1": 217.0,
+          "18": 378.0,
+          "20": 432.0,
+          "19": 182.0,
+          "3": 203.0,
+          "10": 225.0,
+          "9": 279.0,
+          "13": 297.0,
+          "4": 344.0,
+          "14": 396.0,
+          "2": 435.0,
+          "15": 469.0,
+          "16": 100.0,
+          "6": 260.0,
+          "12": 321.0,
+          "5": 241.0,
+          "7": 353.0,
+          "17": 411.0
+        },
+        "metrics": {
+          "fuel": 8715.0,
+          "tightness": 74.0,
+          "driver_duration": 1472.0,
+          "fleet": 4.0,
+          "distance": 581.0
+        },
+        "objective": "distance",
+        "beta": 0,
+        "solver_objective": 581
+      },
+      "validation": {
+        "scenarios": 5000,
+        "service_level_success": 0.2316,
+        "service_level_lcb": 0.22193365819754207,
+        "mean_on_time_fraction": 0.82229,
+        "expected_late_customers": 3.5542,
+        "mean_total_lateness": 64.05239725643138,
+        "mean_simulated_driver_duration": 1479.2563787451604,
+        "fleet_day_success": 0.1128,
+        "mean_route_success": 0.34765,
+        "service_probability_by_kappa": {
+          "0.90": 0.3666,
+          "0.95": 0.2316,
+          "0.98": 0.1128,
+          "1.00": 0.1128
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "deterministic": {
+        "scenarios": 1,
+        "service_level_success": 0.0,
+        "service_level_lcb": 0.0,
+        "mean_on_time_fraction": 0.8,
+        "expected_late_customers": 4.0,
+        "mean_total_lateness": 27.333333333333258,
+        "mean_simulated_driver_duration": 1470.0,
+        "fleet_day_success": 0.0,
+        "mean_route_success": 0.0,
+        "service_probability_by_kappa": {
+          "0.90": 0.0,
+          "0.95": 0.0,
+          "0.98": 0.0,
+          "1.00": 0.0
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "sensitivity": {
+        "0.10,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.013,
+          "service_level_lcb": 0.008285124892881277,
+          "mean_on_time_fraction": 0.8226,
+          "expected_late_customers": 3.548,
+          "mean_total_lateness": 34.59747166116772,
+          "mean_simulated_driver_duration": 1471.6714678764588,
+          "fleet_day_success": 0.0,
+          "mean_route_success": 0.2065,
+          "service_probability_by_kappa": {
+            "0.90": 0.127,
+            "0.95": 0.013,
+            "0.98": 0.0,
+            "1.00": 0.0
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.163,
+          "service_level_lcb": 0.14470121453471288,
+          "mean_on_time_fraction": 0.83035,
+          "expected_late_customers": 3.393,
+          "mean_total_lateness": 36.02986519518779,
+          "mean_simulated_driver_duration": 1471.2663651497933,
+          "fleet_day_success": 0.064,
+          "mean_route_success": 0.25925,
+          "service_probability_by_kappa": {
+            "0.90": 0.261,
+            "0.95": 0.163,
+            "0.98": 0.064,
+            "1.00": 0.064
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.224,
+          "service_level_lcb": 0.2030750584864746,
+          "mean_on_time_fraction": 0.8332999999999999,
+          "expected_late_customers": 3.334,
+          "mean_total_lateness": 37.26780293595085,
+          "mean_simulated_driver_duration": 1471.2479127818751,
+          "fleet_day_success": 0.171,
+          "mean_route_success": 0.2865,
+          "service_probability_by_kappa": {
+            "0.90": 0.301,
+            "0.95": 0.224,
+            "0.98": 0.171,
+            "1.00": 0.171
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.05,
+          "service_level_lcb": 0.0398282156446678,
+          "mean_on_time_fraction": 0.8229500000000001,
+          "expected_late_customers": 3.541,
+          "mean_total_lateness": 55.05990303250107,
+          "mean_simulated_driver_duration": 1477.2073859417508,
+          "fleet_day_success": 0.004,
+          "mean_route_success": 0.289,
+          "service_probability_by_kappa": {
+            "0.90": 0.219,
+            "0.95": 0.05,
+            "0.98": 0.004,
+            "1.00": 0.004
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.237,
+          "service_level_lcb": 0.21560919466459774,
+          "mean_on_time_fraction": 0.8224,
+          "expected_late_customers": 3.552,
+          "mean_total_lateness": 62.299089632542945,
+          "mean_simulated_driver_duration": 1477.5874949429463,
+          "fleet_day_success": 0.122,
+          "mean_route_success": 0.34075,
+          "service_probability_by_kappa": {
+            "0.90": 0.35,
+            "0.95": 0.237,
+            "0.98": 0.122,
+            "1.00": 0.122
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.341,
+          "service_level_lcb": 0.3168011794746175,
+          "mean_on_time_fraction": 0.8236999999999999,
+          "expected_late_customers": 3.526,
+          "mean_total_lateness": 68.39916035125148,
+          "mean_simulated_driver_duration": 1478.8990145683968,
+          "fleet_day_success": 0.279,
+          "mean_route_success": 0.38675,
+          "service_probability_by_kappa": {
+            "0.90": 0.4,
+            "0.95": 0.341,
+            "0.98": 0.279,
+            "1.00": 0.279
+          },
+          "arcs_departing_at_or_after_1700": 1
+        },
+        "0.30,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.044,
+          "service_level_lcb": 0.034505997666575285,
+          "mean_on_time_fraction": 0.79605,
+          "expected_late_customers": 4.079,
+          "mean_total_lateness": 90.44074084214883,
+          "mean_simulated_driver_duration": 1488.189971130023,
+          "fleet_day_success": 0.006,
+          "mean_route_success": 0.289,
+          "service_probability_by_kappa": {
+            "0.90": 0.176,
+            "0.95": 0.044,
+            "0.98": 0.006,
+            "1.00": 0.006
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.30,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.257,
+          "service_level_lcb": 0.2349474777539257,
+          "mean_on_time_fraction": 0.7955999999999999,
+          "expected_late_customers": 4.088,
+          "mean_total_lateness": 108.61867741505024,
+          "mean_simulated_driver_duration": 1491.4503425721673,
+          "fleet_day_success": 0.136,
+          "mean_route_success": 0.36275,
+          "service_probability_by_kappa": {
+            "0.90": 0.372,
+            "0.95": 0.257,
+            "0.98": 0.136,
+            "1.00": 0.136
+          },
+          "arcs_departing_at_or_after_1700": 2
+        },
+        "0.30,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.379,
+          "service_level_lcb": 0.3541240588885971,
+          "mean_on_time_fraction": 0.7981999999999999,
+          "expected_late_customers": 4.036,
+          "mean_total_lateness": 124.16539567306106,
+          "mean_simulated_driver_duration": 1495.428929027109,
+          "fleet_day_success": 0.313,
+          "mean_route_success": 0.42575,
+          "service_probability_by_kappa": {
+            "0.90": 0.438,
+            "0.95": 0.379,
+            "0.98": 0.313,
+            "1.00": 0.313
+          },
+          "arcs_departing_at_or_after_1700": 12
+        }
+      }
+    },
+    "conservative": {
+      "plan": {
+        "routes": [
+          [
+            0,
+            16,
+            6,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            19,
+            3,
+            10,
+            9,
+            13,
+            4,
+            14,
+            2,
+            15,
+            0
+          ],
+          [
+            0,
+            5,
+            7,
+            17,
+            0
+          ],
+          [
+            0,
+            11,
+            1,
+            8,
+            12,
+            20,
+            18,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "departures": [
+          26.0,
+          600.0,
+          95.0,
+          156.0,
+          6.0,
+          600.0
+        ],
+        "service_starts": {
+          "16": 100.0,
+          "6": 260.0,
+          "19": 167.0,
+          "3": 190.0,
+          "10": 215.0,
+          "9": 278.0,
+          "13": 297.0,
+          "4": 344.0,
+          "14": 396.0,
+          "2": 441.0,
+          "15": 480.0,
+          "5": 241.0,
+          "7": 353.0,
+          "17": 421.0,
+          "11": 95.0,
+          "1": 217.0,
+          "8": 278.0,
+          "12": 326.0,
+          "20": 374.0,
+          "18": 437.0
+        },
+        "metrics": {
+          "fuel": 9570.0,
+          "tightness": 68.0,
+          "driver_duration": 1594.0,
+          "fleet": 4.0,
+          "distance": 638.0
+        },
+        "objective": "peak-aware distance",
+        "beta": 0,
+        "solver_objective": 638
+      },
+      "validation": {
+        "scenarios": 5000,
+        "service_level_success": 0.705,
+        "service_level_lcb": 0.6942830728423586,
+        "mean_on_time_fraction": 0.93227,
+        "expected_late_customers": 1.3546,
+        "mean_total_lateness": 21.89899445438979,
+        "mean_simulated_driver_duration": 1510.5777524315815,
+        "fleet_day_success": 0.5216,
+        "mean_route_success": 0.7523,
+        "service_probability_by_kappa": {
+          "0.90": 0.8096,
+          "0.95": 0.705,
+          "0.98": 0.5216,
+          "1.00": 0.5216
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "deterministic": {
+        "scenarios": 1,
+        "service_level_success": 1.0,
+        "service_level_lcb": 0.2698659552411307,
+        "mean_on_time_fraction": 1.0,
+        "expected_late_customers": 0.0,
+        "mean_total_lateness": 0.0,
+        "mean_simulated_driver_duration": 1487.0,
+        "fleet_day_success": 1.0,
+        "mean_route_success": 1.0,
+        "service_probability_by_kappa": {
+          "0.90": 1.0,
+          "0.95": 1.0,
+          "0.98": 1.0,
+          "1.00": 1.0
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "sensitivity": {
+        "0.10,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.989,
+          "service_level_lcb": 0.9821042600092013,
+          "mean_on_time_fraction": 0.9892,
+          "expected_late_customers": 0.216,
+          "mean_total_lateness": 0.8968967536328001,
+          "mean_simulated_driver_duration": 1491.5772092296431,
+          "fleet_day_success": 0.795,
+          "mean_route_success": 0.946,
+          "service_probability_by_kappa": {
+            "0.90": 1.0,
+            "0.95": 0.989,
+            "0.98": 0.795,
+            "1.00": 0.795
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.931,
+          "service_level_lcb": 0.9166202165138866,
+          "mean_on_time_fraction": 0.98535,
+          "expected_late_customers": 0.293,
+          "mean_total_lateness": 1.8487753671099718,
+          "mean_simulated_driver_duration": 1493.8310868458786,
+          "fleet_day_success": 0.821,
+          "mean_route_success": 0.9295,
+          "service_probability_by_kappa": {
+            "0.90": 0.974,
+            "0.95": 0.931,
+            "0.98": 0.821,
+            "1.00": 0.821
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.893,
+          "service_level_lcb": 0.8758478441158097,
+          "mean_on_time_fraction": 0.9805,
+          "expected_late_customers": 0.39,
+          "mean_total_lateness": 2.9253472325348464,
+          "mean_simulated_driver_duration": 1495.1207831807974,
+          "fleet_day_success": 0.856,
+          "mean_route_success": 0.91,
+          "service_probability_by_kappa": {
+            "0.90": 0.927,
+            "0.95": 0.893,
+            "0.98": 0.856,
+            "1.00": 0.856
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.741,
+          "service_level_lcb": 0.7175842454335312,
+          "mean_on_time_fraction": 0.9492999999999999,
+          "expected_late_customers": 1.014,
+          "mean_total_lateness": 11.795300146820388,
+          "mean_simulated_driver_duration": 1504.2625835796105,
+          "fleet_day_success": 0.357,
+          "mean_route_success": 0.77575,
+          "service_probability_by_kappa": {
+            "0.90": 0.911,
+            "0.95": 0.741,
+            "0.98": 0.357,
+            "1.00": 0.357
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.723,
+          "service_level_lcb": 0.699144433882332,
+          "mean_on_time_fraction": 0.9335999999999999,
+          "expected_late_customers": 1.328,
+          "mean_total_lateness": 21.86752376815825,
+          "mean_simulated_driver_duration": 1509.4132232825752,
+          "fleet_day_success": 0.521,
+          "mean_route_success": 0.75975,
+          "service_probability_by_kappa": {
+            "0.90": 0.82,
+            "0.95": 0.723,
+            "0.98": 0.521,
+            "1.00": 0.521
+          },
+          "arcs_departing_at_or_after_1700": 1
+        },
+        "0.20,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.731,
+          "service_level_lcb": 0.7073339557638493,
+          "mean_on_time_fraction": 0.9233499999999999,
+          "expected_late_customers": 1.533,
+          "mean_total_lateness": 31.854059831455814,
+          "mean_simulated_driver_duration": 1512.6846691144747,
+          "fleet_day_success": 0.669,
+          "mean_route_success": 0.75875,
+          "service_probability_by_kappa": {
+            "0.90": 0.78,
+            "0.95": 0.731,
+            "0.98": 0.669,
+            "1.00": 0.669
+          },
+          "arcs_departing_at_or_after_1700": 1
+        },
+        "0.30,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.488,
+          "service_level_lcb": 0.4620675317340886,
+          "mean_on_time_fraction": 0.9026,
+          "expected_late_customers": 1.948,
+          "mean_total_lateness": 41.17838908796203,
+          "mean_simulated_driver_duration": 1523.7984182190905,
+          "fleet_day_success": 0.187,
+          "mean_route_success": 0.6565,
+          "service_probability_by_kappa": {
+            "0.90": 0.707,
+            "0.95": 0.488,
+            "0.98": 0.187,
+            "1.00": 0.187
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.30,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.598,
+          "service_level_lcb": 0.5722656529968939,
+          "mean_on_time_fraction": 0.88075,
+          "expected_late_customers": 2.385,
+          "mean_total_lateness": 74.53800141785864,
+          "mean_simulated_driver_duration": 1533.799124984781,
+          "fleet_day_success": 0.392,
+          "mean_route_success": 0.6745,
+          "service_probability_by_kappa": {
+            "0.90": 0.712,
+            "0.95": 0.598,
+            "0.98": 0.392,
+            "1.00": 0.392
+          },
+          "arcs_departing_at_or_after_1700": 9
+        },
+        "0.30,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.672,
+          "service_level_lcb": 0.6471442776054204,
+          "mean_on_time_fraction": 0.8735999999999999,
+          "expected_late_customers": 2.528,
+          "mean_total_lateness": 101.79367054437145,
+          "mean_simulated_driver_duration": 1540.5254954917998,
+          "fleet_day_success": 0.589,
+          "mean_route_success": 0.6945,
+          "service_probability_by_kappa": {
+            "0.90": 0.716,
+            "0.95": 0.672,
+            "0.98": 0.589,
+            "1.00": 0.589
+          },
+          "arcs_departing_at_or_after_1700": 30
+        }
+      }
+    },
+    "slack": {
+      "plan": {
+        "routes": [
+          [
+            0,
+            6,
+            12,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            16,
+            5,
+            7,
+            17,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            19,
+            3,
+            10,
+            9,
+            13,
+            4,
+            14,
+            2,
+            15,
+            0
+          ],
+          [
+            0,
+            11,
+            8,
+            1,
+            18,
+            20,
+            0
+          ]
+        ],
+        "departures": [
+          226.0,
+          0.0,
+          23.0,
+          0.0,
+          107.0,
+          27.0
+        ],
+        "service_starts": {
+          "6": 267.0,
+          "12": 328.0,
+          "16": 85.0,
+          "5": 170.0,
+          "7": 353.0,
+          "17": 411.0,
+          "19": 167.0,
+          "3": 188.0,
+          "10": 210.0,
+          "9": 264.0,
+          "13": 282.0,
+          "4": 344.0,
+          "14": 396.0,
+          "2": 435.0,
+          "15": 469.0,
+          "11": 101.0,
+          "8": 164.0,
+          "1": 216.0,
+          "18": 378.0,
+          "20": 432.0
+        },
+        "metrics": {
+          "fuel": 8730.0,
+          "tightness": 28.0,
+          "driver_duration": 1454.0,
+          "fleet": 4.0,
+          "distance": 582.0
+        },
+        "objective": "weighted",
+        "beta": 0,
+        "solver_objective": 376990
+      },
+      "validation": {
+        "scenarios": 5000,
+        "service_level_success": 0.4416,
+        "service_level_lcb": 0.4300834011062994,
+        "mean_on_time_fraction": 0.88702,
+        "expected_late_customers": 2.2596,
+        "mean_total_lateness": 40.41975763039406,
+        "mean_simulated_driver_duration": 1461.5449363012435,
+        "fleet_day_success": 0.2114,
+        "mean_route_success": 0.60575,
+        "service_probability_by_kappa": {
+          "0.90": 0.629,
+          "0.95": 0.4416,
+          "0.98": 0.2114,
+          "1.00": 0.2114
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "deterministic": {
+        "scenarios": 1,
+        "service_level_success": 1.0,
+        "service_level_lcb": 0.2698659552411307,
+        "mean_on_time_fraction": 0.95,
+        "expected_late_customers": 1.0,
+        "mean_total_lateness": 12.200000000000045,
+        "mean_simulated_driver_duration": 1451.5,
+        "fleet_day_success": 0.0,
+        "mean_route_success": 0.75,
+        "service_probability_by_kappa": {
+          "0.90": 1.0,
+          "0.95": 1.0,
+          "0.98": 0.0,
+          "1.00": 0.0
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "sensitivity": {
+        "0.10,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.453,
+          "service_level_lcb": 0.4272691986005479,
+          "mean_on_time_fraction": 0.9173,
+          "expected_late_customers": 1.654,
+          "mean_total_lateness": 16.669579050195395,
+          "mean_simulated_driver_duration": 1453.523169246214,
+          "fleet_day_success": 0.025,
+          "mean_route_success": 0.67025,
+          "service_probability_by_kappa": {
+            "0.90": 0.87,
+            "0.95": 0.453,
+            "0.98": 0.025,
+            "1.00": 0.025
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.523,
+          "service_level_lcb": 0.49699305134126787,
+          "mean_on_time_fraction": 0.9204499999999998,
+          "expected_late_customers": 1.591,
+          "mean_total_lateness": 18.557244496254512,
+          "mean_simulated_driver_duration": 1453.0395059387272,
+          "fleet_day_success": 0.163,
+          "mean_route_success": 0.6925,
+          "service_probability_by_kappa": {
+            "0.90": 0.772,
+            "0.95": 0.523,
+            "0.98": 0.163,
+            "1.00": 0.163
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.581,
+          "service_level_lcb": 0.5551512768342723,
+          "mean_on_time_fraction": 0.9203499999999999,
+          "expected_late_customers": 1.593,
+          "mean_total_lateness": 20.00312381198186,
+          "mean_simulated_driver_duration": 1452.8901848524542,
+          "fleet_day_success": 0.219,
+          "mean_route_success": 0.70025,
+          "service_probability_by_kappa": {
+            "0.90": 0.702,
+            "0.95": 0.581,
+            "0.98": 0.219,
+            "1.00": 0.219
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.282,
+          "service_level_lcb": 0.2592071246543356,
+          "mean_on_time_fraction": 0.8921999999999999,
+          "expected_late_customers": 2.156,
+          "mean_total_lateness": 32.01630826889363,
+          "mean_simulated_driver_duration": 1460.0716466368158,
+          "fleet_day_success": 0.046,
+          "mean_route_success": 0.58225,
+          "service_probability_by_kappa": {
+            "0.90": 0.647,
+            "0.95": 0.282,
+            "0.98": 0.046,
+            "1.00": 0.046
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.452,
+          "service_level_lcb": 0.42627684056826454,
+          "mean_on_time_fraction": 0.8889499999999999,
+          "expected_late_customers": 2.221,
+          "mean_total_lateness": 39.22706710464685,
+          "mean_simulated_driver_duration": 1459.7492014196082,
+          "fleet_day_success": 0.208,
+          "mean_route_success": 0.61525,
+          "service_probability_by_kappa": {
+            "0.90": 0.639,
+            "0.95": 0.452,
+            "0.98": 0.208,
+            "1.00": 0.208
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.515,
+          "service_level_lcb": 0.4889988768750844,
+          "mean_on_time_fraction": 0.8887999999999999,
+          "expected_late_customers": 2.224,
+          "mean_total_lateness": 45.55001624578875,
+          "mean_simulated_driver_duration": 1460.527747742834,
+          "fleet_day_success": 0.344,
+          "mean_route_success": 0.64975,
+          "service_probability_by_kappa": {
+            "0.90": 0.632,
+            "0.95": 0.515,
+            "0.98": 0.344,
+            "1.00": 0.344
+          },
+          "arcs_departing_at_or_after_1700": 1
+        },
+        "0.30,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.169,
+          "service_level_lcb": 0.15040629651063978,
+          "mean_on_time_fraction": 0.8537,
+          "expected_late_customers": 2.926,
+          "mean_total_lateness": 62.36322594218019,
+          "mean_simulated_driver_duration": 1472.1598323611188,
+          "fleet_day_success": 0.032,
+          "mean_route_success": 0.49375,
+          "service_probability_by_kappa": {
+            "0.90": 0.438,
+            "0.95": 0.169,
+            "0.98": 0.032,
+            "1.00": 0.032
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.30,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.399,
+          "service_level_lcb": 0.37383416022797167,
+          "mean_on_time_fraction": 0.849,
+          "expected_late_customers": 3.02,
+          "mean_total_lateness": 81.0166852323269,
+          "mean_simulated_driver_duration": 1474.1702465934188,
+          "fleet_day_success": 0.22,
+          "mean_route_success": 0.55275,
+          "service_probability_by_kappa": {
+            "0.90": 0.55,
+            "0.95": 0.399,
+            "0.98": 0.22,
+            "1.00": 0.22
+          },
+          "arcs_departing_at_or_after_1700": 2
+        },
+        "0.30,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.499,
+          "service_level_lcb": 0.473030441950497,
+          "mean_on_time_fraction": 0.8483499999999999,
+          "expected_late_customers": 3.033,
+          "mean_total_lateness": 97.68755581105289,
+          "mean_simulated_driver_duration": 1477.4561492819914,
+          "fleet_day_success": 0.384,
+          "mean_route_success": 0.60975,
+          "service_probability_by_kappa": {
+            "0.90": 0.602,
+            "0.95": 0.499,
+            "0.98": 0.384,
+            "1.00": 0.384
+          },
+          "arcs_departing_at_or_after_1700": 12
+        }
+      }
+    },
+    "fleet_matched": {
+      "plan": {
+        "routes": [
+          [
+            0,
+            16,
+            6,
+            12,
+            0
+          ],
+          [
+            0,
+            5,
+            7,
+            17,
+            0
+          ],
+          [
+            0,
+            19,
+            3,
+            10,
+            9,
+            13,
+            4,
+            14,
+            2,
+            15,
+            0
+          ],
+          [
+            0,
+            11,
+            8,
+            1,
+            18,
+            20,
+            0
+          ]
+        ],
+        "departures": [
+          38.0,
+          170.0,
+          122.0,
+          28.0
+        ],
+        "service_starts": {
+          "16": 100.0,
+          "6": 260.0,
+          "12": 321.0,
+          "5": 241.0,
+          "7": 353.0,
+          "17": 411.0,
+          "19": 182.0,
+          "3": 203.0,
+          "10": 225.0,
+          "9": 279.0,
+          "13": 297.0,
+          "4": 344.0,
+          "14": 396.0,
+          "2": 435.0,
+          "15": 469.0,
+          "11": 102.0,
+          "8": 165.0,
+          "1": 217.0,
+          "18": 378.0,
+          "20": 432.0
+        },
+        "metrics": {
+          "fuel": 8715.0,
+          "tightness": 74.0,
+          "driver_duration": 1472.0,
+          "fleet": 4.0,
+          "distance": 581.0
+        },
+        "objective": "fleet-matched distance",
+        "beta": 0,
+        "solver_objective": 581
+      },
+      "validation": {
+        "scenarios": 5000,
+        "service_level_success": 0.2316,
+        "service_level_lcb": 0.22193365819754207,
+        "mean_on_time_fraction": 0.82229,
+        "expected_late_customers": 3.5542,
+        "mean_total_lateness": 64.05239725643138,
+        "mean_simulated_driver_duration": 1479.2563787451606,
+        "fleet_day_success": 0.1128,
+        "mean_route_success": 0.34765,
+        "service_probability_by_kappa": {
+          "0.90": 0.3666,
+          "0.95": 0.2316,
+          "0.98": 0.1128,
+          "1.00": 0.1128
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "deterministic": {
+        "scenarios": 1,
+        "service_level_success": 0.0,
+        "service_level_lcb": 0.0,
+        "mean_on_time_fraction": 0.8,
+        "expected_late_customers": 4.0,
+        "mean_total_lateness": 27.333333333333258,
+        "mean_simulated_driver_duration": 1470.0,
+        "fleet_day_success": 0.0,
+        "mean_route_success": 0.0,
+        "service_probability_by_kappa": {
+          "0.90": 0.0,
+          "0.95": 0.0,
+          "0.98": 0.0,
+          "1.00": 0.0
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "sensitivity": {
+        "0.10,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.013,
+          "service_level_lcb": 0.008285124892881277,
+          "mean_on_time_fraction": 0.8226,
+          "expected_late_customers": 3.548,
+          "mean_total_lateness": 34.59747166116772,
+          "mean_simulated_driver_duration": 1471.6714678764588,
+          "fleet_day_success": 0.0,
+          "mean_route_success": 0.2065,
+          "service_probability_by_kappa": {
+            "0.90": 0.127,
+            "0.95": 0.013,
+            "0.98": 0.0,
+            "1.00": 0.0
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.163,
+          "service_level_lcb": 0.14470121453471288,
+          "mean_on_time_fraction": 0.83035,
+          "expected_late_customers": 3.393,
+          "mean_total_lateness": 36.02986519518779,
+          "mean_simulated_driver_duration": 1471.2663651497935,
+          "fleet_day_success": 0.064,
+          "mean_route_success": 0.25925,
+          "service_probability_by_kappa": {
+            "0.90": 0.261,
+            "0.95": 0.163,
+            "0.98": 0.064,
+            "1.00": 0.064
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.224,
+          "service_level_lcb": 0.2030750584864746,
+          "mean_on_time_fraction": 0.8332999999999999,
+          "expected_late_customers": 3.334,
+          "mean_total_lateness": 37.26780293595085,
+          "mean_simulated_driver_duration": 1471.2479127818751,
+          "fleet_day_success": 0.171,
+          "mean_route_success": 0.2865,
+          "service_probability_by_kappa": {
+            "0.90": 0.301,
+            "0.95": 0.224,
+            "0.98": 0.171,
+            "1.00": 0.171
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.05,
+          "service_level_lcb": 0.0398282156446678,
+          "mean_on_time_fraction": 0.8229500000000001,
+          "expected_late_customers": 3.541,
+          "mean_total_lateness": 55.05990303250107,
+          "mean_simulated_driver_duration": 1477.2073859417508,
+          "fleet_day_success": 0.004,
+          "mean_route_success": 0.289,
+          "service_probability_by_kappa": {
+            "0.90": 0.219,
+            "0.95": 0.05,
+            "0.98": 0.004,
+            "1.00": 0.004
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.237,
+          "service_level_lcb": 0.21560919466459774,
+          "mean_on_time_fraction": 0.8224,
+          "expected_late_customers": 3.552,
+          "mean_total_lateness": 62.299089632542945,
+          "mean_simulated_driver_duration": 1477.5874949429463,
+          "fleet_day_success": 0.122,
+          "mean_route_success": 0.34075,
+          "service_probability_by_kappa": {
+            "0.90": 0.35,
+            "0.95": 0.237,
+            "0.98": 0.122,
+            "1.00": 0.122
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.341,
+          "service_level_lcb": 0.3168011794746175,
+          "mean_on_time_fraction": 0.8236999999999999,
+          "expected_late_customers": 3.526,
+          "mean_total_lateness": 68.39916035125148,
+          "mean_simulated_driver_duration": 1478.899014568397,
+          "fleet_day_success": 0.279,
+          "mean_route_success": 0.38675,
+          "service_probability_by_kappa": {
+            "0.90": 0.4,
+            "0.95": 0.341,
+            "0.98": 0.279,
+            "1.00": 0.279
+          },
+          "arcs_departing_at_or_after_1700": 1
+        },
+        "0.30,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.044,
+          "service_level_lcb": 0.034505997666575285,
+          "mean_on_time_fraction": 0.79605,
+          "expected_late_customers": 4.079,
+          "mean_total_lateness": 90.44074084214883,
+          "mean_simulated_driver_duration": 1488.189971130023,
+          "fleet_day_success": 0.006,
+          "mean_route_success": 0.289,
+          "service_probability_by_kappa": {
+            "0.90": 0.176,
+            "0.95": 0.044,
+            "0.98": 0.006,
+            "1.00": 0.006
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.30,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.257,
+          "service_level_lcb": 0.2349474777539257,
+          "mean_on_time_fraction": 0.7955999999999999,
+          "expected_late_customers": 4.088,
+          "mean_total_lateness": 108.61867741505024,
+          "mean_simulated_driver_duration": 1491.4503425721673,
+          "fleet_day_success": 0.136,
+          "mean_route_success": 0.36275,
+          "service_probability_by_kappa": {
+            "0.90": 0.372,
+            "0.95": 0.257,
+            "0.98": 0.136,
+            "1.00": 0.136
+          },
+          "arcs_departing_at_or_after_1700": 2
+        },
+        "0.30,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.379,
+          "service_level_lcb": 0.3541240588885971,
+          "mean_on_time_fraction": 0.7981999999999999,
+          "expected_late_customers": 4.036,
+          "mean_total_lateness": 124.16539567306106,
+          "mean_simulated_driver_duration": 1495.428929027109,
+          "fleet_day_success": 0.313,
+          "mean_route_success": 0.42575,
+          "service_probability_by_kappa": {
+            "0.90": 0.438,
+            "0.95": 0.379,
+            "0.98": 0.313,
+            "1.00": 0.313
+          },
+          "arcs_departing_at_or_after_1700": 12
+        }
+      }
+    },
+    "procedure": {
+      "plan": {
+        "routes": [
+          [
+            0,
+            6,
+            12,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            16,
+            5,
+            7,
+            17,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            19,
+            3,
+            10,
+            9,
+            13,
+            4,
+            14,
+            2,
+            15,
+            0
+          ],
+          [
+            0,
+            11,
+            8,
+            1,
+            18,
+            20,
+            0
+          ]
+        ],
+        "departures": [
+          226.0,
+          0.0,
+          23.0,
+          0.0,
+          107.0,
+          27.0
+        ],
+        "service_starts": {
+          "6": 267.0,
+          "12": 328.0,
+          "16": 85.0,
+          "5": 170.0,
+          "7": 353.0,
+          "17": 411.0,
+          "19": 167.0,
+          "3": 188.0,
+          "10": 210.0,
+          "9": 264.0,
+          "13": 282.0,
+          "4": 344.0,
+          "14": 396.0,
+          "2": 435.0,
+          "15": 469.0,
+          "11": 101.0,
+          "8": 164.0,
+          "1": 216.0,
+          "18": 378.0,
+          "20": 432.0
+        },
+        "metrics": {
+          "fuel": 8730.0,
+          "tightness": 28.0,
+          "driver_duration": 1454.0,
+          "fleet": 4.0,
+          "distance": 582.0
+        },
+        "objective": "weighted",
+        "beta": 0,
+        "solver_objective": 376990
+      },
+      "validation": {
+        "scenarios": 5000,
+        "service_level_success": 0.4416,
+        "service_level_lcb": 0.4300834011062994,
+        "mean_on_time_fraction": 0.88702,
+        "expected_late_customers": 2.2596,
+        "mean_total_lateness": 40.41975763039406,
+        "mean_simulated_driver_duration": 1461.5449363012435,
+        "fleet_day_success": 0.2114,
+        "mean_route_success": 0.60575,
+        "service_probability_by_kappa": {
+          "0.90": 0.629,
+          "0.95": 0.4416,
+          "0.98": 0.2114,
+          "1.00": 0.2114
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "deterministic": {
+        "scenarios": 1,
+        "service_level_success": 1.0,
+        "service_level_lcb": 0.2698659552411307,
+        "mean_on_time_fraction": 0.95,
+        "expected_late_customers": 1.0,
+        "mean_total_lateness": 12.200000000000045,
+        "mean_simulated_driver_duration": 1451.5,
+        "fleet_day_success": 0.0,
+        "mean_route_success": 0.75,
+        "service_probability_by_kappa": {
+          "0.90": 1.0,
+          "0.95": 1.0,
+          "0.98": 0.0,
+          "1.00": 0.0
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "sensitivity": {
+        "0.10,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.453,
+          "service_level_lcb": 0.4272691986005479,
+          "mean_on_time_fraction": 0.9173,
+          "expected_late_customers": 1.654,
+          "mean_total_lateness": 16.669579050195395,
+          "mean_simulated_driver_duration": 1453.523169246214,
+          "fleet_day_success": 0.025,
+          "mean_route_success": 0.67025,
+          "service_probability_by_kappa": {
+            "0.90": 0.87,
+            "0.95": 0.453,
+            "0.98": 0.025,
+            "1.00": 0.025
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.523,
+          "service_level_lcb": 0.49699305134126787,
+          "mean_on_time_fraction": 0.9204499999999998,
+          "expected_late_customers": 1.591,
+          "mean_total_lateness": 18.557244496254512,
+          "mean_simulated_driver_duration": 1453.0395059387272,
+          "fleet_day_success": 0.163,
+          "mean_route_success": 0.6925,
+          "service_probability_by_kappa": {
+            "0.90": 0.772,
+            "0.95": 0.523,
+            "0.98": 0.163,
+            "1.00": 0.163
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.581,
+          "service_level_lcb": 0.5551512768342723,
+          "mean_on_time_fraction": 0.9203499999999999,
+          "expected_late_customers": 1.593,
+          "mean_total_lateness": 20.00312381198186,
+          "mean_simulated_driver_duration": 1452.8901848524542,
+          "fleet_day_success": 0.219,
+          "mean_route_success": 0.70025,
+          "service_probability_by_kappa": {
+            "0.90": 0.702,
+            "0.95": 0.581,
+            "0.98": 0.219,
+            "1.00": 0.219
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.282,
+          "service_level_lcb": 0.2592071246543356,
+          "mean_on_time_fraction": 0.8921999999999999,
+          "expected_late_customers": 2.156,
+          "mean_total_lateness": 32.01630826889363,
+          "mean_simulated_driver_duration": 1460.0716466368158,
+          "fleet_day_success": 0.046,
+          "mean_route_success": 0.58225,
+          "service_probability_by_kappa": {
+            "0.90": 0.647,
+            "0.95": 0.282,
+            "0.98": 0.046,
+            "1.00": 0.046
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.452,
+          "service_level_lcb": 0.42627684056826454,
+          "mean_on_time_fraction": 0.8889499999999999,
+          "expected_late_customers": 2.221,
+          "mean_total_lateness": 39.22706710464685,
+          "mean_simulated_driver_duration": 1459.7492014196082,
+          "fleet_day_success": 0.208,
+          "mean_route_success": 0.61525,
+          "service_probability_by_kappa": {
+            "0.90": 0.639,
+            "0.95": 0.452,
+            "0.98": 0.208,
+            "1.00": 0.208
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.515,
+          "service_level_lcb": 0.4889988768750844,
+          "mean_on_time_fraction": 0.8887999999999999,
+          "expected_late_customers": 2.224,
+          "mean_total_lateness": 45.55001624578875,
+          "mean_simulated_driver_duration": 1460.527747742834,
+          "fleet_day_success": 0.344,
+          "mean_route_success": 0.64975,
+          "service_probability_by_kappa": {
+            "0.90": 0.632,
+            "0.95": 0.515,
+            "0.98": 0.344,
+            "1.00": 0.344
+          },
+          "arcs_departing_at_or_after_1700": 1
+        },
+        "0.30,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.169,
+          "service_level_lcb": 0.15040629651063978,
+          "mean_on_time_fraction": 0.8537,
+          "expected_late_customers": 2.926,
+          "mean_total_lateness": 62.36322594218019,
+          "mean_simulated_driver_duration": 1472.1598323611188,
+          "fleet_day_success": 0.032,
+          "mean_route_success": 0.49375,
+          "service_probability_by_kappa": {
+            "0.90": 0.438,
+            "0.95": 0.169,
+            "0.98": 0.032,
+            "1.00": 0.032
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.30,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.399,
+          "service_level_lcb": 0.37383416022797167,
+          "mean_on_time_fraction": 0.849,
+          "expected_late_customers": 3.02,
+          "mean_total_lateness": 81.0166852323269,
+          "mean_simulated_driver_duration": 1474.1702465934188,
+          "fleet_day_success": 0.22,
+          "mean_route_success": 0.55275,
+          "service_probability_by_kappa": {
+            "0.90": 0.55,
+            "0.95": 0.399,
+            "0.98": 0.22,
+            "1.00": 0.22
+          },
+          "arcs_departing_at_or_after_1700": 2
+        },
+        "0.30,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.499,
+          "service_level_lcb": 0.473030441950497,
+          "mean_on_time_fraction": 0.8483499999999999,
+          "expected_late_customers": 3.033,
+          "mean_total_lateness": 97.68755581105289,
+          "mean_simulated_driver_duration": 1477.4561492819914,
+          "fleet_day_success": 0.384,
+          "mean_route_success": 0.60975,
+          "service_probability_by_kappa": {
+            "0.90": 0.602,
+            "0.95": 0.499,
+            "0.98": 0.384,
+            "1.00": 0.384
+          },
+          "arcs_departing_at_or_after_1700": 12
+        }
+      }
+    },
+    "screened_conservative": {
+      "plan": {
+        "routes": [
+          [
+            0,
+            16,
+            6,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            19,
+            3,
+            10,
+            9,
+            13,
+            4,
+            14,
+            2,
+            15,
+            0
+          ],
+          [
+            0,
+            5,
+            7,
+            17,
+            0
+          ],
+          [
+            0,
+            11,
+            1,
+            8,
+            12,
+            20,
+            18,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "departures": [
+          26.0,
+          600.0,
+          95.0,
+          156.0,
+          6.0,
+          600.0
+        ],
+        "service_starts": {
+          "16": 100.0,
+          "6": 260.0,
+          "19": 167.0,
+          "3": 190.0,
+          "10": 215.0,
+          "9": 278.0,
+          "13": 297.0,
+          "4": 344.0,
+          "14": 396.0,
+          "2": 441.0,
+          "15": 480.0,
+          "5": 241.0,
+          "7": 353.0,
+          "17": 421.0,
+          "11": 95.0,
+          "1": 217.0,
+          "8": 278.0,
+          "12": 326.0,
+          "20": 374.0,
+          "18": 437.0
+        },
+        "metrics": {
+          "fuel": 9570.0,
+          "tightness": 68.0,
+          "driver_duration": 1594.0,
+          "fleet": 4.0,
+          "distance": 638.0
+        },
+        "objective": "peak-aware distance",
+        "beta": 0,
+        "solver_objective": 638
+      },
+      "validation": {
+        "scenarios": 5000,
+        "service_level_success": 0.705,
+        "service_level_lcb": 0.6942830728423586,
+        "mean_on_time_fraction": 0.93227,
+        "expected_late_customers": 1.3546,
+        "mean_total_lateness": 21.89899445438979,
+        "mean_simulated_driver_duration": 1510.5777524315815,
+        "fleet_day_success": 0.5216,
+        "mean_route_success": 0.7523,
+        "service_probability_by_kappa": {
+          "0.90": 0.8096,
+          "0.95": 0.705,
+          "0.98": 0.5216,
+          "1.00": 0.5216
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "deterministic": {
+        "scenarios": 1,
+        "service_level_success": 1.0,
+        "service_level_lcb": 0.2698659552411307,
+        "mean_on_time_fraction": 1.0,
+        "expected_late_customers": 0.0,
+        "mean_total_lateness": 0.0,
+        "mean_simulated_driver_duration": 1487.0,
+        "fleet_day_success": 1.0,
+        "mean_route_success": 1.0,
+        "service_probability_by_kappa": {
+          "0.90": 1.0,
+          "0.95": 1.0,
+          "0.98": 1.0,
+          "1.00": 1.0
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "sensitivity": {
+        "0.10,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.989,
+          "service_level_lcb": 0.9821042600092013,
+          "mean_on_time_fraction": 0.9892,
+          "expected_late_customers": 0.216,
+          "mean_total_lateness": 0.8968967536328001,
+          "mean_simulated_driver_duration": 1491.5772092296431,
+          "fleet_day_success": 0.795,
+          "mean_route_success": 0.946,
+          "service_probability_by_kappa": {
+            "0.90": 1.0,
+            "0.95": 0.989,
+            "0.98": 0.795,
+            "1.00": 0.795
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.931,
+          "service_level_lcb": 0.9166202165138866,
+          "mean_on_time_fraction": 0.98535,
+          "expected_late_customers": 0.293,
+          "mean_total_lateness": 1.8487753671099718,
+          "mean_simulated_driver_duration": 1493.8310868458786,
+          "fleet_day_success": 0.821,
+          "mean_route_success": 0.9295,
+          "service_probability_by_kappa": {
+            "0.90": 0.974,
+            "0.95": 0.931,
+            "0.98": 0.821,
+            "1.00": 0.821
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.893,
+          "service_level_lcb": 0.8758478441158097,
+          "mean_on_time_fraction": 0.9805,
+          "expected_late_customers": 0.39,
+          "mean_total_lateness": 2.9253472325348464,
+          "mean_simulated_driver_duration": 1495.1207831807974,
+          "fleet_day_success": 0.856,
+          "mean_route_success": 0.91,
+          "service_probability_by_kappa": {
+            "0.90": 0.927,
+            "0.95": 0.893,
+            "0.98": 0.856,
+            "1.00": 0.856
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.741,
+          "service_level_lcb": 0.7175842454335312,
+          "mean_on_time_fraction": 0.9492999999999999,
+          "expected_late_customers": 1.014,
+          "mean_total_lateness": 11.795300146820388,
+          "mean_simulated_driver_duration": 1504.2625835796105,
+          "fleet_day_success": 0.357,
+          "mean_route_success": 0.77575,
+          "service_probability_by_kappa": {
+            "0.90": 0.911,
+            "0.95": 0.741,
+            "0.98": 0.357,
+            "1.00": 0.357
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.723,
+          "service_level_lcb": 0.699144433882332,
+          "mean_on_time_fraction": 0.9335999999999999,
+          "expected_late_customers": 1.328,
+          "mean_total_lateness": 21.86752376815825,
+          "mean_simulated_driver_duration": 1509.4132232825752,
+          "fleet_day_success": 0.521,
+          "mean_route_success": 0.75975,
+          "service_probability_by_kappa": {
+            "0.90": 0.82,
+            "0.95": 0.723,
+            "0.98": 0.521,
+            "1.00": 0.521
+          },
+          "arcs_departing_at_or_after_1700": 1
+        },
+        "0.20,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.731,
+          "service_level_lcb": 0.7073339557638493,
+          "mean_on_time_fraction": 0.9233499999999999,
+          "expected_late_customers": 1.533,
+          "mean_total_lateness": 31.854059831455814,
+          "mean_simulated_driver_duration": 1512.6846691144747,
+          "fleet_day_success": 0.669,
+          "mean_route_success": 0.75875,
+          "service_probability_by_kappa": {
+            "0.90": 0.78,
+            "0.95": 0.731,
+            "0.98": 0.669,
+            "1.00": 0.669
+          },
+          "arcs_departing_at_or_after_1700": 1
+        },
+        "0.30,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.488,
+          "service_level_lcb": 0.4620675317340886,
+          "mean_on_time_fraction": 0.9026,
+          "expected_late_customers": 1.948,
+          "mean_total_lateness": 41.17838908796203,
+          "mean_simulated_driver_duration": 1523.7984182190905,
+          "fleet_day_success": 0.187,
+          "mean_route_success": 0.6565,
+          "service_probability_by_kappa": {
+            "0.90": 0.707,
+            "0.95": 0.488,
+            "0.98": 0.187,
+            "1.00": 0.187
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.30,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.598,
+          "service_level_lcb": 0.5722656529968939,
+          "mean_on_time_fraction": 0.88075,
+          "expected_late_customers": 2.385,
+          "mean_total_lateness": 74.53800141785864,
+          "mean_simulated_driver_duration": 1533.799124984781,
+          "fleet_day_success": 0.392,
+          "mean_route_success": 0.6745,
+          "service_probability_by_kappa": {
+            "0.90": 0.712,
+            "0.95": 0.598,
+            "0.98": 0.392,
+            "1.00": 0.392
+          },
+          "arcs_departing_at_or_after_1700": 9
+        },
+        "0.30,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.672,
+          "service_level_lcb": 0.6471442776054204,
+          "mean_on_time_fraction": 0.8735999999999999,
+          "expected_late_customers": 2.528,
+          "mean_total_lateness": 101.79367054437145,
+          "mean_simulated_driver_duration": 1540.5254954917998,
+          "fleet_day_success": 0.589,
+          "mean_route_success": 0.6945,
+          "service_probability_by_kappa": {
+            "0.90": 0.716,
+            "0.95": 0.672,
+            "0.98": 0.589,
+            "1.00": 0.589
+          },
+          "arcs_departing_at_or_after_1700": 30
+        }
+      }
+    },
+    "capped_procedure": {
+      "plan": {
+        "routes": [
+          [
+            0,
+            6,
+            12,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            16,
+            5,
+            7,
+            17,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            19,
+            3,
+            10,
+            9,
+            13,
+            4,
+            14,
+            2,
+            15,
+            0
+          ],
+          [
+            0,
+            11,
+            8,
+            1,
+            18,
+            20,
+            0
+          ]
+        ],
+        "departures": [
+          226.0,
+          0.0,
+          23.0,
+          0.0,
+          107.0,
+          27.0
+        ],
+        "service_starts": {
+          "6": 267.0,
+          "12": 328.0,
+          "16": 85.0,
+          "5": 170.0,
+          "7": 353.0,
+          "17": 411.0,
+          "19": 167.0,
+          "3": 188.0,
+          "10": 210.0,
+          "9": 264.0,
+          "13": 282.0,
+          "4": 344.0,
+          "14": 396.0,
+          "2": 435.0,
+          "15": 469.0,
+          "11": 101.0,
+          "8": 164.0,
+          "1": 216.0,
+          "18": 378.0,
+          "20": 432.0
+        },
+        "metrics": {
+          "fuel": 8730.0,
+          "tightness": 28.0,
+          "driver_duration": 1454.0,
+          "fleet": 4.0,
+          "distance": 582.0
+        },
+        "objective": "weighted",
+        "beta": 0,
+        "solver_objective": 376990
+      },
+      "validation": {
+        "scenarios": 5000,
+        "service_level_success": 0.4416,
+        "service_level_lcb": 0.4300834011062994,
+        "mean_on_time_fraction": 0.88702,
+        "expected_late_customers": 2.2596,
+        "mean_total_lateness": 40.41975763039406,
+        "mean_simulated_driver_duration": 1461.5449363012435,
+        "fleet_day_success": 0.2114,
+        "mean_route_success": 0.60575,
+        "service_probability_by_kappa": {
+          "0.90": 0.629,
+          "0.95": 0.4416,
+          "0.98": 0.2114,
+          "1.00": 0.2114
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "deterministic": {
+        "scenarios": 1,
+        "service_level_success": 1.0,
+        "service_level_lcb": 0.2698659552411307,
+        "mean_on_time_fraction": 0.95,
+        "expected_late_customers": 1.0,
+        "mean_total_lateness": 12.200000000000045,
+        "mean_simulated_driver_duration": 1451.5,
+        "fleet_day_success": 0.0,
+        "mean_route_success": 0.75,
+        "service_probability_by_kappa": {
+          "0.90": 1.0,
+          "0.95": 1.0,
+          "0.98": 0.0,
+          "1.00": 0.0
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "sensitivity": {
+        "0.10,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.453,
+          "service_level_lcb": 0.4272691986005479,
+          "mean_on_time_fraction": 0.9173,
+          "expected_late_customers": 1.654,
+          "mean_total_lateness": 16.669579050195395,
+          "mean_simulated_driver_duration": 1453.523169246214,
+          "fleet_day_success": 0.025,
+          "mean_route_success": 0.67025,
+          "service_probability_by_kappa": {
+            "0.90": 0.87,
+            "0.95": 0.453,
+            "0.98": 0.025,
+            "1.00": 0.025
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.523,
+          "service_level_lcb": 0.49699305134126787,
+          "mean_on_time_fraction": 0.9204499999999998,
+          "expected_late_customers": 1.591,
+          "mean_total_lateness": 18.557244496254512,
+          "mean_simulated_driver_duration": 1453.0395059387272,
+          "fleet_day_success": 0.163,
+          "mean_route_success": 0.6925,
+          "service_probability_by_kappa": {
+            "0.90": 0.772,
+            "0.95": 0.523,
+            "0.98": 0.163,
+            "1.00": 0.163
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.581,
+          "service_level_lcb": 0.5551512768342723,
+          "mean_on_time_fraction": 0.9203499999999999,
+          "expected_late_customers": 1.593,
+          "mean_total_lateness": 20.00312381198186,
+          "mean_simulated_driver_duration": 1452.8901848524542,
+          "fleet_day_success": 0.219,
+          "mean_route_success": 0.70025,
+          "service_probability_by_kappa": {
+            "0.90": 0.702,
+            "0.95": 0.581,
+            "0.98": 0.219,
+            "1.00": 0.219
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.282,
+          "service_level_lcb": 0.2592071246543356,
+          "mean_on_time_fraction": 0.8921999999999999,
+          "expected_late_customers": 2.156,
+          "mean_total_lateness": 32.01630826889363,
+          "mean_simulated_driver_duration": 1460.0716466368158,
+          "fleet_day_success": 0.046,
+          "mean_route_success": 0.58225,
+          "service_probability_by_kappa": {
+            "0.90": 0.647,
+            "0.95": 0.282,
+            "0.98": 0.046,
+            "1.00": 0.046
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.452,
+          "service_level_lcb": 0.42627684056826454,
+          "mean_on_time_fraction": 0.8889499999999999,
+          "expected_late_customers": 2.221,
+          "mean_total_lateness": 39.22706710464685,
+          "mean_simulated_driver_duration": 1459.7492014196082,
+          "fleet_day_success": 0.208,
+          "mean_route_success": 0.61525,
+          "service_probability_by_kappa": {
+            "0.90": 0.639,
+            "0.95": 0.452,
+            "0.98": 0.208,
+            "1.00": 0.208
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.515,
+          "service_level_lcb": 0.4889988768750844,
+          "mean_on_time_fraction": 0.8887999999999999,
+          "expected_late_customers": 2.224,
+          "mean_total_lateness": 45.55001624578875,
+          "mean_simulated_driver_duration": 1460.527747742834,
+          "fleet_day_success": 0.344,
+          "mean_route_success": 0.64975,
+          "service_probability_by_kappa": {
+            "0.90": 0.632,
+            "0.95": 0.515,
+            "0.98": 0.344,
+            "1.00": 0.344
+          },
+          "arcs_departing_at_or_after_1700": 1
+        },
+        "0.30,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.169,
+          "service_level_lcb": 0.15040629651063978,
+          "mean_on_time_fraction": 0.8537,
+          "expected_late_customers": 2.926,
+          "mean_total_lateness": 62.36322594218019,
+          "mean_simulated_driver_duration": 1472.1598323611188,
+          "fleet_day_success": 0.032,
+          "mean_route_success": 0.49375,
+          "service_probability_by_kappa": {
+            "0.90": 0.438,
+            "0.95": 0.169,
+            "0.98": 0.032,
+            "1.00": 0.032
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.30,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.399,
+          "service_level_lcb": 0.37383416022797167,
+          "mean_on_time_fraction": 0.849,
+          "expected_late_customers": 3.02,
+          "mean_total_lateness": 81.0166852323269,
+          "mean_simulated_driver_duration": 1474.1702465934188,
+          "fleet_day_success": 0.22,
+          "mean_route_success": 0.55275,
+          "service_probability_by_kappa": {
+            "0.90": 0.55,
+            "0.95": 0.399,
+            "0.98": 0.22,
+            "1.00": 0.22
+          },
+          "arcs_departing_at_or_after_1700": 2
+        },
+        "0.30,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.499,
+          "service_level_lcb": 0.473030441950497,
+          "mean_on_time_fraction": 0.8483499999999999,
+          "expected_late_customers": 3.033,
+          "mean_total_lateness": 97.68755581105289,
+          "mean_simulated_driver_duration": 1477.4561492819914,
+          "fleet_day_success": 0.384,
+          "mean_route_success": 0.60975,
+          "service_probability_by_kappa": {
+            "0.90": 0.602,
+            "0.95": 0.499,
+            "0.98": 0.384,
+            "1.00": 0.384
+          },
+          "arcs_departing_at_or_after_1700": 12
+        }
+      }
+    },
+    "clock_aware": {
+      "plan": {
+        "routes": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            11,
+            8,
+            1,
+            18,
+            20,
+            0
+          ],
+          [
+            0,
+            19,
+            3,
+            10,
+            9,
+            13,
+            4,
+            14,
+            2,
+            15,
+            0
+          ],
+          [
+            0,
+            16,
+            6,
+            12,
+            0
+          ],
+          [
+            0,
+            5,
+            7,
+            17,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "departures": [
+          0.0,
+          17.0,
+          112.0,
+          34.0,
+          168.0,
+          0.0
+        ],
+        "service_starts": {
+          "11": 90.86666666666667,
+          "8": 164,
+          "1": 217.0,
+          "18": 378,
+          "20": 431.5,
+          "19": 183.33333333333337,
+          "3": 203.83333333333337,
+          "10": 225.83333333333337,
+          "9": 279.33333333333337,
+          "13": 296.83333333333337,
+          "4": 344,
+          "14": 396,
+          "2": 434.5,
+          "15": 468.5,
+          "16": 99.13333333333333,
+          "6": 260,
+          "12": 321.0,
+          "5": 240.5,
+          "7": 353,
+          "17": 411.0
+        },
+        "metrics": {
+          "fuel": 8715.0,
+          "tightness": 71.9666666666667,
+          "driver_duration": 1497.0,
+          "fleet": 4.0,
+          "distance": 581.0
+        },
+        "objective": "clock-profile-aware distance approximation",
+        "beta": 0,
+        "solver_objective": null
+      },
+      "validation": {
+        "scenarios": 5000,
+        "service_level_success": 0.3372,
+        "service_level_lcb": 0.3262935890426968,
+        "mean_on_time_fraction": 0.8549099999999998,
+        "expected_late_customers": 2.9018,
+        "mean_total_lateness": 44.59564550316531,
+        "mean_simulated_driver_duration": 1505.6612943088842,
+        "fleet_day_success": 0.1818,
+        "mean_route_success": 0.451,
+        "service_probability_by_kappa": {
+          "0.90": 0.4834,
+          "0.95": 0.3372,
+          "0.98": 0.1818,
+          "1.00": 0.1818
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "deterministic": {
+        "scenarios": 1,
+        "service_level_success": 1.0,
+        "service_level_lcb": 0.2698659552411307,
+        "mean_on_time_fraction": 1.0,
+        "expected_late_customers": 0.0,
+        "mean_total_lateness": 0.0,
+        "mean_simulated_driver_duration": 1497.0,
+        "fleet_day_success": 1.0,
+        "mean_route_success": 1.0,
+        "service_probability_by_kappa": {
+          "0.90": 1.0,
+          "0.95": 1.0,
+          "0.98": 1.0,
+          "1.00": 1.0
+        },
+        "arcs_departing_at_or_after_1700": 0
+      },
+      "sensitivity": {
+        "0.10,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.179,
+          "service_level_lcb": 0.15993421926042828,
+          "mean_on_time_fraction": 0.8743500000000001,
+          "expected_late_customers": 2.513,
+          "mean_total_lateness": 15.043199077125344,
+          "mean_simulated_driver_duration": 1498.6714678764588,
+          "fleet_day_success": 0.032,
+          "mean_route_success": 0.435,
+          "service_probability_by_kappa": {
+            "0.90": 0.499,
+            "0.95": 0.179,
+            "0.98": 0.032,
+            "1.00": 0.032
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.363,
+          "service_level_lcb": 0.3383885842710711,
+          "mean_on_time_fraction": 0.87905,
+          "expected_late_customers": 2.419,
+          "mean_total_lateness": 17.221807823621507,
+          "mean_simulated_driver_duration": 1498.248952654245,
+          "fleet_day_success": 0.208,
+          "mean_route_success": 0.47725,
+          "service_probability_by_kappa": {
+            "0.90": 0.509,
+            "0.95": 0.363,
+            "0.98": 0.208,
+            "1.00": 0.208
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.10,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.481,
+          "service_level_lcb": 0.4550976666695345,
+          "mean_on_time_fraction": 0.8836499999999999,
+          "expected_late_customers": 2.327,
+          "mean_total_lateness": 18.68638860977423,
+          "mean_simulated_driver_duration": 1498.178848126107,
+          "fleet_day_success": 0.395,
+          "mean_route_success": 0.5175,
+          "service_probability_by_kappa": {
+            "0.90": 0.533,
+            "0.95": 0.481,
+            "0.98": 0.395,
+            "1.00": 0.395
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.138,
+          "service_level_lcb": 0.12103445981290073,
+          "mean_on_time_fraction": 0.8584,
+          "expected_late_customers": 2.832,
+          "mean_total_lateness": 36.24202493299071,
+          "mean_simulated_driver_duration": 1504.0498201943042,
+          "fleet_day_success": 0.025,
+          "mean_route_success": 0.40525,
+          "service_probability_by_kappa": {
+            "0.90": 0.413,
+            "0.95": 0.138,
+            "0.98": 0.025,
+            "1.00": 0.025
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.335,
+          "service_level_lcb": 0.3109238045700975,
+          "mean_on_time_fraction": 0.8569,
+          "expected_late_customers": 2.862,
+          "mean_total_lateness": 43.10412581073379,
+          "mean_simulated_driver_duration": 1503.9893943670459,
+          "fleet_day_success": 0.19,
+          "mean_route_success": 0.4545,
+          "service_probability_by_kappa": {
+            "0.90": 0.475,
+            "0.95": 0.335,
+            "0.98": 0.19,
+            "1.00": 0.19
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.20,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.463,
+          "service_level_lcb": 0.4371985442942897,
+          "mean_on_time_fraction": 0.8588,
+          "expected_late_customers": 2.824,
+          "mean_total_lateness": 48.8958165322276,
+          "mean_simulated_driver_duration": 1505.011658966736,
+          "fleet_day_success": 0.386,
+          "mean_route_success": 0.50575,
+          "service_probability_by_kappa": {
+            "0.90": 0.518,
+            "0.95": 0.463,
+            "0.98": 0.386,
+            "1.00": 0.386
+          },
+          "arcs_departing_at_or_after_1700": 1
+        },
+        "0.30,0.0": {
+          "scenarios": 1000,
+          "service_level_success": 0.099,
+          "service_level_lcb": 0.08453042628560907,
+          "mean_on_time_fraction": 0.82745,
+          "expected_late_customers": 3.451,
+          "mean_total_lateness": 68.70023058728961,
+          "mean_simulated_driver_duration": 1514.4122237810434,
+          "fleet_day_success": 0.019,
+          "mean_route_success": 0.3635,
+          "service_probability_by_kappa": {
+            "0.90": 0.291,
+            "0.95": 0.099,
+            "0.98": 0.019,
+            "1.00": 0.019
+          },
+          "arcs_departing_at_or_after_1700": 0
+        },
+        "0.30,0.5": {
+          "scenarios": 1000,
+          "service_level_success": 0.32,
+          "service_level_lcb": 0.2962498920842229,
+          "mean_on_time_fraction": 0.8261999999999999,
+          "expected_late_customers": 3.476,
+          "mean_total_lateness": 85.90049179063854,
+          "mean_simulated_driver_duration": 1516.921228184143,
+          "fleet_day_success": 0.18,
+          "mean_route_success": 0.43625,
+          "service_probability_by_kappa": {
+            "0.90": 0.451,
+            "0.95": 0.32,
+            "0.98": 0.18,
+            "1.00": 0.18
+          },
+          "arcs_departing_at_or_after_1700": 2
+        },
+        "0.30,0.9": {
+          "scenarios": 1000,
+          "service_level_success": 0.457,
+          "service_level_lcb": 0.43123968008501234,
+          "mean_on_time_fraction": 0.8272,
+          "expected_late_customers": 3.456,
+          "mean_total_lateness": 100.85366118932076,
+          "mean_simulated_driver_duration": 1520.440202591418,
+          "fleet_day_success": 0.381,
+          "mean_route_success": 0.5,
+          "service_probability_by_kappa": {
+            "0.90": 0.511,
+            "0.95": 0.457,
+            "0.98": 0.381,
+            "1.00": 0.381
+          },
+          "arcs_departing_at_or_after_1700": 12
+        }
+      }
+    }
+  },
+  "configuration_status": {
+    "nominal": "ok",
+    "conservative": "ok",
+    "slack": "ok",
+    "fleet_matched": "ok",
+    "procedure": "ok",
+    "screened_conservative": "ok",
+    "capped_procedure": "ok",
+    "clock_aware": "ok"
+  },
+  "elapsed_seconds": 85.26188501199977,
+  "source_record_sha256": "5d57a64b4774265e7e956dd54e4aba540f38e1407afc525e60df7544d3759e60"
+}

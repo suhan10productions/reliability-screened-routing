@@ -1,6 +1,8 @@
-\subsection{Family-wise screening}\label{sec:familywise}
+\section{Further exploratory checks}\label{sec:checks}
 
-The three checks in this and the next two subsections were added after both confirmatory studies and are exploratory. The first reuses the stored screening counts, the second times screening and one HGS solve on each development instance and counts the selected buffers, and the third evaluates the stored plans on new scenarios.
+The three checks in this appendix were added after both confirmatory studies and are exploratory. The first reuses the stored screening counts, the second times screening and one HGS solve on each development instance and counts the selected buffers, and the third evaluates the stored plans on new scenarios. The misspecification check also reruns the selection under each alternative model.
+
+\subsection{Family-wise screening}\label{sec:familywise}
 
 The admission bound holds for each candidate separately, while the procedure searches 13 buffer levels per instance. To check whether this matters, every stored candidate family was screened again with the Wilson bound at $\eta/13$, a Bonferroni adjustment that makes the 95\% bound hold simultaneously over the grid. Selection and fallback were otherwise unchanged, and any newly selected plan was validated on the original fresh bank (Table~\ref{tab:familywise}). Over the 8 combinations of study and procedure, the adjustment reduced the admitted instances from 318 to 306, at most 2 per combination, and selected a different plan on 79 of the instances it still admitted. Admitted plans whose validation lower bound fell below 0.95 went from 11 of 318 to 1 of 306. Pooled service changed by between $-$1.8 and 0.2 points. Admitted plans averaged 97.3 to 98.0\% on the fresh bank under the per-candidate bound, depending on study and procedure, and 97.7 to 98.3\% under the family-wise bound. The stricter bound thus removed all 11 admitted plans whose validation bound fell below 0.95, while one plan it newly selected fell below it, at the cost of a few admissions and up to 1.8 points of pooled service.
 
@@ -74,4 +76,28 @@ Stronger morning peak & 30.3 [25.5, 35.1] & 46.1 [42.0, 50.1] & 47.7 [43.0, 52.3
 \end{tabular}
 \end{table}
 
-Heavy tails did not lower service. Conservative speed gained most, from 57.8 to 64.0\% for OR-Tools, and the capped procedures and screened robust changed by less than one point. The other three models lowered service for every configuration, most of all the stronger peak and then incidents. The stronger peak reduced the capped procedures by up to 6.9 points and conservative speed by up to 21.2 points: travel in the morning peak now takes 40\% longer than at nominal speed, which the 20\% pad no longer covers. The advantage over conservative speed held under every model, with lower interval limits of at least 11.5 points for the original procedure, 21.9 for the capped procedure and 23.3 for the HGS capped procedure. On its 45 instances, screened robust with relief stayed ahead of the HGS capped procedure under every model, but its lead fell from 3.6 to 1.7 points under time-of-day noise, and the intervals include zero under time-of-day noise and the stronger peak. The plans were not re-screened under the new models, so these results show how fixed plans degrade. What screening under a correctly specified model would achieve is a separate question.
+Heavy tails did not lower service. Conservative speed gained most, from 57.8 to 64.0\% for OR-Tools, and the capped procedures and screened robust changed by less than one point. The other three models lowered service for every configuration, most of all the stronger peak and then incidents. The stronger peak reduced the capped procedures by up to 6.9 points and conservative speed by up to 21.2 points: travel in the morning peak now takes 40\% longer than at nominal speed, which the 20\% pad no longer covers. The advantage over conservative speed held under every model, with lower interval limits of at least 11.5 points for the original procedure, 21.9 for the capped procedure and 23.3 for the HGS capped procedure. On its 45 instances, screened robust with relief stayed ahead of the HGS capped procedure under every model, but its lead fell from 3.6 to 1.7 points under time-of-day noise, and the intervals include zero under time-of-day noise and the stronger peak. These results concern fixed plans.
+
+Re-screening asks what the procedure itself would do under each model. Every stored candidate of the capped families was screened again on 1000 scenarios drawn from that model (seed 100000 plus the instance seed), the selection rule was applied unchanged, and the selected plan was validated on the same 5000 scenarios of that model. The candidate families were not regenerated. Under the paper's model this reproduces every stored selection, which the script checks. Table~\ref{tab:rescreen} reports two fallbacks for instances where nothing is admitted: the procedure's stored fallback, and the candidate with the highest screening success (Section~\ref{sec:fallback}).
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Re-screening under each delay model (exploratory): pooled service-event probability (\%) of the capped procedures over 159 OR-Tools and 106 HGS instances. Fixed: the stored plans. Re-screened: the stored candidates screened again under the model, with the stored fallback. Best: the same, with the best-screened fallback.}
+\label{tab:rescreen}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Delay model & \multicolumn{3}{c}{OR-Tools capped} & \multicolumn{3}{c}{HGS capped}\\
+ & Fixed & Re-screened & Best & Fixed & Re-screened & Best\\
+\midrule
+Paper's model (new scenarios) & 89.7 & 89.7 & 96.0 & 92.9 & 92.9 & 96.7\\
+Heavy tails & 89.9 & 91.3 & 96.0 & 93.6 & 93.8 & 96.5\\
+Incidents & 84.6 & 69.4 & 93.2 & 87.5 & 68.5 & 93.7\\
+Time-of-day noise & 88.4 & 86.8 & 95.4 & 91.3 & 88.5 & 96.1\\
+Stronger morning peak & 82.9 & 72.8 & 93.5 & 86.0 & 72.4 & 94.8\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+With the stored fallback, re-screening did worse than keeping the fixed plans under incidents and the stronger peak, by up to 19.0 points, and for HGS also under time-of-day noise. Fewer candidates passed under these models (OR-Tools 81 and 102 admissions against 133 under the paper's model), and the instances that failed received the weak stored fallback. With the best-screened fallback, re-screening exceeded the fixed plans under every model, and pooled service stayed between 93.2 and 96.0\% for OR-Tools and between 93.7 and 96.7\% for HGS.

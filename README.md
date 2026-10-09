@@ -226,3 +226,45 @@ results.
 Exploratory runs with 200 customers use `study_robust.py --reduced-grid`
 (Gamma 3 and box, theta 0.4 and 0.6). `code/weight_bracketing.py` reruns the
 weight analysis with two diagnostic vectors and stores the plans.
+
+Protocol 3 and its manifest were timestamped in commit
+21ffaa8eed4e899778e14014b73533fd4d14d865 (tag `protocol-3-freeze`), archived as
+Zenodo DOI 10.5281/zenodo.23242687, before any of its runs.
+
+## Licence
+
+The code is released under the MIT License (`LICENSE`). The records in
+`results/`, the manuscript sources and the documentation are released under
+Creative Commons Attribution 4.0 (CC BY 4.0). Third-party benchmark files keep
+their own terms: `data/gh200` comes from the PyVRP instance collection (MIT
+License), and `data/solomon` from the ML4VRP 2024 competition repository.
+
+## Revision-3 exploratory analyses
+
+- `code/fallback_policy.py` -> `results/fallback_policy.json`: fallback rules
+  compared on the stored records of all three studies (post hoc).
+- `code/misspecification_rescreen.py` -> `results/misspecification_rescreen.json`:
+  the stored candidate families screened again under each alternative delay
+  model, with the stored and the best-screened fallback.
+- `code/robust_fleet_matched.py` -> `results/robust_fleet_matched.json`:
+  relieved robust plans restricted to the comparator's fleet size.
+- `code/weight_bracketing.py` -> `results/weight_bracketing/`: four weight
+  vectors (original and equal rerun, fleet weight raised, duration weight
+  raised), storing every candidate.
+- `code/gh_benchmark.py` -> `results/gh200/`, `results/gh200_summary.json`:
+  the HGS pipeline on the Gehring–Homberger R1 and RC1 instances with 200
+  customers (`data/gh200`).
+- `study_robust.py --reduced-grid` with 200 customers ->
+  `results/robust_capped_dev200/`.
+- `code/analyse_v12.py` writes the corresponding manuscript text, tables and
+  macros.
+
+```bash
+PYTHONPATH=code python code/fallback_policy.py --output results/fallback_policy.json
+PYTHONPATH=code python code/misspecification_rescreen.py --output results/misspecification_rescreen.json
+PYTHONPATH=code python code/robust_fleet_matched.py --output results/robust_fleet_matched.json
+PYTHONPATH=code python code/weight_bracketing.py --workers 2
+PYTHONPATH=code python code/gh_benchmark.py --workers 2 && PYTHONPATH=code python code/gh_benchmark.py --summarise
+PYTHONPATH=code python code/study_robust.py --sizes 200 --capped --reduced-grid --output results/robust_capped_dev200 --workers 2
+PYTHONPATH=code python code/analyse_v12.py
+```
