@@ -97,7 +97,7 @@ def main():
         s['clock_pairs']['clock_minus_nominal']=ci([val(r,'clock_aware')-val(r,'nominal') for r in clock],100)
         clock_rows.append(f'{n} & {len(clock)}/{len(full)} & '+' & '.join(fmt(s['clock_pairs'][c]) for c in ('nominal','clock_aware','procedure','clock_minus_nominal')))
         summary['sizes'][str(n)]=s
-    sections.append(table('Validated service-event probability (\\%) on the same 46 instances: every entry in a row has the displayed denominator. Entries are mean [95\\% instance-bootstrap interval]. N, C, S, F and P denote nominal, conservative-speed, slack-aware, fleet-matched and original procedure, respectively.',
+    sections.append(table('Validated service-event probability (\\%) on the same 46 instances: every entry in a row has the displayed denominator; $k$ is the number of instances per size. Entries are mean [95\\% instance-bootstrap interval]. N, C, S, F and P denote nominal, conservative-speed, slack-aware, fleet-matched and original procedure, respectively.',
         'tab:matched','rrlllll','$n$ & $k$ & N & C & S & F & P',means,'scriptsize'))
     sections.append(table('Paired differences in service probability (percentage points) on the same subsets as Table~\\ref{tab:matched}. SC denotes screened conservative speed with its prespecified fallback.',
         'tab:paired','rlll','$n$ & S minus C & P minus C & SC minus C',contrasts,'small'))

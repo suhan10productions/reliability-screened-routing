@@ -236,7 +236,7 @@ def main():
 
     text = [
         r"\section{Further exploratory checks}\label{sec:checks}", "",
-        "The three checks in this appendix were added after both confirmatory studies and are "
+        "The three checks in this appendix were added after the first two confirmatory studies and are "
         "exploratory. The first reuses the stored screening counts, the second times screening and one HGS solve on "
         "each development instance and counts the selected buffers, and the third evaluates the stored plans on new "
         "scenarios. The misspecification check also reruns the selection under each alternative model.", "",
@@ -280,7 +280,7 @@ def main():
         "would have.", "",
         r"\subsection{Misspecified delay models}\label{sec:misspec}", "",
         "The plans were screened under one assumed disturbance model. To test how much the conclusions depend on it, "
-        "the stored plans of the development and both confirmatory studies were evaluated, without re-screening or "
+        "the stored plans of the development study and the first two confirmatory studies were evaluated, without re-screening or "
         "re-optimization, on 5000 new scenarios per instance under four other models. The models were chosen before "
         "the run, but they were not registered. The heavy-tail model replaces the normal common and local "
         "log-errors by Student-$t$ errors with three degrees of freedom, scaled to the same variance. At equal "

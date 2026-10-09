@@ -99,7 +99,7 @@ def main():
               "tab:confirmatory2", r"@{}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{4.4cm}"
               r">{\raggedright\arraybackslash}p{3.3cm}cc@{}",
               r"Hypothesis & Quantity & Estimate [interval] & Level & Decision", rows, size="footnotesize"),
-        f"G1 was confirmed. With the HGS generator, screening with capped contraction exceeded conservative padding by "
+        f"G1 was confirmed. With the HGS generator, screening with capped contraction exceeded conservative speed by "
         f"{f1(g['G1']['mean_pp'])} points, and pooled service probability reached {f1(pooled['hgs_capped_cons'])}\\% "
         f"against {f1(pooled['hgs_conservative'])}\\% for HGS conservative speed. Capping was essential with this "
         f"generator: at 100 and 200 customers the HGS capped family was admitted on "

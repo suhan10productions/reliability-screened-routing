@@ -73,8 +73,8 @@ def fallback_section():
         r"\subsection{Fallback rule}\label{sec:fallback}", "",
         "When screening admits no candidate, each procedure returns a fixed fallback: the uncontracted slack-aware "
         "plan for the OR-Tools procedures and the conservative-speed plan for the HGS procedure. These fallbacks are "
-        "the main reason the procedures pool below the 95\\% target. After the development study and both "
-        "confirmatory studies, a third fallback rule was examined: return the candidate of the procedure's own family with the highest screening success "
+        "the main reason the procedures pool below the 95\\% target. After the development study and the first "
+        "two confirmatory studies, a third fallback rule was examined: return the candidate of the procedure's own family with the highest screening success "
         "(ties by the normalized score, then the smaller buffer). The rule uses only the screening evidence already "
         "computed, so the validation bank still judges the returned plan independently, and it changes nothing on "
         f"instances where a plan was admitted. Table~\\ref{{tab:fallback}} compares the rules on the stored records "
@@ -146,10 +146,8 @@ def part_b(out):
         "there the OR-Tools anchor solves that fix the scaling ranges found no plan, so neither procedure could run "
         "and the instance scores zero, as the failure policy requires. On the other "
         f"{len(rest)} instances the two procedures with the best-screened fallback pooled {f1(ex_ort)}\\% and "
-        f"{f1(ex_hgs)}\\%; these figures are descriptive and were not prespecified. Both halves ran on a two-core "
-        "Linux machine (Section~\\ref{sec:conf3design}). The first stage was interrupted once by a restart of that "
-        "machine; the frozen drivers resume from the records already written, so the completed instances were kept "
-        "and the rest were run afterwards.", "",
+        f"{f1(ex_hgs)}\\%; these figures are descriptive and were not prespecified. Hardware and the course of the run "
+        "are described in Sections~\\ref{sec:conf3design} and~\\ref{sec:reproducibility}.", "",
     ]
 
 

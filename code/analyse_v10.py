@@ -304,12 +304,12 @@ def main():
         "every setting. "
         "The robust plans minimize distance alone, without the slack, duration and fleet terms of the screened "
         "procedures, so differences in vehicles are part of the comparison.", "",
-        r"\begin{figure}[ht]", r" \centering", r" \includegraphics[width=0.93\textwidth]{Fig2.pdf}",
+        r"\begin{figure}[!t]", r" \centering", r" \includegraphics[width=0.93\textwidth]{Fig2.pdf}",
         r" \caption{Pooled validated service-event probability against mean distance relative to the nominal plan of "
         f"the robust search, on the {len(seeds)} development instances. Lines join the relieved robust settings for "
         f"each ${th}$, from $\\Gamma=1$ to box uncertainty. The screened procedures (OR-Tools, HGS), screened robust "
         r"with relief and conservative speed are shown separately, with 95\% bootstrap intervals over instances for "
-        r"their service probability. The dashed line marks the 95\% target}",
+        r"their service probability. The dashed line marks the 95\% target.}",
         r" \label{fig:robust}", r"\end{figure}", "",
     ]
     (ROOT / "paper/robust_results.tex").write_text("\n".join(text))

@@ -61,3 +61,13 @@ Manuscript:
 - Licence: MIT for code, CC BY 4.0 for records and documents (`LICENSE`, README).
 
 No frozen file changed (all three manifests verified).
+
+## v42: editorial pass
+- Coloured internal and citation links, PDF title, author and numbered bookmarks.
+- References added: Laporte et al. (1992), Gendreau et al. (1996), Kenyon and
+  Morton (2003), Jabali et al. (2015); bibliography entries tidied.
+- Introduction enumerates the five parts; "conservative padding" replaced by
+  "conservative speed" throughout; Section 6.1 retitled; the generative-AI
+  statement moved into Statements and Declarations; ethics statement covers the
+  public benchmark data; figure captions end with full stops; Table 3 caption
+  defines $k$.

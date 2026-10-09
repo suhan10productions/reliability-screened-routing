@@ -12,7 +12,10 @@
 \captionsetup[table]{labelfont=bf,labelsep=space}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{hyperref}
-\hypersetup{hidelinks}
+\hypersetup{colorlinks=true,linkcolor={blue!55!black},citecolor={blue!55!black},
+  urlcolor={blue!55!black},bookmarksnumbered=true,
+  pdftitle={Reliability-Screened Routing Under Predictable and Stochastic Travel Variation},
+  pdfauthor={Suhan Ali}}
 
 \newcommand{\todo}[1]{\textcolor{red}{[#1]}}
 %% Hook expected by Springer Nature bibliography styles; empty outside their class.
@@ -157,12 +160,12 @@ over as well: the same admission rule, unchanged, selected among OR-Tools, HGS
 and robust candidates. These two elements, screening and reachability relief, are
 the parts of the procedure that do not depend on the planner.
 
-The evidence comes in five parts. A development study on 53 synthetic instances
+The evidence comes in five parts. First, a development study on 53 synthetic instances
 shaped the design. It compares the procedure with uniform travel-time padding and
 with ablations that isolate clock-profile information, fleet size, contracted
-candidates and screening, and its findings are exploratory. A first confirmatory
-study then tested four prespecified hypotheses on 53 new instances, and an
-exploratory analysis varied the objective weights. A second confirmatory study,
+candidates and screening, and its findings are exploratory. Second, a first confirmatory
+study tested four prespecified hypotheses on 53 new instances, and an
+exploratory analysis varied the objective weights. Third, a second confirmatory study,
 on another 53 new instances, replaced OR-Tools with hybrid genetic search
 \cite{vidal2022,wouda2024} and tested the conservative-speed fallback that the
 first study had suggested post hoc. Fourth, an exploratory comparison on the
@@ -173,8 +176,8 @@ fallback that returns the best-screened candidate when nothing is admitted. All
 three protocols were publicly timestamped before their runs. Further exploratory
 checks repeat the selection with a family-wise screening bound, measure
 computation time, bracket the weight sensitivity, add 20 Gehring--Homberger
-instances, and evaluate the stored plans, and screen the stored candidates again,
-under four other delay models.
+instances, evaluate the stored plans, and re-screen the stored candidates,
+under four alternative delay models.
 
 \section{Related work}
 
@@ -188,7 +191,7 @@ its representational properties \cite{ghiani2014}.
 
 Stochastic VRPTW research has treated uncertain travel and service times using
 chance constraints, recourse, approximate route-feasibility tests, and
-data-driven formulations \cite{li2010,errico2018,bomboi2022,serrano2026}.
+data-driven formulations \cite{laporte1992,kenyon2003,li2010,errico2018,bomboi2022,serrano2026}.
 Ehmke, Campbell, and Urban embed per-customer service levels in a routing
 method \cite{ehmke2015}; Ta\c{s} et al. jointly model time dependence,
 stochastic travel, service costs, and soft windows \cite{tas2014}; and Bomboi,
@@ -196,7 +199,8 @@ Buchheim, and Pruente develop route-feasibility checks for correlated and
 time-dependent travel times \cite{bomboi2022}. Vareias, Repoussis, and
 Tarantilis assign time windows to customers under stochastic travel times
 \cite{vareias2019}. Their models minimize distance and expected penalty costs
-subject to per-customer chance constraints, and they solve them in two levels,
+subject to per-customer chance constraints, building on the self-imposed
+windows of Jabali et al.\ \cite{jabali2015}, and they solve them in two levels,
 with adaptive large neighbourhood search for the routes and an exact method for
 the window subproblems. This is the closest analogue to the internal window
 contraction used here.
@@ -209,7 +213,7 @@ travel-time distribution is only partly known \cite{jaillet2016}. Zhang et al.
 develop a riskiness index for time windows under uncertainty, together with an
 exact solution algorithm \cite{zhang2019}. Gendreau, Jabali and Rei survey
 stochastic routing models and the directions that remain open
-\cite{gendreau2016}. These methods require a solver built for their uncertainty
+\cite{gendreau1996,gendreau2016}. These methods require a solver built for their uncertainty
 model. The budgeted model of Agra et al., which applies the uncertainty set of
 Bertsimas and Sim \cite{bertsimas2004} to routing, is implemented here as a
 comparator (Section~\ref{sec:robust-design}); the distributionally robust and
@@ -226,7 +230,9 @@ than a new stochastic optimizer, but it makes selection failures and
 out-of-sample reliability directly visible. Compared with the self-imposed windows
 of Vareias et al.\ \cite{vareias2019}, three things differ. The windows offered to customers stay
 fixed, and only an internal planning deadline that customers never see is
-contracted. Reliability is a fleet-level service event, tested by screening a
+contracted. Reliability is a fleet-level service event, closer to the plan-level
+risk measures of Kenyon and Morton \cite{kenyon2003} than to per-customer
+constraints, tested by screening a
 whole family of candidates on one bank and validating the chosen plan on
 another. The routing solver can be replaced, and reachability-capped
 contraction removes, for both OR-Tools and HGS, the direct-reachability
@@ -486,7 +492,7 @@ with a per-candidate 95\% lower bound. It applies to admitted plans only; where
 nothing is admitted, the procedure returns the fallback, which has not passed
 this test.
 
-\subsection{Generator replacement and reachability-capped contraction}\label{sec:capping}
+\subsection{Screened conservative speed and reachability-capped contraction}\label{sec:capping}
 
 Screened conservative speed uses the same buffer grid, admission bank and
 Wilson threshold, but its candidates minimize distance on the padded matrix.
@@ -551,7 +557,7 @@ Customers & Vehicles available & Instances & Seeds\\
 \label{tab:parameters}
 \begin{tabular}{p{0.42\textwidth}p{0.46\textwidth}}
 \toprule
-Parameter & Retained value \\
+Parameter & Value \\
 \midrule
 Nominal/free-flow speed $\bar v$ & 40 km/h \\
 Shift and clock origin & 600 min, beginning 06:00 local time \\
@@ -575,7 +581,7 @@ Buffer grid & $\beta\in\{0,5,\ldots,60\}$ min \\
 \end{tabular}
 \end{table}
 
-Eight configurations are compared:
+Eight configurations are compared in the development study:
 \begin{enumerate}
   \item \textbf{Nominal distance}: fixed 40 km/h planning matrix and a
         distance-minimizing objective.
@@ -655,8 +661,8 @@ of the Bonferroni adjustment would not change either primary decision. H4
 compares fixed plans: each plan is screened under the primary setting
 ($\sigma=0.20$, $\rho=0.5$) and then evaluated across the sweep without
 re-screening. In this paper, a hypothesis is \emph{confirmed} when it meets the
-decision criterion fixed in its protocol, and nothing more is meant. Both
-studies are confirmatory within the prespecified synthetic setting: their
+decision criterion fixed in its protocol, and nothing more is meant. All three
+protocols are confirmatory only within the prespecified synthetic setting: their
 instances come from the generator and disturbance model of the development
 study, so they test repeatability there and are not external validation. H2
 and H3 both measure the effect of capping, one on service and one on admission,
@@ -907,7 +913,7 @@ reproducibility archive \cite{ali2026archive}.
  line marks zero. Faint vertical lines mark $\sigma=0.10$, $0.20$ and $0.30$;
  markers are offset slightly around them only for legibility. Error bars are
  95\% bootstrap intervals over instances. Plans are fixed across this
- disturbance sweep, and the intervals are not simultaneous across cells}
+ disturbance sweep, and the intervals are not simultaneous across cells.}
  \label{fig:reliability}
 \end{figure}
 
@@ -922,7 +928,7 @@ reproducibility archive \cite{ali2026archive}.
 \input{fallback_results.tex}
 \input{checks_summary.tex}
 
-Appendix~\ref{sec:additional} reports the results of both confirmatory studies by
+Appendix~\ref{sec:additional} reports the results of the first two confirmatory studies by
 size (Tables~\ref{tab:conf-size} and~\ref{tab:study2-size}, descriptive only), every robust setting
 (Table~\ref{tab:robust-grid}), customer outcomes on the matched
 subset (Table~\ref{tab:customers}), absolute planned resources
@@ -953,10 +959,10 @@ including period boundaries, customer lateness and shared arc disturbances.
 Seeds are fixed. Admission uses seed $100000$ plus the instance seed, all
 validation uses 5000 fresh scenarios from seed $400000$ plus the instance seed,
 and the 1000-scenario disturbance sweep uses seed $500000$ plus the instance
-seed. The revision protocol was fixed before the new candidate configurations
-were run, but earlier aggregate results had motivated these analyses, so they are an
-exploratory extension on known synthetic instances. They are neither
-preregistered nor an external replication, and the fresh scenario draws do not
+seed. The capped, screened-conservative and clock-aware configurations were specified
+before they were run on the development instances, but earlier aggregate results
+motivated them, so they are exploratory and are neither preregistered nor an
+external replication; the fresh scenario draws do not
 remove the reuse of the instance set. Plans in the sweep are not re-screened when
 $\sigma$ or $\rho$ changes.
 
@@ -1006,17 +1012,6 @@ Reproducibility shows that the reported numbers follow from the archived code an
 records. It does not show that the synthetic instances or the assumed disturbance
 model represent a real operation; that needs the evidence listed in
 Section~\ref{sec:limitations}.
-
-\paragraph{Use of generative AI tools.} Generative AI assistants were used for
-code development, experiment implementation, code review, analysis checking, and
-drafting and editing text. They were OpenAI's ChatGPT (Astra 6) and Anthropic's
-Claude (Opus 5, Opus 5.5 and Sonnet 5), and they are not authors. Every experiment
-was run from the archived code, every reported number regenerates from the
-archived raw records, and the headline results were recomputed independently of
-the analysis scripts. Rerunning the solver can return different routes, because
-each solve stops at a wall-clock limit; Section~\ref{sec:weights} measures this
-run-to-run variation. The author reviewed all code and text and takes full
-responsibility for the content.
 
 \section{Limitations}\label{sec:limitations}
 
@@ -1083,7 +1078,7 @@ stricter than an operator who adjusts departures would face.
 
 Eighth, the fallback decides much of the procedure-level result. The
 slack-aware plan prespecified in the first two studies can be worse than
-conservative padding when screening admits nothing (Section~\ref{sec:solomon}),
+conservative speed when screening admits nothing (Section~\ref{sec:solomon}),
 and the conservative-speed fallback did not measurably improve the capped
 procedure. The best-screened fallback, tested prospectively in the third
 protocol, did improve both capped procedures, but pooled service stayed just
@@ -1098,9 +1093,9 @@ procedure exceeded them by \ProcConsRange{} percentage points on average,
 although the interval at 200 customers includes zero. For independent
 disturbances its advantage grew with noise, from $\SweepLowIndep$ to
 \SweepHighIndep{} points. The slack-aware objective without screening fell below
-conservative padding, so the advantage comes from the complete procedure, in
+conservative speed, so the advantage comes from the complete procedure, in
 which the contracted candidate family and statistical selection act together.
-Screening also improves conservative padding: applied to conservative-speed
+Screening also improves conservative speed: applied to conservative-speed
 candidates, it performed about as well as the original procedure, and the capped
 procedure had the highest service probability of the three
 (Table~\ref{tab:screen}; exploratory). The fixed 20\% pad is therefore the weaker
@@ -1277,11 +1272,19 @@ Gehring--Homberger instance files in the archive are third-party benchmark data
 \cite{solomon1987,ml4vrp2024,gehring1999} and remain under their original
 terms.
 
-\paragraph{Use of generative AI.} Described in
-Section~\ref{sec:reproducibility}.
+\paragraph{Use of generative AI.} Generative AI assistants were used for
+code development, experiment implementation, code review, analysis checking, and
+drafting and editing text. They were OpenAI's ChatGPT (Astra 6) and Anthropic's
+Claude (Opus 5, Opus 5.5 and Sonnet 5), and they are not authors. Every experiment
+was run from the archived code, every reported number regenerates from the
+archived raw records, and the headline results were recomputed independently of
+the analysis scripts. Rerunning the solver can return different routes, because
+each solve stops at a wall-clock limit; Section~\ref{sec:weights} measures this
+run-to-run variation. The author reviewed all code and text and takes full
+responsibility for the content.
 
-\paragraph{Ethics approval.} Not applicable: the study uses synthetic data
-only.
+\paragraph{Ethics approval.} Not applicable: the study uses synthetic and public
+benchmark data only.
 
 \paragraph{Consent.} Not applicable.
 
