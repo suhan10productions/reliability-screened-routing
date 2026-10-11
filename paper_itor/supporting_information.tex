@@ -37,6 +37,8 @@ time windows: a solver-independent alternative to travel-time padding''}
 \author{Suhan Ali}
 \date{}
 \begin{document}
+% same order of the four Ali (2026) records as in the main text, so their letters a--d match
+\nocite{ali2026freeze,ali2026freeze2,ali2026freeze3,ali2026archive}
 \maketitle
 \noindent This document gives the full model, the design of every study, every result table and the
 further exploratory checks. All numbers are generated from the records in the archive
@@ -88,7 +90,7 @@ $M\geq H^{\max}+\max_i s_i+\max_{ij}\bar t_{ij}$,
 \end{align}
 The bounds $0\leq d_v,r_v\leq H^{\max}y_v$ deactivate unused vehicles, and
 $r_v-d_v\leq H^{\max}y_v$. The code enforces these timing relations through
-OR-Tools routing dimensions and never builds \eqref{eq:time} explicitly, so no
+OR-Tools routing dimensions and never builds these time constraints explicitly, so no
 big-$M$ relaxation or big-$M$ diagnostic is claimed for the code.
 
 For target slack $s^*$,
@@ -577,7 +579,7 @@ $\hat t_{ij}=\lceil\theta\,\bar t_{ij}\rceil$ minutes for a protection level
 $\theta$. A route must stay feasible, with every service start inside its window
 and the return inside the shift, whenever at most $\Gamma$ of its arcs take their
 upper value. Because vehicles may wait, the worst case is computed exactly by the
-dynamic programme of Agra et al.~\cite{agra2013}. For a route with stops
+dynamic programme of \citet{agra2013}. For a route with stops
 $1,\ldots,m$, let $A_k(g)$ be the latest possible service start at stop $k$ when at
 most $g$ deviations have occurred, with $A_0(g)$ the depot departure and
 $A_{k}(-1)=-\infty$:
@@ -845,6 +847,6 @@ and were not re-elicited for driver duration.
 
 
 \clearpage
-\bibliographystyle{apalike}
-\bibliography{../paper/sn-bibliography}
+\bibliographystyle{itor}
+\bibliography{itor_refs}
 \end{document}

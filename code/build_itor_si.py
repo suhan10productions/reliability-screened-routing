@@ -42,6 +42,11 @@ def main():
         body = body.replace(old, new)
         appx = appx.replace(old, new)
     assert "sec:limitations" not in body + appx
+    # the time constraints span three numbered lines; name them in words, and avoid a doubled author name
+    for old, new in [("never builds \\eqref{eq:time} explicitly", "never builds these time constraints explicitly"),
+                     ("dynamic programme of Agra et al.~\\cite{agra2013}", "dynamic programme of \\citet{agra2013}")]:
+        assert body.count(old) == 1, old
+        body = body.replace(old, new)
     # commit hashes: let them break across lines
     import re
     body = re.sub(r"\\texttt\{([0-9a-f]{40})\}", lambda m: "\\texttt{" + "\\allowbreak ".join(m.group(1)[k:k + 8] for k in range(0, 40, 8)) + "}", body)
@@ -85,6 +90,8 @@ time windows: a solver-independent alternative to travel-time padding''}
 \author{Suhan Ali}
 \date{}
 \begin{document}
+% same order of the four Ali (2026) records as in the main text, so their letters a--d match
+\nocite{ali2026freeze,ali2026freeze2,ali2026freeze3,ali2026archive}
 \maketitle
 \noindent This document gives the full model, the design of every study, every result table and the
 further exploratory checks. All numbers are generated from the records in the archive
@@ -92,7 +99,7 @@ further exploratory checks. All numbers are generated from the records in the ar
 \tableofcontents
 \clearpage
 """
-    end = "\n\\clearpage\n\\bibliographystyle{apalike}\n\\bibliography{../paper/sn-bibliography}\n\\end{document}\n"
+    end = "\n\\clearpage\n\\bibliographystyle{itor}\n\\bibliography{itor_refs}\n\\end{document}\n"
     OUT.write_text(preamble + body + "\n\\clearpage\n" + appx + end)
     print("SI written:", OUT.relative_to(ROOT))
 

@@ -35,7 +35,7 @@ solver-independent alternative to travel-time padding}
 \affil{\affmark{a}Independent researcher, Lahore, Pakistan}
 \email{syedsuhanali9@gmail.com [S. Ali]}
 \thanks{\affmark{$\ast$}Author to whom all correspondence should be addressed
-(e-mail: syedsuhanali9@gmail.com). ORCID: 0009-0004-5079-7684.}
+(e-mail: syedsuhanali9@gmail.com). ORCID: \mbox{0009-0004-5079-7684}.}
 
 \historydate{Received DD MMMM YYYY; received in revised form DD MMMM YYYY; accepted DD MMMM YYYY}
 
@@ -103,8 +103,9 @@ well.
 \item It compares screening with uniform padding on matched instances and
 reports what the extra reliability costs. In a development study on 53 synthetic
 instances with 20 to 200 customers, the screened procedure was \ProcConsRange{}
-percentage points more reliable than 20\% padding, depending on size, although
-the interval at 200 customers included zero. Three protocols, each timestamped
+percentage points more reliable than 20\% padding on the 46 instances where
+padding found a plan, depending on size, although the interval at 200 customers
+included zero. Three protocols, each timestamped
 in a public repository with frozen code before any of its runs
 \citep{ali2026freeze,ali2026freeze2,ali2026freeze3}, then tested the main
 findings on new instances with two generators, OR-Tools \citep{ortools} and
@@ -153,7 +154,7 @@ place the buffers inside a dedicated optimization and judge reliability one
 customer at a time. Neither can be attached to an unmodified solver, and neither
 bounds the probability that a whole service day goes well.
 
-Robust models require the plan to stay feasible for every realisation in an
+Robust models require the plan to stay feasible for every realization in an
 uncertainty set. \citet{agra2013} solve a robust VRPTW with the budgeted set of
 \citet{bertsimas2004}, \citet{jaillet2016} minimize a requirements violation
 index, and \citet{zhang2019} develop a riskiness index together with an exact
@@ -334,7 +335,7 @@ running past the end of the shift are still evaluated.
 \centering
 \footnotesize
 \caption{Instances and parameters of the development study. The confirmatory
-studies use the same sizes with the seeds shifted (Section~\ref{sec:design}).}
+studies use the same sizes with the seeds shifted (Table~\ref{tab:studies}).}
 \label{tab:parameters}
 \begin{tabular}{@{}p{0.43\textwidth}p{0.5\textwidth}@{}}
 \toprule
@@ -364,7 +365,7 @@ outcomes.
 
 Three confirmatory protocols followed (Table~\ref{tab:studies}). Each protocol fixed
 its hypotheses, tests, decision rules, failure policy and instance seeds. It was
-committed to a public repository, together with a SHA-256 manifest of the code
+committed to a public repository, together with a \mbox{SHA-256} manifest of the code
 that runs and analyses it, and archived on Zenodo
 \citep{ali2026freeze,ali2026freeze2,ali2026freeze3}, all before any of its
 instances was solved.
@@ -425,7 +426,7 @@ $\SweepLowIndep$ points at $\sigma=0.10$, where padding was slightly ahead, to
 \SweepHighIndep{} points at $\sigma=0.30$. With strongly correlated delays the
 increase was not monotonic. Depending on size, the original procedure drove
 \ItorCostDistRange\% more distance than conservative speed, and its fleet was
-sometimes larger and sometimes smaller (\SI{sec:si-dev}).
+sometimes larger and sometimes smaller (Table~\ref{S-tab:cost} of the SI).
 
 \begin{figure}[t]
  \centering
@@ -445,7 +446,7 @@ plan, and on \CertifiedFailures{} of them a reachability obstruction was
 certified at some buffer level. Capping (Table~\ref{tab:screen}) raised the
 number of admitted instances from \OriginalSelected{} to \CappedSelected{} and
 pooled service by \CappedGainInterval{} points. At 100 and 200 customers the
-capped procedure was admitted on \CappedLargeSelected{} instances and pooled
+capped procedure admitted a plan on \CappedLargeSelected{} instances and pooled
 \CappedLargeRange\%. On average it used \CappedDistanceCost\% more distance and
 \CappedFleetCost{} more vehicles than the original procedure, and
 \CappedFleetLarge{} more vehicles at 200 customers.
@@ -514,7 +515,7 @@ instances with up to 100 customers. Screened robust with relief beat the
 OR-Tools capped procedure by \PaROne{} points over all \PaInstances{} of them,
 and the HGS capped procedure by \PaRTwo{} points over the 45 instances of
 protocol~2, the only ones with HGS plans. The two estimates happen to coincide.
-It pooled \PaScreenedP\% and used \PaRThree{} more
+Screened robust with relief pooled \PaScreenedP\% and used \PaRThree{} more
 vehicles than the HGS procedure. Within the robust family, screening returned
 plans \PaRFourAbs\% shorter than the most protective setting, at a cost of
 \PaBoxMinusScr{} points of service. When the robust plans were limited after the
@@ -534,8 +535,9 @@ service in every study and for every procedure, by \FbGainMin{} to
 instances. Compared with each procedure's default fallback, it improved the
 OR-Tools capped procedure by \PbFOne{} points and the HGS capped procedure by
 \PbFTwo{}, bringing pooled service to \PbFThree\% and \PbFFour\%. Both estimates
-are just below the 95\% target. On \PbNoAnchor{} instance the anchor solves
-found no plan, so neither procedure could run and the instance scored zero.
+are just below the 95\% target. On \PbNoAnchor{} of the \PbInstances{} instances
+the anchor solves found no plan, so neither procedure could run and that
+instance scored zero.
 Without it, pooled service was \PbExOrt\% and \PbExHgs\% (descriptive). Plans
 returned by a fallback have not passed the screen.
 
@@ -544,11 +546,12 @@ returned by a fallback have not passed the screen.
 \emph{Objective weights.} With equal weights, fewer development instances were
 admitted (\WtEqualAdmitted{} against \WtBaseAdmitted{} in the same run), and the
 advantage over conservative speed fell to \WtEqualPCMean{} points
-[\WtEqualPCLo, \WtEqualPCHi]. A later run on another machine repeated both
-weight vectors and found the advantage falling from \BrOrigAdv{} to \BrEqAdv{}
-points [\BrEqAdvLo, \BrEqAdvHi]. Raising only the driver-duration weight changed
+[\WtEqualPCLo, \WtEqualPCHi]. A later run that repeated both weight vectors
+found the advantage falling from \BrOrigAdv{} to \BrEqAdv{} points
+[\BrEqAdvLo, \BrEqAdvHi]. Raising only the driver-duration weight changed
 service by \BrDurDiff{} points, and raising only the fleet weight changed it by
-\BrFleetDiff{}. The advantage therefore depends on how much waiting time the
+\BrFleetDiff{}, and the run cannot separate the two effects. The stored
+candidates suggest that the advantage depends on how much waiting time the
 objective leaves in the routes to absorb delays. None of the protocols varied
 the weights (\SI{sec:weights}).
 
@@ -569,11 +572,12 @@ service stayed between \ResLoOrt{} and \ResHiHgs\% (\SI{sec:misspec}).
 \emph{Family-wise screening and computation time.} Across all studies and
 procedures, a Bonferroni bound over the 13 buffer levels removed all
 \FwMissOrig{} of the \FwAdmittedOrig{} admitted plans that later had a validation
-lower bound below 0.95, while \FwMissFw{} newly selected plan did. The cost
+lower bound below 0.95, while \FwMissFw{} of the newly selected plans did. The cost
 was at most \FwLostMax{} admissions per study and procedure, and pooled service
 changed by between \FwPooledChangeMin{} and \FwPooledChangeMax{} points.
 Screening a candidate took \TimeScreenTwenty{} to \TimeScreenTwoHundred{}~ms,
-whereas generating one took seconds (\SI{sec:familywise}).
+whereas generating one took seconds (Sections~\ref{S-sec:familywise}
+and~\ref{S-sec:time}).
 
 \section{Discussion and limitations}\label{sec:discussion}
 
@@ -604,8 +608,9 @@ operator who adjusts departures would face. Breakdowns, new orders and
 rolling-horizon replanning are left out, so the study says nothing about how to
 recover once a delay has happened.
 
-Under the prespecified fallback rules, pooled service stayed below 95\% in every
-study, because some instances had no admitted plan. The best-screened fallback
+Under the prespecified fallback rules, pooled service of the OR-Tools and HGS
+procedures stayed below 95\% in every study, because some instances had no
+admitted plan. The best-screened fallback
 narrows that gap, but closing it needs better candidates on those instances,
 where a stronger or a stochastic generator could help most.
 
@@ -647,6 +652,6 @@ e-mail during the project. All claims in the paper rest on the reported model,
 code and experiments.
 
 \bibliographystyle{itor}
-\bibliography{../paper/sn-bibliography}
+\bibliography{itor_refs}
 
 \end{document}
