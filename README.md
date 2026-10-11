@@ -272,3 +272,15 @@ PYTHONPATH=code python code/gh_benchmark.py --workers 2 && PYTHONPATH=code pytho
 PYTHONPATH=code python code/study_robust.py --sizes 200 --capped --reduced-grid --output results/robust_capped_dev200 --workers 2
 PYTHONPATH=code python code/analyse_v12.py
 ```
+
+## ITOR version (October 2026)
+
+`paper_itor/` holds the shorter manuscript prepared for International Transactions in Operational
+Research with the ITOR class, and its Supporting Information. Nothing in it computes a new result:
+`code/itor_tables.py` takes the development tables and the summary of every prespecified hypothesis
+from the generated files and the saved output of the frozen analyses, `code/build_itor_si.py`
+builds the Supporting Information from `paper/routing_model_orf.tex`, and `code/package_itor.py`
+writes the self-contained upload (`paper_itor/upload.zip`). Build with
+
+    cd code && PYTHONPATH=. python3 itor_tables.py && python3 build_itor_si.py
+    cd ../paper_itor && ./build.sh && cd ../code && python3 package_itor.py

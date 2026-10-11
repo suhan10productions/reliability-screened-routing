@@ -1,0 +1,186 @@
+"""Tables and macros for the ITOR version of the manuscript (paper_itor/).
+
+Nothing here computes a new result. The script
+  * copies two development tables (tab:paired, tab:screen) out of the files that
+    analyse_v7.py writes, so their numbers stay generated;
+  * writes the summary of all prespecified hypotheses, taking every estimate from
+    the result macros (themselves generated from the records) and every decision
+    from the saved output of the frozen analysis programs;
+  * writes the few extra macros the ITOR text needs.
+
+Run after analyse_v7 ... analyse_v12:
+  cd code && PYTHONPATH=. python3 itor_tables.py
+"""
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+PAPER = ROOT / "paper"
+OUT = ROOT / "paper_itor"
+
+
+def extract_table(src: Path, label: str) -> str:
+    text = src.read_text()
+    for m in re.finditer(r"\\begin\{table\}.*?\\end\{table\}", text, flags=re.S):
+        if f"\\label{{{label}}}" in m.group(0):
+            return m.group(0).replace("[htbp]", "[t]") + "\n"
+    raise SystemExit(f"{label} not found in {src}")
+
+
+def compact_screen(table: str) -> str:
+    """Regroup the generated tab:screen (one row per size and procedure) into one row per size."""
+    rows = re.findall(r"^(\d+) & (Original procedure|Screened conservative|Capped procedure) & (\S+) & (\S+) & (.+?)\\\\$",
+                      table, flags=re.M)
+    assert len(rows) == 12, len(rows)
+    by = {}
+    for n, proc, sel, ret, prob in rows:
+        by.setdefault(n, {})[proc] = (sel, ret.split("/")[0], prob)
+    order = ("Original procedure", "Screened conservative", "Capped procedure")
+    body = []
+    for n in sorted(by, key=int):
+        cells = []
+        for proc in order:
+            sel, ret, prob = by[n][proc]
+            cells += [f"{sel} ({ret})", prob]
+        body.append(f"{n} & " + " & ".join(cells) + r"\\")
+    return "\n".join([
+        r"\begin{table}[t]", r"\centering", r"\footnotesize", r"\setlength{\tabcolsep}{4pt}",
+        r"\caption{Development study, all 53 instances. For each procedure: instances admitted by screening out of all "
+        r"instances of that size, with the number whose lower bound also reached 0.95 on the validation bank in "
+        r"parentheses, and pooled validated service probability (\%) with a 95\% bootstrap interval, fallback plans "
+        r"included.}",
+        r"\label{tab:screen}",
+        r"\begin{tabular}{@{}rllllll@{}}", r"\toprule",
+        r" & \multicolumn{2}{l}{Original procedure} & \multicolumn{2}{l}{Screened conservative} & "
+        r"\multicolumn{2}{l}{Capped procedure}\\",
+        r"$n$ & Admitted & Pooled & Admitted & Pooled & Admitted & Pooled\\", r"\midrule",
+        *body, r"\bottomrule", r"\end{tabular}", r"\end{table}", ""])
+
+
+def verdict(v: str) -> str:
+    v = v.strip().lower()
+    if v.startswith("estimate"):
+        return "estimate"
+    assert v in ("confirmed", "not confirmed"), v
+    return v
+
+
+def f1(x):
+    return f"{x:.1f}".replace("-", "$-$")
+
+
+def f2(x):
+    return f"{x:.2f}".replace("-", "$-$")
+
+
+def main():
+    OUT.mkdir(exist_ok=True)
+    p1 = json.loads((ROOT / "results/confirm/analysis_output.txt").read_text())
+    p2 = json.loads((ROOT / "results/confirm2/analysis_output.txt").read_text())
+    pa = json.loads((ROOT / "results/confirm_robust_analysis_output.json").read_text())
+    pb = json.loads((ROOT / "results/confirm3_fallback_analysis_output.json").read_text())
+    for d in (p1, p2, pa, pb):
+        assert d["mode"].lower().startswith("confirmatory"), d["mode"]
+
+    paired = extract_table(PAPER / "results_summary_v7.tex", "tab:paired")
+    assert "Table~\\ref{tab:matched}" in paired
+    # the matched-levels table is in the Supporting Information (labels imported with prefix S-)
+    paired = paired.replace("Table~\\ref{tab:matched}", "Table~\\ref{S-tab:matched} of the SI")
+    (OUT / "tab_paired.tex").write_text(paired)
+    (OUT / "tab_screen.tex").write_text(compact_screen(extract_table(PAPER / "results_summary_v7.tex", "tab:screen")))
+
+    # distance column of the generated resource table (tab:cost): mean change per size
+    cost = extract_table(PAPER / "results_summary_v7.tex", "tab:cost")
+    dist = [float(m.group(1)) for m in re.finditer(r"^\d+ & (-?[\d.]+) \[", cost.replace("$-$", "-"), flags=re.M)]
+    assert len(dist) == 4, dist
+    macros = {
+        "PaRThreeLo": f2(pa["R3"]["lo"]), "PaRThreeHi": f2(pa["R3"]["hi"]),
+        "PaRFourLo": f1(pa["R4"]["lo"]), "PaRFourHi": f1(pa["R4"]["hi"]),
+        "ItorCostDistRange": f"{min(dist):.1f}--{max(dist):.1f}",
+    }
+    (OUT / "result_macros_itor.tex").write_text(
+        "".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in macros.items()))
+
+    V = {
+        "H1": verdict(p1["H1_P_minus_C"]["verdict"]), "H2": verdict(p1["H2_K_minus_P"]["verdict"]),
+        "H3": verdict(p1["H3_admission"]["verdict"]), "H4": verdict(p1["H4_noise_growth"]["verdict"]),
+        **{g: verdict(p2[g]["verdict"]) for g in ("G1", "G2", "G3", "G4")},
+        **{r: verdict(pa[r]["verdict"]) for r in ("R1", "R2", "R3", "R4")},
+        "F1": verdict(pb["F1"]["verdict"]), "F2": verdict(pb["F2"]["verdict"]),
+        "F3": "estimate", "F4": "estimate",
+    }
+    primaries = {"H1", "H2", "G1", "G2", "R1", "R2", "F1", "F2"}
+    assert sum(V[h] == "confirmed" for h in primaries) == 7 and V["G2"] == "not confirmed"
+
+    def row(h, what, est, level):
+        name = h + ("$^{*}$" if h in primaries else "")
+        return f"{name} & {what} & {est} & {level} & {V[h]}\\\\"
+
+    rows = [
+        r"\multicolumn{5}{@{}l}{\textit{Protocol 1: 53 new instances, OR-Tools generator}}\\",
+        row("H1", r"Original procedure minus conservative speed (\ConfCommon{} instances)",
+            r"\ConfHOneMean{} [\ConfHOneLo, \ConfHOneHi]", "97.5\\%"),
+        row("H2", r"Capped minus original procedure (\ConfInstances{} instances)",
+            r"\ConfHTwoMean{} [\ConfHTwoLo, \ConfHTwoHi]", "97.5\\%"),
+        row("H3", r"Instances admitted, capped versus original procedure",
+            r"\ConfHThreeK{} vs \ConfHThreeP{} ($p=\ConfHThreeExact$)", "exact"),
+        row("H4", r"Advantage over conservative speed at $\sigma=0.30$ minus at $\sigma=0.10$, $\rho=0$",
+            r"\ConfHFourMean{} [\ConfHFourLo, \ConfHFourHi]", "95\\%"),
+        r"\midrule",
+        r"\multicolumn{5}{@{}l}{\textit{Protocol 2: 53 new instances, HGS and OR-Tools generators}}\\",
+        row("G1", r"HGS capped procedure minus HGS conservative speed (\CtwoCommon{} instances)",
+            r"\CtwoGOneMean{} [\CtwoGOneLo, \CtwoGOneHi]", "97.5\\%"),
+        row("G2", r"Conservative minus slack-aware fallback, OR-Tools capped procedure",
+            r"\CtwoGTwoMean{} [\CtwoGTwoLo, \CtwoGTwoHi]", "97.5\\%"),
+        row("G3", r"The same for the uncapped OR-Tools procedure",
+            r"\CtwoGThreeMean{} [\CtwoGThreeLo, \CtwoGThreeHi]", "95\\%"),
+        row("G4", r"HGS minus OR-Tools capped procedure, both with conservative fallback",
+            r"\CtwoGFourMean{} [\CtwoGFourLo, \CtwoGFourHi]", "95\\%"),
+        r"\midrule",
+        r"\multicolumn{5}{@{}l}{\textit{Protocol 3, part A: \PaInstances{} confirmatory instances with up to 100 customers}}\\",
+        row("R1", r"Screened robust with relief minus OR-Tools capped procedure",
+            r"\PaROne{} [\PaROneLo, \PaROneHi]", "97.5\\%"),
+        row("R2", r"Screened robust with relief minus HGS capped procedure (45 instances)",
+            r"\PaRTwo{} [\PaRTwoLo, \PaRTwoHi]", "97.5\\%"),
+        row("R3", r"The same contrast in vehicles",
+            r"\PaRThree{} [\PaRThreeLo, \PaRThreeHi]", "95\\%"),
+        row("R4", r"Distance (\%) of screened robust versus the most protective relieved setting",
+            r"\PaRFour{} [\PaRFourLo, \PaRFourHi]", "95\\%"),
+        r"\midrule",
+        r"\multicolumn{5}{@{}l}{\textit{Protocol 3, part B: \PbInstances{} new instances, best-screened fallback}}\\",
+        row("F1", r"Best-screened minus slack-aware fallback, OR-Tools capped procedure",
+            r"\PbFOne{} [\PbFOneLo, \PbFOneHi]", "97.5\\%"),
+        row("F2", r"Best-screened minus conservative fallback, HGS capped procedure",
+            r"\PbFTwo{} [\PbFTwoLo, \PbFTwoHi]", "97.5\\%"),
+        row("F3", r"Pooled service (\%), OR-Tools capped procedure with the new rule",
+            r"\PbFThree{} [\PbFThreeLo, \PbFThreeHi]", "95\\%"),
+        row("F4", r"Pooled service (\%), HGS capped procedure with the new rule",
+            r"\PbFFour{} [\PbFFourLo, \PbFFourHi]", "95\\%"),
+    ]
+    table = "\n".join([
+        r"\begin{table}[!htbp]",
+        r"\centering",
+        r"\footnotesize",
+        r"\caption{Every prespecified hypothesis of the three protocols. Primary hypotheses are marked $^{*}$. "
+        r"Differences are in percentage points of validated service-event probability unless stated; intervals are "
+        r"paired bootstrap intervals over instances (20,000 resamples), at 97.5\% for the two primary hypotheses of "
+        r"each study (Bonferroni) and 95\% otherwise. A hypothesis is confirmed when it meets the decision rule fixed "
+        r"in its protocol.}",
+        r"\label{tab:hypotheses}",
+        r"\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{6.4cm}>{\raggedright\arraybackslash}p{3.0cm}ll@{}}",
+        r"\toprule",
+        r"Hyp. & Contrast & Estimate [interval] & Level & Decision\\",
+        r"\midrule",
+        *rows,
+        r"\bottomrule",
+        r"\end{tabular}",
+        r"\end{table}", ""])
+    (OUT / "tab_hypotheses.tex").write_text(table)
+    print("itor tables ok:", ", ".join(sorted(p.name for p in OUT.glob("tab_*.tex"))))
+
+
+if __name__ == "__main__":
+    main()

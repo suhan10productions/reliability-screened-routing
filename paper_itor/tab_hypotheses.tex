@@ -1,0 +1,35 @@
+\begin{table}[!htbp]
+\centering
+\footnotesize
+\caption{Every prespecified hypothesis of the three protocols. Primary hypotheses are marked $^{*}$. Differences are in percentage points of validated service-event probability unless stated; intervals are paired bootstrap intervals over instances (20,000 resamples), at 97.5\% for the two primary hypotheses of each study (Bonferroni) and 95\% otherwise. A hypothesis is confirmed when it meets the decision rule fixed in its protocol.}
+\label{tab:hypotheses}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{6.4cm}>{\raggedright\arraybackslash}p{3.0cm}ll@{}}
+\toprule
+Hyp. & Contrast & Estimate [interval] & Level & Decision\\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Protocol 1: 53 new instances, OR-Tools generator}}\\
+H1$^{*}$ & Original procedure minus conservative speed (\ConfCommon{} instances) & \ConfHOneMean{} [\ConfHOneLo, \ConfHOneHi] & 97.5\% & confirmed\\
+H2$^{*}$ & Capped minus original procedure (\ConfInstances{} instances) & \ConfHTwoMean{} [\ConfHTwoLo, \ConfHTwoHi] & 97.5\% & confirmed\\
+H3 & Instances admitted, capped versus original procedure & \ConfHThreeK{} vs \ConfHThreeP{} ($p=\ConfHThreeExact$) & exact & confirmed\\
+H4 & Advantage over conservative speed at $\sigma=0.30$ minus at $\sigma=0.10$, $\rho=0$ & \ConfHFourMean{} [\ConfHFourLo, \ConfHFourHi] & 95\% & confirmed\\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Protocol 2: 53 new instances, HGS and OR-Tools generators}}\\
+G1$^{*}$ & HGS capped procedure minus HGS conservative speed (\CtwoCommon{} instances) & \CtwoGOneMean{} [\CtwoGOneLo, \CtwoGOneHi] & 97.5\% & confirmed\\
+G2$^{*}$ & Conservative minus slack-aware fallback, OR-Tools capped procedure & \CtwoGTwoMean{} [\CtwoGTwoLo, \CtwoGTwoHi] & 97.5\% & not confirmed\\
+G3 & The same for the uncapped OR-Tools procedure & \CtwoGThreeMean{} [\CtwoGThreeLo, \CtwoGThreeHi] & 95\% & confirmed\\
+G4 & HGS minus OR-Tools capped procedure, both with conservative fallback & \CtwoGFourMean{} [\CtwoGFourLo, \CtwoGFourHi] & 95\% & estimate\\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Protocol 3, part A: \PaInstances{} confirmatory instances with up to 100 customers}}\\
+R1$^{*}$ & Screened robust with relief minus OR-Tools capped procedure & \PaROne{} [\PaROneLo, \PaROneHi] & 97.5\% & confirmed\\
+R2$^{*}$ & Screened robust with relief minus HGS capped procedure (45 instances) & \PaRTwo{} [\PaRTwoLo, \PaRTwoHi] & 97.5\% & confirmed\\
+R3 & The same contrast in vehicles & \PaRThree{} [\PaRThreeLo, \PaRThreeHi] & 95\% & confirmed\\
+R4 & Distance (\%) of screened robust versus the most protective relieved setting & \PaRFour{} [\PaRFourLo, \PaRFourHi] & 95\% & confirmed\\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Protocol 3, part B: \PbInstances{} new instances, best-screened fallback}}\\
+F1$^{*}$ & Best-screened minus slack-aware fallback, OR-Tools capped procedure & \PbFOne{} [\PbFOneLo, \PbFOneHi] & 97.5\% & confirmed\\
+F2$^{*}$ & Best-screened minus conservative fallback, HGS capped procedure & \PbFTwo{} [\PbFTwoLo, \PbFTwoHi] & 97.5\% & confirmed\\
+F3 & Pooled service (\%), OR-Tools capped procedure with the new rule & \PbFThree{} [\PbFThreeLo, \PbFThreeHi] & 95\% & estimate\\
+F4 & Pooled service (\%), HGS capped procedure with the new rule & \PbFFour{} [\PbFFourLo, \PbFFourHi] & 95\% & estimate\\
+\bottomrule
+\end{tabular}
+\end{table}
