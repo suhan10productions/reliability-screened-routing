@@ -40,20 +40,19 @@ solver-independent alternative to travel-time padding}
 \historydate{Received DD MMMM YYYY; received in revised form DD MMMM YYYY; accepted DD MMMM YYYY}
 
 \begin{abstract}
-Routing plans built on nominal travel times fail under congestion and
-random delay, and the usual safeguard of padding every trip wastes capacity on
-safe routes. This paper adds a statistical reliability check
-to any solver for the vehicle routing problem with time windows. The solver
-generates candidate plans with internal buffers that leave customer windows
-unchanged. A plan is admitted only if a 95\% Wilson lower bound on the
-probability that at least 95\% of customers are served on time reaches 0.95;
-admitted plans are validated on fresh scenarios. Capping each buffer at
-the customer's direct-reachability limit removes a failure that also blocks
-budgeted-robust models. On synthetic instances with 20--200 customers,
-screening beat 20\% padding by \ProcConsRange{} percentage points (not
-significant at 200 customers). In three timestamped protocols,
-seven of eight primary hypotheses held; a conservative-speed fallback did
-not measurably help. Results depend on the assumed delay model.
+Routes planned on nominal travel times run late under congestion and random
+delay. Padding every trip, the usual remedy, adds distance and vehicles even to
+safe routes. This paper adds a statistical reliability check to
+any solver for the vehicle routing problem with time windows. The solver produces candidate plans with internal buffers,
+leaving customer windows unchanged. A plan is admitted only if a 95\% Wilson lower
+bound on the probability that at least 95\% of customers are served on time
+reaches 0.95, and is then tested on fresh scenarios. Capping each buffer at the
+customer's direct-reachability limit removes a failure that budgeted-robust
+models share. On synthetic instances with 20--200 customers, screening beat 20\%
+padding by \ProcConsRange{} percentage points, though not significantly at 200
+customers. In three timestamped protocols, seven of eight primary hypotheses
+held; the exception was a conservative-speed fallback. Results depend on
+the assumed delay model.
 \end{abstract}
 
 \keywords{vehicle routing; time windows; stochastic travel times; time-dependent
@@ -63,111 +62,116 @@ travel times; chance constraints; simulation; reproducibility}
 
 \section{Introduction}
 
-The vehicle routing problem with time windows (VRPTW) asks a fleet to serve
-customers within agreed windows, subject to vehicle capacity and shift length
-\citep{solomon1987,toth2014}. Most planning tools solve it on one fixed matrix
-of travel times. Real travel times change with the time of day and with random
-delays, and a delay early in a route pushes every later customer towards the end
-of its window. A plan that is optimal on nominal times takes no account of this.
+In the vehicle routing problem with time windows (VRPTW), a fleet of vehicles
+with limited capacity and shift length must serve each customer within an
+agreed window \citep{solomon1987,toth2014}. Most planning tools solve it with a
+single matrix of travel times. On the road, travel times change through the day
+and from one day to the next, and a delay early in a route pushes every later
+customer towards the end of its window. A plan that is optimal on nominal times
+takes no account of this.
 
-The simplest safeguard is to plan at a slower speed than expected. Padding every
-trip by a fixed percentage is easy to explain and needs no new software, but it
-protects off-peak trips as much as peak ones and adds distance and vehicles
-whether or not a route is at risk. Stochastic and robust VRPTW models avoid that
-waste by building the uncertainty into the optimization
+The simplest safeguard is to plan with a lower speed than expected. Padding every trip by a fixed percentage is easy to explain and needs no
+new software. Its cost is that off-peak trips are padded as much as peak ones,
+so the plan uses extra distance and vehicles whether a route is at risk or not.
+Stochastic and robust formulations of the VRPTW spend that protection more
+carefully, because they model the uncertainty inside the optimization
 \citep{errico2018,agra2013,gendreau2016}. They need a solver written for their
-uncertainty model, and most operators run a general solver that they cannot
-easily replace.
+uncertainty model, however, and most operators run a general-purpose solver
+that they cannot easily replace.
 
-This paper studies a procedure that sits between the two. A standard VRPTW
-solver proposes a family of candidate plans, each planned against internal
-deadlines contracted by a buffer, while the windows promised to customers stay
-fixed. Each candidate is simulated on a bank of scenarios drawn from a
-time-dependent, correlated delay model, and it is admitted only if a one-sided
-Wilson lower bound on the probability of a good service day reaches a target.
-Among admitted plans the procedure returns the best under the planner's own
-objective, and it reports that plan's reliability from an independent
-validation bank that played no part in the choice. The solver and its objective
-are left as they are; reliability is judged after the solve, by the same rule
-for every solver.
+This paper studies a procedure that keeps the operator's solver and adds a
+statistical test after it. The solver is asked for several candidate plans,
+each planned against internal deadlines that have been brought forward by a
+buffer, and the windows offered to customers do not change. Each candidate is
+simulated on a set of days drawn from a time-dependent model with correlated
+delays. It is admitted only if a one-sided Wilson lower bound on the
+probability of a good service day reaches a target, and the best admitted plan
+under the planner's own objective is returned. The reliability of that plan is
+then reported from a second, independent set of simulated days that played no
+part in choosing it. Because the test comes after the solve, the same rule
+applies to any solver and any objective.
 
-The paper makes three contributions.
+The paper contributes in three ways.
 \begin{enumerate}
-\item It specifies this screening-and-validation procedure and identifies a
-failure that internal buffers create: a contracted deadline can make a customer
-unreachable even by a direct trip, so the solver finds no plan. Capping each
-customer's buffer at its direct-reachability limit removes that failure. The
-same obstruction appears in a budgeted-robust VRPTW model, and the analogous
-relief removes it there too.
-\item It gives matched evidence on when screening beats uniform padding and at
-what cost. In a development study on 53 synthetic instances with 20 to 200
-customers, the screened procedure was \ProcConsRange{} percentage points more
-reliable than 20\% padding, depending on size; at 200 customers the interval
-included zero. Three protocols, each publicly timestamped with
-frozen code before its runs \citep{ali2026freeze,ali2026freeze2,ali2026freeze3},
-then tested the main findings on new instances, with OR-Tools \citep{ortools}
-and hybrid genetic search (HGS; \citealp{vidal2022,wouda2024}) as generators.
-Seven of their eight primary hypotheses met their decision criteria, and the
-paper reports the one that did not.
-\item It places the procedure against a budgeted-robust optimizer
-\citep{bertsimas2004,agra2013} and tests a fallback rule for instances where no
-plan passes. The robust plans with reachability relief, screened in the same
-way, were more reliable on instances with up to 100 customers but used more
-vehicles; restricted to the comparator's fleet, their advantage was no longer
-measurable. Returning the best-screened candidate when nothing is admitted
-raised pooled service in a prespecified test on 53 further instances.
+\item It sets out the screening-and-validation procedure and identifies a
+failure that internal buffers can cause. When a deadline is brought forward far
+enough, a customer can become unreachable even by a direct trip from the depot,
+and the solver then returns no plan at all. Capping each customer's buffer at
+its direct-reachability limit prevents this. The same failure occurs in a
+budgeted-robust VRPTW model, and the corresponding relief prevents it there as
+well.
+\item It compares screening with uniform padding on matched instances and
+reports what the extra reliability costs. In a development study on 53 synthetic
+instances with 20 to 200 customers, the screened procedure was \ProcConsRange{}
+percentage points more reliable than 20\% padding, depending on size, although
+the interval at 200 customers included zero. Three protocols, each timestamped
+in a public repository with frozen code before any of its runs
+\citep{ali2026freeze,ali2026freeze2,ali2026freeze3}, then tested the main
+findings on new instances with two generators, OR-Tools \citep{ortools} and
+hybrid genetic search (HGS; \citealp{vidal2022,wouda2024}). Seven of the eight
+primary hypotheses met their decision criteria, and the one that did not is
+reported alongside the others.
+\item It sets the procedure against a budgeted-robust optimizer
+\citep{bertsimas2004,agra2013} and tests a rule for instances on which no plan
+passes. Robust plans with reachability relief, put through the same screen, were
+more reliable on instances with up to 100 customers. They also used more
+vehicles, and when they were limited to the comparator's fleet their advantage
+was no longer statistically detectable. Returning the best-screened candidate when nothing
+is admitted raised the average service over all instances in a prespecified
+test on 53 further instances.
 \end{enumerate}
 
-The instances are synthetic and the delay model is assumed, so the evidence
-shows repeatability within one setting. Every number in the paper is regenerated
-from the archived records, and the full model, every result table and further
-checks are in the Supporting Information (SI).
+All instances are synthetic and the delay model is assumed, so the evidence is
+about repeatability in one controlled setting. Every number in the paper can be
+regenerated from the archived records. The full model, all result tables and
+the further checks are in the Supporting Information (SI).
 
-Section~\ref{sec:related} reviews related work. Section~\ref{sec:method}
-defines the planning model, the evaluation model and the procedure.
-Section~\ref{sec:design} describes the experiments and
-Section~\ref{sec:results} the results. Section~\ref{sec:discussion} discusses
-implications and limitations, and Section~\ref{sec:conclusion} concludes.
+Section~\ref{sec:related} reviews related work and Section~\ref{sec:method}
+defines the models and the procedure. Sections~\ref{sec:design}
+and~\ref{sec:results} give the design and the results,
+Section~\ref{sec:discussion} discusses practical use and limitations, and
+Section~\ref{sec:conclusion} concludes.
 
 \section{Related work}\label{sec:related}
 
-Time-dependent routing needs care because a speed multiplier applied at
-departure can break first-in-first-out (FIFO). \citet{ichoua2003} introduced
-the integrated speed-profile construction used here, and \citet{ghiani2014}
-analysed its properties. Stochastic VRPTW research treats uncertain travel and
-service times through chance constraints, recourse, approximate feasibility
-tests and data-driven formulations
+Time-dependent travel needs some care, because applying a speed multiplier at
+the moment of departure can break the first-in-first-out (FIFO) property. The
+integrated speed profile of \citet{ichoua2003}, which is used here, avoids this,
+and \citet{ghiani2014} analyse its properties. For uncertain travel and service
+times, the stochastic VRPTW literature uses chance constraints, recourse models,
+approximate feasibility tests and data-driven formulations
 \citep{laporte1992,kenyon2003,li2010,errico2018,bomboi2022,serrano2026}.
-\citet{ehmke2015} embed per-customer service levels in a routing method;
-\citet{tas2014} jointly model time dependence, stochastic travel and soft
-windows; and \citet{bomboi2022} check route feasibility under correlated,
-time-dependent travel times. \citet{jabali2015} introduced self-imposed time
-windows, and \citet{vareias2019} assign windows under stochastic travel times
-with per-customer chance constraints. These are the closest analogues of the
-internal contraction used here, but both build the buffers into a dedicated
-optimization and judge reliability customer by customer. Neither can be added to
-an unmodified solver, and neither bounds the probability of a whole service day.
+\citet{ehmke2015} build per-customer service levels into a routing method,
+\citet{tas2014} model time dependence, stochastic travel and soft windows
+together, and \citet{bomboi2022} check route feasibility when travel times are
+correlated and time-dependent.
 
-A second line builds the uncertainty into the optimization. \citet{agra2013}
-solve a robust VRPTW over a budgeted uncertainty set \citep{bertsimas2004};
-\citet{jaillet2016} minimize a requirements violation index; and
-\citet{zhang2019} develop a riskiness index with an exact algorithm. Surveys by
-\citet{gendreau1996} and \citet{gendreau2016} cover stochastic routing more
-broadly. This paper compares the procedure with padding and with one budgeted
-robust model; it does not compare it with a chance-constrained or
-distributionally robust VRPTW solver.
+The closest work to the buffers used here is on self-imposed time windows,
+introduced by \citet{jabali2015}, and on window assignment under stochastic
+travel times with per-customer chance constraints \citep{vareias2019}. Both
+place the buffers inside a dedicated optimization and judge reliability one
+customer at a time. Neither can be attached to an unmodified solver, and neither
+bounds the probability that a whole service day goes well.
 
-This paper makes its statistical claim after the solve. It does not build a
-feasibility approximation into a specialist search. It takes routes from
-a replaceable nominal solver, searches a family of internal buffers on one
-scenario bank and checks the chosen plan once on a held-out bank. Its service
-event limits the share of late customers across the whole day, which is closer
-to the plan-level risk measures of \citet{kenyon2003} than to per-customer
-constraints. Windows offered to customers never change. Monte Carlo
-approximations of chance constraints need a separate check of the chosen
-solution \citep{ahmed2008}, which the validation bank provides, and the Wilson
-bound is used because normal-approximation intervals behave poorly near one
-\citep{wilson1927,brown2001}.
+Robust models require the plan to stay feasible for every realisation in an
+uncertainty set. \citet{agra2013} solve a robust VRPTW with the budgeted set of
+\citet{bertsimas2004}, \citet{jaillet2016} minimize a requirements violation
+index, and \citet{zhang2019} develop a riskiness index together with an exact
+algorithm. \citet{gendreau1996} and \citet{gendreau2016} survey stochastic
+routing more broadly. The experiments below compare the procedure with padding
+and with one budgeted robust model. Chance-constrained and distributionally
+robust VRPTW solvers are not included.
+
+The procedure studied here makes its statistical claim after the solve and
+builds no feasibility approximation into a specialist search. Routes come from a replaceable nominal solver, a family of internal buffers is searched
+on one set of simulated days, and the chosen plan is checked once on a held-out
+set. The service event limits the share of late customers over the whole day,
+which is closer to the plan-level risk measures of \citet{kenyon2003} than to
+per-customer constraints, and the windows offered to customers never change.
+Monte Carlo approximations of chance constraints need a separate check of the
+solution they select \citep{ahmed2008}, and the held-out set provides it. The
+Wilson bound is used because normal-approximation intervals behave poorly for
+probabilities close to one \citep{wilson1927,brown2001}.
 
 \section{Model and procedure}\label{sec:method}
 
@@ -175,83 +179,87 @@ bound is used because normal-approximation intervals behave poorly near one
 
 Let $N=\{0,1,\ldots,n\}$ be the nodes, with depot 0 and customers $C$, and let
 $V$ be a homogeneous fleet with capacity $Q$ and maximum shift duration
-$H^{\max}$. Customer $i$ has demand $\delta_i$, service time $s_i$ and offered
-window $[l_i,u_i]$ for the start of service. Planning uses nominal distances
-$d_{ij}$ and times $\bar t_{ij}$. A plan assigns customers to routes, fixes the
-visit order and sets a depot departure $d_v$ and return $r_v$ for each vehicle
-$v$, with service start $a_i$ at each customer. The full formulation is in
-\SI{sec:si-model}; there $x_{ijv}=1$ if vehicle $v$ drives arc $(i,j)$ and
-$y_v=1$ if vehicle $v$ is used. Four criteria describe a plan:
+$H^{\max}$. Customer $i$ has demand $\delta_i$, service time $s_i$ and an
+offered window $[l_i,u_i]$ for the start of service. Planning uses nominal
+distances $d_{ij}$ and travel times $\bar t_{ij}$. A plan assigns customers to
+routes, fixes the order of visits and sets a depot departure $d_v$ and return
+$r_v$ for each vehicle $v$, with service starting at time $a_i$ at customer $i$.
+The full formulation is in \SI{sec:si-model}, where $x_{ijv}=1$ if vehicle $v$
+drives arc $(i,j)$ and $y_v=1$ if vehicle $v$ is used. A plan is described by
+four criteria:
 \begin{equation}
  F_1=c_f\sum_{v}\sum_{i,j}d_{ij}x_{ijv},\quad
  F_2=\sum_{i\in C}\max\{0,s^*-(u_i-a_i)\},\quad
  F_3=\sum_{v}(r_v-d_v),\quad
- F_4=\sum_{v}y_v,                                       \label{eq:criteria}
+ F_4=\sum_{v}y_v.                                       \label{eq:criteria}
 \end{equation}
-namely distance cost at $c_f$ per kilometre, slack deficit against a target slack $s^*$, driver
-duration and fleet use. Each criterion is scaled by the range $[L_k,U_k]$ it
-takes over four single-criterion anchor solutions, and the candidate objective
-is
+These are the distance cost at $c_f$ per kilometre, the slack deficit against a
+target slack $s^*$, the total driver duration and the number of vehicles. Each
+criterion is scaled by its range $[L_k,U_k]$ over four anchor solutions, each of
+which minimizes one criterion alone, and the candidate objective is
 \begin{equation}
  Z=\sum_{k=1}^{4}w_k\,\frac{F_k-L_k}{\max\{U_k-L_k,1\}}.        \label{eq:objective}
 \end{equation}
-The weights $\mathbf{w}=(0.5693,0.2643,0.1055,0.0609)$ are a fixed experimental
-vector chosen before any experiment; their origin and a sensitivity analysis
-are in \SI{sec:ahp-matrix} and Section~\ref{sec:checks}. The objective shapes the
-candidates and ranks the admitted ones, but the admission test does not use it,
-and any scalar objective could replace it.
+The weights $\mathbf{w}=(0.5693,0.2643,0.1055,0.0609)$ were fixed before any
+experiment and are treated as an experimental setting. Their origin is given in
+\SI{sec:ahp-matrix}, and their effect is examined in Section~\ref{sec:checks}.
+The objective shapes the candidates and ranks the admitted ones. The admission
+test does not use it, so any other scalar objective could take its place.
 
 \subsection{Evaluation model}
 
-The day is split into periods $[T_k,T_{k+1})$ with speeds $\nu_k>0$. The
-deterministic travel time from $i$ to $j$ when leaving at time $\tau$ is the
+The day is divided into periods $[T_k,T_{k+1})$ with speeds $\nu_k>0$. When a
+vehicle leaves $i$ for $j$ at time $\tau$, the deterministic travel time is the
 smallest $\Delta\geq0$ with
 \begin{equation}
  \int_{\tau}^{\tau+\Delta}\nu(u)\,du=d_{ij},                 \label{eq:fifo}
 \end{equation}
-which preserves FIFO \citep{ichoua2003}. In scenario $\omega$ the realised
-travel time is $t_{ij}(\tau)\exp\{\varepsilon_{ij}(\omega)\}$, with
+which preserves FIFO \citep{ichoua2003}. In scenario $\omega$ this time is
+multiplied by $\exp\{\varepsilon_{ij}(\omega)\}$, where
 \begin{equation}
  \varepsilon_{ij}(\omega)=\sigma\bigl(\sqrt{\rho}\,\xi_0(\omega)
  +\sqrt{1-\rho}\,\xi_{ij}(\omega)\bigr),                       \label{eq:noise}
 \end{equation}
-where $\xi_0$ is a common standard normal factor drawn once per scenario and
-$\xi_{ij}$ is an arc-specific one. The multiplier has median one, so the
-deterministic profile gives the median travel time. Each arc draws from its own
-stream keyed by the bank seed and its endpoints, so plans evaluated on one bank
-see the same disturbances on shared arcs. A fixed set of simulated days drawn in this way is called a scenario
-\emph{bank}. Every vehicle leaves at its planned time in every scenario.
+$\xi_0$ is a standard normal factor shared by all arcs in the scenario and
+$\xi_{ij}$ is specific to the arc. The multiplier has median one, so the
+deterministic profile gives the median travel time. A fixed set of simulated
+days drawn in this way is called a scenario \emph{bank}. Each arc draws from its
+own random stream, keyed by the bank seed and its endpoints, so plans evaluated
+on the same bank meet the same delays on the arcs they share. In every scenario
+each vehicle leaves the depot at its planned time.
 
 \subsection{Screening and validation}
 
-For plan $R$ in scenario $\omega$, let $q(R,\omega)$ be the share of customers
+For plan $R$ and scenario $\omega$, let $q(R,\omega)$ be the share of customers
 whose service starts by $u_i$. The service event is
-$J(R,\omega)=\mathbf{1}\{q(R,\omega)\geq\kappa\}$ with $\kappa=0.95$, and the
-target is $\Pr[J=1]\geq\alpha$ with $\alpha=0.95$. Requiring every customer to
-be on time would be a poor target for large instances, because that probability
-falls with the number of customers even for good plans; it is reported but not
-used for admission.
+$J(R,\omega)=\mathbf{1}\{q(R,\omega)\geq\kappa\}$ with $\kappa=0.95$, so a
+day with $J=1$ is a success, and the target is $\Pr[J=1]\geq\alpha$ with
+$\alpha=0.95$.
+Asking for every customer to be on time would make a poor target on large
+instances, since that probability falls with the number of customers even for
+good plans. It is reported, but it is not used for admission.
 
-For each buffer $\beta$ in a grid, the solver plans against the contracted
-deadline $\max\{l_i,u_i-\beta\}$ and minimizes~\eqref{eq:objective}, with the
-anchor ranges fixed at their uncontracted values. Each candidate is simulated on
-a screening bank of $N_s$ scenarios, and with empirical success $\hat p$ its
-one-sided Wilson lower bound at level $1-\eta$ is
+For each buffer $\beta$ in the grid, the solver plans against the earlier
+deadline $\max\{l_i,u_i-\beta\}$ and minimizes~\eqref{eq:objective}; the anchor
+ranges stay at their uncontracted values. Each candidate is simulated on a
+screening bank of $N_s$ scenarios. If it succeeds on a share $\hat p$ of them,
+its one-sided Wilson lower bound at level $1-\eta$ is
 \begin{equation}
  L(\hat p)=\frac{\hat p+z^2/(2N_s)-z\sqrt{\hat p(1-\hat p)/N_s+z^2/(4N_s^2)}}{1+z^2/N_s},
  \qquad z=z_{1-\eta}.                                          \label{eq:wilson}
 \end{equation}
 A candidate is admitted when $L(\hat p)\geq\alpha$, and the admitted candidate
-with the smallest $Z$ is selected. It is then simulated once on a larger,
-untouched validation bank, which only reports its reliability. Scoring always
-uses the offered windows $u_i$. If no candidate is admitted, a fallback rule
-fixed in advance returns a plan, so the procedure has an output on every
-instance. The results therefore distinguish the validated reliability of
-admitted plans from the procedure-level reliability over all instances,
-fallbacks included; the latter, averaged over instances, is called
-\emph{pooled service}. The bound holds for each candidate separately; a
-family-wise version over the grid is examined in Section~\ref{sec:checks}.
-The procedure is:
+with the smallest $Z$ is selected. The selected plan is simulated once more on a
+larger validation bank that has not been used before, and this run only reports
+its reliability. Lateness is always scored against the offered windows $u_i$.
+If no candidate is admitted, a fallback rule fixed in advance supplies a plan,
+so the procedure returns something on every instance. The results therefore
+report the validated reliability of admitted plans separately from the
+reliability of whatever the procedure returned, fallbacks included. The average
+of the latter over instances is called \emph{pooled service}. The Wilson
+bound applies to each candidate on its own, and a family-wise version over the
+whole grid is examined in Section~\ref{sec:checks}. The procedure has four
+steps.
 \begin{enumerate}
 \item For each buffer $\beta\in\{0,5,\ldots,60\}$ minutes, solve the planning
 model with deadlines $\max\{l_i,u_i-\beta\}$ (or~\eqref{eq:cap} when capped).
@@ -264,62 +272,63 @@ service probability.
 
 \subsection{Reachability-capped contraction}
 
-Contraction can make a customer unreachable even by a direct trip from the
-depot, in which case no plan exists at that buffer. Let
-$e_i=\max\{l_i,\bar t_{0i}\}$ be the earliest direct service time. The capped
-procedure plans against
+If a deadline is brought forward too far, a customer can become unreachable even
+by a direct trip from the depot, and then no plan exists at that buffer. Let
+$e_i=\max\{l_i,\bar t_{0i}\}$ be the earliest time at which service could start
+after a direct trip. The capped procedure plans against
 \begin{equation}
  u_i^{\rm cap}(\beta)=\min\bigl\{u_i,\max\{l_i,u_i-\beta,e_i\}\bigr\},
  \label{eq:cap}
 \end{equation}
-so contraction alone never removes a customer that was reachable before. The cap
-does not guarantee that a joint routing exists or that the target is met. A
+so contraction alone never makes a reachable customer unreachable. The cap does
+not guarantee that a joint routing exists or that the target will be met. A
 shortest-path relaxation certifies when a contracted model is infeasible, which
 separates proven infeasibility from search failure (\SI{sec:capping}).
 
 \subsection{Comparators}
 
-\emph{Conservative speed} plans for distance at 33.3~km/h instead of 40~km/h,
+\emph{Conservative speed} minimizes distance at 33.3~km/h instead of 40~km/h,
 which pads every trip by 20\%. \emph{Screened conservative speed} applies the
-same screen to conservative-speed candidates. The \emph{original procedure}
+same screen to candidates planned at that speed. The \emph{original procedure}
 screens contracted candidates without the cap, and the \emph{capped procedure}
-uses~\eqref{eq:cap}. The candidate generator is OR-Tools \citep{ortools} or the
-HGS of PyVRP \citep{wouda2024}, which solves the same planning model but cannot
-express the slack-deficit term during generation.
+uses~\eqref{eq:cap}. Candidates come from OR-Tools \citep{ortools} or from the
+HGS of PyVRP \citep{wouda2024}. HGS solves the same planning model, but it
+cannot include the slack-deficit term while it generates plans.
 
 The robust comparator is a VRPTW with budgeted uncertainty
-\citep{bertsimas2004,agra2013}: on each arc the travel time may rise from
+\citep{bertsimas2004,agra2013}. The travel time of each arc may rise from
 $\bar t_{ij}$ to $\bar t_{ij}+\lceil\theta\bar t_{ij}\rceil$, and a route must
-stay feasible whenever at most $\Gamma$ of its arcs do so; \emph{box
-uncertainty} is the case in which every arc may take its upper value. Feasibility is
-checked exactly with the dynamic programme of \citet{agra2013} inside a large
-neighbourhood search written for this study, which minimizes distance and stops
-after a fixed number of iterations, so it is deterministic. Robust models meet
-the same obstruction as contraction: a customer that cannot be reached on time
-by a direct trip at its upper travel time makes every plan infeasible. The
-\emph{relieved} variant raises such a customer's robust deadline to its
-worst-case direct start while every original window must still hold under
-nominal times. \emph{Screened robust} passes all robust plans of an instance
-through the same screen and returns the shortest admitted one, or the one with
-the highest screening success. \SI{sec:robust-design} gives the details.
+remain feasible whenever at most $\Gamma$ of its arcs take their upper value.
+Under \emph{box uncertainty} all of them may. Feasibility is checked exactly with
+the dynamic programme of \citet{agra2013} inside a large neighbourhood search
+written for this study. The search minimizes distance and stops after a fixed
+number of iterations, so its output is deterministic. Robust models run into
+the same reachability problem as contraction, since a customer that cannot be
+reached in time by a direct trip at its upper travel time makes every plan
+infeasible. The \emph{relieved} variant raises that customer's robust deadline to
+its worst-case direct start, while every original window must still hold under
+nominal travel times. \emph{Screened robust} passes all robust plans for an
+instance through the same screen. It returns the shortest admitted plan, or the
+plan with the highest screening success if none is admitted.
+\SI{sec:robust-design} gives the details.
 
-Three fallback rules are compared: the uncontracted slack-aware plan
-(\emph{slack-aware}), the generator's conservative-speed plan
-(\emph{conservative}), and the candidate of the procedure's own family with the
-highest screening success (\emph{best-screened}). None of them uses a validation
-outcome. Unless stated otherwise, the OR-Tools procedures use the slack-aware
-fallback and the HGS procedures the conservative one, as fixed in their
-protocols.
+Three fallback rules are compared. The \emph{slack-aware} rule returns the
+uncontracted plan of the weighted objective, the \emph{conservative} rule
+returns the generator's conservative-speed plan, and the \emph{best-screened}
+rule returns the candidate of the procedure's own family with the highest
+screening success. None of them looks at a validation result. Unless stated
+otherwise, the OR-Tools procedures use the slack-aware fallback and the HGS
+procedures the conservative one, as their protocols specify.
 
 \section{Experimental design}\label{sec:design}
 
-Instances place a central depot and uniformly distributed customers on a
-$100\times100$ grid. Demand is uniform on 10--49 units, service takes 10
-minutes, window widths are uniform on 90--149 minutes, capacity is 1000 and the
-shift lasts 600 minutes from 06:00. Table~\ref{tab:parameters} lists the
-instance sizes and the model constants. The planned shift has a morning peak
-from 07:00 to 09:00, and the speed profile continues into the evening so that
-overrunning routes are still evaluated.
+Each instance has a central depot and customers spread uniformly over a
+$100\times100$ grid. Demands are uniform on 10--49 units, service takes 10
+minutes, window widths are uniform on 90--149 minutes, vehicles carry 1000 units
+and the shift lasts 600 minutes from 06:00. Table~\ref{tab:parameters} lists the
+instance sizes and the model constants. Speeds drop during a morning peak from
+07:00 to 09:00, and the speed profile continues into the evening so that routes
+running past the end of the shift are still evaluated.
 
 \begin{table}[t]
 \centering
@@ -344,32 +353,35 @@ Solver budgets & OR-Tools 5~s per candidate; HGS 10,000 iterations\\
 \end{tabular}
 \end{table}
 
-The development study ran every configuration on 53 instances with fixed seeds,
-and its findings are exploratory. Within an instance all configurations share
-the same screening and validation banks, so every comparison is paired.
-Across-instance intervals use a paired bootstrap with 20,000 resamples and a
-fixed seed. A configuration without a plan scores zero, so a failure counts
-against the configuration that failed. Software errors are recorded and block
-the analysis; they are never scored as routing outcomes.
+In the development study every configuration was run on 53 seeded instances,
+and its findings are treated as exploratory. All configurations of an instance
+share the same screening and validation banks, so every comparison is paired.
+Intervals across instances come from a paired bootstrap with 20,000 resamples
+and a fixed seed. A configuration that finds no plan scores zero on that
+instance, so a failure counts against the configuration that failed. Software
+errors are logged and stop the analysis, and they are never scored as routing
+outcomes.
 
-Three confirmatory protocols followed. Each fixed its hypotheses, tests, decision
-rules, failure policy and instance seeds, and was committed to a public
-repository with a SHA-256 manifest of the code that runs and analyses it, and
-archived on Zenodo, before any of its instances was solved
-\citep{ali2026freeze,ali2026freeze2,ali2026freeze3}. The analysis programs stop
-unless every record is present and every frozen file matches its manifest.
-Protocol~1 tested the OR-Tools procedures on 53 new instances. Protocol~2 tested
-HGS as the generator and the conservative fallback on 53 further instances.
-Protocol~3 had two parts: part A repeated the robust comparison on the
-\PaInstances{} confirmatory instances with up to 100 customers, and part B
-tested the best-screened fallback on 53 new instances. Table~\ref{tab:studies}
-summarizes the studies. In each study the two primary
-hypotheses use 97.5\% intervals (Bonferroni) and are confirmed only if the
-interval excludes zero in the stated direction; secondary hypotheses use 95\%
-intervals and cannot rescue a primary one. All instances come from the same
-generator and delay model, so the protocols test repeatability in that setting
-rather than external validity. Hardware, software versions and the course of each
-run are in Sections~\ref{S-sec:confdesign}, \ref{S-sec:conf2design}
+Three confirmatory protocols followed (Table~\ref{tab:studies}). Each protocol fixed
+its hypotheses, tests, decision rules, failure policy and instance seeds. It was
+committed to a public repository, together with a SHA-256 manifest of the code
+that runs and analyses it, and archived on Zenodo
+\citep{ali2026freeze,ali2026freeze2,ali2026freeze3}, all before any of its
+instances was solved.
+The analysis programs refuse to run unless every record is present and every
+frozen file matches its manifest. Protocol~1 tested the OR-Tools procedures on
+53 new instances. Protocol~2 used 53 further instances to test HGS as the
+generator and the conservative fallback. Protocol~3 had two parts: part A
+repeated the robust comparison on the \PaInstances{} earlier confirmatory
+instances with up to 100 customers, and part B tested the best-screened fallback
+on 53 new instances. Within each study the two primary hypotheses use 97.5\%
+intervals (a Bonferroni adjustment), and each is confirmed only if its interval
+excludes zero in the stated direction. Secondary hypotheses use 95\% intervals
+and cannot rescue a primary one. Since every instance comes from the same
+generator and delay model, the protocols test whether the findings repeat in
+this setting; external validity is outside their scope. Hardware, software
+versions and the course of each run are given in
+Sections~\ref{S-sec:confdesign}, \ref{S-sec:conf2design}
 and~\ref{S-sec:conf3design}.
 
 \begin{table}[t]
@@ -395,28 +407,29 @@ Protocol 3B (F1--F4) & 53 new & OR-Tools, HGS & Does the best-screened fallback 
 
 \subsection{Screening against padding}
 
-Table~\ref{tab:paired} gives the paired contrasts with conservative speed on the
-46 development instances where conservative speed found a plan. The complete
+Table~\ref{tab:paired} gives the paired differences from conservative speed on
+the 46 development instances where conservative speed found a plan. The complete
 original procedure was \ProcConsRange{} points more reliable, depending on size,
 although the interval at 200 customers includes zero. The slack-aware objective
-without screening was less reliable than padding at every size, so the gain
-comes from the candidate family and the screen acting together. Screening conservative-speed candidates also helped, which makes the
+on its own, without screening, was less reliable than padding at every size, so
+the gain needs both the family of buffered candidates and the screen. Applying
+the same screen to conservative-speed candidates also helped, which makes a
 fixed 20\% pad the weaker of the two padding baselines.
 
 \input{tab_paired.tex}
 
 The advantage grows with noise when delays are independent
-(Fig.~\ref{fig:reliability}). With fixed plans and $\rho=0$, the difference
-between the original procedure and conservative speed rose from
-$\SweepLowIndep$ points at $\sigma=0.10$, where padding was slightly better, to \SweepHighIndep{} at
-$\sigma=0.30$. Under strongly correlated delays the increase was not monotonic.
-The gain costs some resources: the original procedure used more
-distance than conservative speed (\ItorCostDistRange\%, depending on size), with fleet changes that
-went both ways (\SI{sec:si-dev}).
+(Fig.~\ref{fig:reliability}). For fixed plans with $\rho=0$, the difference
+between the original procedure and conservative speed went from
+$\SweepLowIndep$ points at $\sigma=0.10$, where padding was slightly ahead, to
+\SweepHighIndep{} points at $\sigma=0.30$. With strongly correlated delays the
+increase was not monotonic. Depending on size, the original procedure drove
+\ItorCostDistRange\% more distance than conservative speed, and its fleet was
+sometimes larger and sometimes smaller (\SI{sec:si-dev}).
 
 \begin{figure}[t]
  \centering
- \includegraphics[width=\textwidth]{../paper/Fig1.pdf}
+ \includegraphics[width=0.92\textwidth]{../paper/Fig1.pdf}
  \caption{Paired difference in service probability between the original
  procedure (P) and conservative speed (C) on the 46 common development
  instances, for fixed plans across the disturbance grid. Circles, squares and
@@ -427,63 +440,63 @@ went both ways (\SI{sec:si-dev}).
 
 \subsection{Capping the contraction}
 
-Of the \FailureCount{} development instances on which the original procedure
-admitted no plan, \CertifiedFailures{} met a certified reachability obstruction
-at some buffer level. Capping (Table~\ref{tab:screen}) raised the number of admitted instances from
-\OriginalSelected{} to \CappedSelected{} instances and pooled service by
-\CappedGainInterval{} points. At 100 and 200 customers the capped procedure was
-admitted on \CappedLargeSelected{} instances and pooled \CappedLargeRange\%. It
-used \CappedDistanceCost\% more distance and \CappedFleetCost{} more vehicles
-on average than the original procedure, rising to \CappedFleetLarge{} vehicles
-at 200 customers.
+On \FailureCount{} development instances the original procedure admitted no
+plan, and on \CertifiedFailures{} of them a reachability obstruction was
+certified at some buffer level. Capping (Table~\ref{tab:screen}) raised the
+number of admitted instances from \OriginalSelected{} to \CappedSelected{} and
+pooled service by \CappedGainInterval{} points. At 100 and 200 customers the
+capped procedure was admitted on \CappedLargeSelected{} instances and pooled
+\CappedLargeRange\%. On average it used \CappedDistanceCost\% more distance and
+\CappedFleetCost{} more vehicles than the original procedure, and
+\CappedFleetLarge{} more vehicles at 200 customers.
 
 \input{tab_screen.tex}
 
-The remaining shortfall comes from the fallback. Admitted plans averaged
-\CappedSelectedMean\% validated service for the capped procedure, while its
-\CappedFallbackCount{} fallback plans, all at 20 or 50 customers, averaged
-\CappedFallbackMean\%. Of the admitted plans, \CappedRetained{} of
-\CappedSelected{} kept a lower bound of at least 0.95 on the fresh validation
+Pooled service stays below the target because of the fallback. Plans admitted
+by the capped procedure averaged \CappedSelectedMean\% validated service, while
+its \CappedFallbackCount{} fallback plans, all at 20 or 50 customers, averaged
+\CappedFallbackMean\%. Of the \CappedSelected{} admitted plans,
+\CappedRetained{} also had a lower bound of at least 0.95 on the validation
 bank.
 
 \subsection{Confirmatory evidence}
 
-Table~\ref{tab:hypotheses} lists every prespecified hypothesis. In protocol~1
-the original procedure exceeded conservative speed by \ConfHOneMean{} points and
-capping added \ConfHTwoMean{}. Capping admitted \ConfHThreeK{} instances against
-\ConfHThreeP{} and lost none. H2 and H3 are therefore not independent:
-\HTwoFromKonly{} of the \ConfHTwoMean{} points of H2 come from the instances that
-only the capped procedure admitted. The capped
-procedure pooled \ConfPooledK\% over all instances, against \ConfPooledP\% for
+Table~\ref{tab:hypotheses} lists every prespecified hypothesis with its estimate
+and decision. In protocol~1 the original procedure beat conservative speed by
+\ConfHOneMean{} points, and capping added another \ConfHTwoMean{}. Capping
+admitted \ConfHThreeK{} instances against \ConfHThreeP{} and lost none. H2 and
+H3 are not independent, because \HTwoFromKonly{} of the \ConfHTwoMean{} points
+in H2 come from instances that only the capped procedure admitted. Over all
+instances the capped procedure pooled \ConfPooledK\%, against \ConfPooledP\% for
 the original procedure.
 
 \input{tab_hypotheses.tex}
 
-Protocol~2 asked whether the gain survives a stronger generator. With HGS,
-screening with capped contraction exceeded HGS conservative-speed planning by
-\CtwoGOneMean{} points, and pooled service reached \CtwoPooledHGSK\% against
+Protocol~2 asked whether the gain holds up with a stronger generator. With HGS,
+screening with capped contraction beat HGS conservative-speed planning by
+\CtwoGOneMean{} points, and pooled service was \CtwoPooledHGSK\% against
 \CtwoPooledHGSCons\%. The HGS and OR-Tools capped procedures differed by
-\CtwoGFourMean{} points, an interval that bounds the difference but, with no
-equivalence margin set, does not show equivalence. Capping mattered more with
-HGS: at 100 and 200 customers it raised admission from \CtwoHGSPAdmittedLarge{}
-to \CtwoHGSKAdmittedLarge{} of \CtwoLarge{} instances. The conservative
-fallback, suggested post hoc by protocol~1, did not measurably improve the
-capped OR-Tools procedure (G2): that procedure fell back on only
-\CtwoORTKFallbacks{} instances, and the new rule changed the plan on
-\CtwoFallbacksChanged{} of them, with effects in both directions. It did help
-the uncapped procedure (G3).
+\CtwoGFourMean{} points [\CtwoGFourLo, \CtwoGFourHi]. No equivalence margin was set in advance, so this
+interval limits the size of the difference without establishing equivalence.
+Capping mattered more with HGS. At 100 and 200 customers it raised the number of
+admitted instances from \CtwoHGSPAdmittedLarge{} to \CtwoHGSKAdmittedLarge{} of
+\CtwoLarge{}. The conservative fallback, which protocol~1 had suggested after
+the fact, did not measurably improve the capped OR-Tools procedure (G2). That
+procedure fell back on only \CtwoORTKFallbacks{} instances, the new rule changed
+the plan on \CtwoFallbacksChanged{} of them, and the changes went both ways. The
+rule did help the uncapped procedure (G3).
 
 \subsection{Comparison with robust optimization}
 
-On the \RobInstances{} development instances with up to 100 customers, the standard robust
-model under box uncertainty had no plan on \RobNoPlanBoxSix{} instances at
-$\theta=0.6$, each time because some customer could not be protected even on a
-direct trip; every smaller budget failed on the same instances. With relief,
-every setting had a plan, and the relieved settings traded distance for service
-along a smooth frontier (Fig.~\ref{fig:robust}). Screened robust with relief
-pooled \RobScreenedCapP\%, against \RobOrtCappedP\% for the OR-Tools and
-\RobHgsCappedP\% for the HGS capped procedure, and used \RobScreenedCapMinusHgsFleet{}
-more vehicles than the latter.
+On the \RobInstances{} development instances with up to 100 customers, the
+standard robust model under box uncertainty with $\theta=0.6$ had no plan on
+\RobNoPlanBoxSix{} instances. In each case some customer could not be protected
+even on a direct trip, and every smaller budget failed on the same instances.
+With relief every setting had a plan, and moving between settings traded
+distance for service along a smooth curve (Fig.~\ref{fig:robust}). Screened
+robust with relief pooled \RobScreenedCapP\%, compared with \RobOrtCappedP\% for
+the OR-Tools capped procedure and \RobHgsCappedP\% for the HGS one, and it used
+\RobScreenedCapMinusHgsFleet{} more vehicles than the HGS procedure.
 
 \begin{figure}[t]
  \centering
@@ -496,115 +509,121 @@ more vehicles than the latter.
  \label{fig:robust}
 \end{figure}
 
-Part A of protocol~3 confirmed this on the confirmatory instances with up to 100
-customers. Screened robust with relief exceeded the OR-Tools capped procedure by
-\PaROne{} points over all \PaInstances{} of them, and the HGS capped procedure by
-\PaRTwo{} points over the 45 of protocol~2, where HGS plans exist; the two
-estimates agree only by coincidence. It
-pooled \PaScreenedP\% and used \PaRThree{} more vehicles than the HGS
-procedure. Within the robust family, screening returned plans \PaRFourAbs\%
-shorter than the most protective setting for \PaBoxMinusScr{} points less
-service. When the robust plans were restricted, after the fact, to no more
-vehicles than the comparator's plan, they were not measurably more reliable:
-the differences were \FmConfHgs{} [\FmConfHgsLo, \FmConfHgsHi] points against
-the HGS and \FmConfOrt{} [\FmConfOrtLo, \FmConfOrtHi] against the OR-Tools
-capped procedure. On these instances the screened procedures trade some
-reliability for fewer vehicles, returning the shortest candidate that passes a
-stated test. Runs with 200 customers are reported in \SI{sec:robust}.
+Part A of protocol~3 confirmed these findings on the earlier confirmatory
+instances with up to 100 customers. Screened robust with relief beat the
+OR-Tools capped procedure by \PaROne{} points over all \PaInstances{} of them,
+and the HGS capped procedure by \PaRTwo{} points over the 45 instances of
+protocol~2, the only ones with HGS plans. The two estimates happen to coincide.
+It pooled \PaScreenedP\% and used \PaRThree{} more
+vehicles than the HGS procedure. Within the robust family, screening returned
+plans \PaRFourAbs\% shorter than the most protective setting, at a cost of
+\PaBoxMinusScr{} points of service. When the robust plans were limited after the
+fact to no more vehicles than the comparator used, they were no longer
+measurably more reliable. The differences were \FmConfHgs{} [\FmConfHgsLo,
+\FmConfHgsHi] points against the HGS capped procedure and \FmConfOrt{}
+[\FmConfOrtLo, \FmConfOrtHi] against the OR-Tools one. On these instances the
+screened procedures used fewer vehicles at some cost in reliability. Results with
+200 customers are in \SI{sec:robust}.
 
 \subsection{Fallback rule}
 
 After the first two protocols, the stored records showed that returning the
-best-screened candidate when nothing is admitted raised pooled service in every
-study and procedure, by \FbGainMin{} to \FbGainMax{} points. Part B of
-protocol~3 tested the rule on \PbInstances{} new instances. Over each procedure's
-default fallback, it improved the OR-Tools capped procedure by \PbFOne{} points
-and the HGS capped procedure by \PbFTwo{}, to pooled service of \PbFThree\% and
-\PbFFour\%. Both estimates stay just below the 95\% target. On \PbNoAnchor{}
-instance the anchor solves found no plan, so neither procedure could run and it
-scored zero; without it, pooled service was \PbExOrt\% and \PbExHgs\%
-(descriptive). Plans returned by the fallback have not passed the screen.
+best-screened candidate when nothing is admitted would have raised pooled
+service in every study and for every procedure, by \FbGainMin{} to
+\FbGainMax{} points. Part B of protocol~3 tested this rule on \PbInstances{} new
+instances. Compared with each procedure's default fallback, it improved the
+OR-Tools capped procedure by \PbFOne{} points and the HGS capped procedure by
+\PbFTwo{}, bringing pooled service to \PbFThree\% and \PbFFour\%. Both estimates
+are just below the 95\% target. On \PbNoAnchor{} instance the anchor solves
+found no plan, so neither procedure could run and the instance scored zero.
+Without it, pooled service was \PbExOrt\% and \PbExHgs\% (descriptive). Plans
+returned by a fallback have not passed the screen.
 
 \subsection{Sensitivity and further checks}\label{sec:checks}
 
-\emph{Objective weights.} On the development instances, equal weights admitted
-fewer instances (\WtEqualAdmitted{} against \WtBaseAdmitted{} in the same run)
-and cut the advantage over conservative speed to \WtEqualPCMean{} points
-[\WtEqualPCLo, \WtEqualPCHi]. A later run on another machine, repeating both
-vectors, cut it from \BrOrigAdv{} to \BrEqAdv{} points [\BrEqAdvLo, \BrEqAdvHi]. Raising the driver-duration weight alone changed
-service by \BrDurDiff{} points and raising the fleet weight alone by
-\BrFleetDiff{}, so the advantage depends on how much waiting time the objective
-leaves to absorb delay. No protocol varied the weights (\SI{sec:weights}).
+\emph{Objective weights.} With equal weights, fewer development instances were
+admitted (\WtEqualAdmitted{} against \WtBaseAdmitted{} in the same run), and the
+advantage over conservative speed fell to \WtEqualPCMean{} points
+[\WtEqualPCLo, \WtEqualPCHi]. A later run on another machine repeated both
+weight vectors and found the advantage falling from \BrOrigAdv{} to \BrEqAdv{}
+points [\BrEqAdvLo, \BrEqAdvHi]. Raising only the driver-duration weight changed
+service by \BrDurDiff{} points, and raising only the fleet weight changed it by
+\BrFleetDiff{}. The advantage therefore depends on how much waiting time the
+objective leaves in the routes to absorb delays. None of the protocols varied
+the weights (\SI{sec:weights}).
 
-\emph{Benchmark instances.} On \SolomonN{} Solomon R1 and RC1 instances, OR-Tools
-found a plan for \SolomonPlans{} and screening admitted \SolomonAdmitted{}. With
-HGS on 20 Gehring--Homberger instances with 200 customers \citep{gehring1999},
-the procedure could run on \GhAttempted{}, admitted \GhAdmitted{}, and exceeded
-conservative speed by \GhDiff{} points [\GhDiffLo, \GhDiffHi]
-(Sections~\ref{S-sec:solomon} and~\ref{S-sec:gh}).
+\emph{Benchmark instances.} On \SolomonN{} Solomon R1 and RC1 instances,
+OR-Tools found a plan for \SolomonPlans{} and screening admitted
+\SolomonAdmitted{}. On 20 Gehring--Homberger instances with 200 customers
+\citep{gehring1999}, with HGS as the generator, the procedure could run on
+\GhAttempted{}, admitted a plan on \GhAdmitted{} and beat conservative speed by
+\GhDiff{} points [\GhDiffLo, \GhDiffHi] (Sections~\ref{S-sec:solomon}
+and~\ref{S-sec:gh}).
 
 \emph{Delay-model misspecification.} Under four alternative delay models, the
-fixed plans of the capped procedures lost up to \MisCappedDrop{} points and
-their advantage over conservative speed held. Screening the stored candidates
-again under each model, with the best-screened fallback, kept pooled service
-between \ResLoOrt{} and \ResHiHgs\% (\SI{sec:misspec}).
+fixed plans of the capped procedures lost up to \MisCappedDrop{} points, and
+they stayed ahead of conservative speed. When the stored candidates were
+screened again under each model and the best-screened fallback was used, pooled
+service stayed between \ResLoOrt{} and \ResHiHgs\% (\SI{sec:misspec}).
 
-\emph{Family-wise screening and computation time.} Over all studies and
+\emph{Family-wise screening and computation time.} Across all studies and
 procedures, a Bonferroni bound over the 13 buffer levels removed all
-\FwMissOrig{} of the \FwAdmittedOrig{} admitted plans that later missed the
-validation bound, while \FwMissFw{} newly selected plan missed it, at the cost of at most \FwLostMax{} admissions per study and
-procedure and between \FwPooledChangeMin{} and \FwPooledChangeMax{} points of
-pooled service. Screening a candidate took \TimeScreenTwenty{} to
-\TimeScreenTwoHundred{}~ms, against seconds to generate it
-(\SI{sec:familywise}).
+\FwMissOrig{} of the \FwAdmittedOrig{} admitted plans that later had a validation
+lower bound below 0.95, while \FwMissFw{} newly selected plan did. The cost
+was at most \FwLostMax{} admissions per study and procedure, and pooled service
+changed by between \FwPooledChangeMin{} and \FwPooledChangeMax{} points.
+Screening a candidate took \TimeScreenTwenty{} to \TimeScreenTwoHundred{}~ms,
+whereas generating one took seconds (\SI{sec:familywise}).
 
 \section{Discussion and limitations}\label{sec:discussion}
 
-For a planner who already uses a VRPTW solver, the results suggest a practical
-change. Generating a handful of buffered variants and screening them on
-simulated days costs little beyond the solves, needs no change to the solver or
-its objective, and replaced a fixed 20\% pad with plans that were measurably
-more reliable on the same instances. Each admitted plan has a tested lower
-bound on a defined service event, and the validation bank reports how that plan
-behaved on days it had not seen. The
-reachability cap is a one-line change that removed most certified failures and
-should be used with any buffer-based method, robust models included.
+For a planner who already runs a VRPTW solver, the change is cheap. Generating a handful of buffered variants and simulating them costs
+little beyond the solves themselves, and it needs no change to the solver or its
+objective. On the same instances it gave plans that were measurably more
+reliable than a fixed 20\% pad. Every admitted plan also comes with a tested
+lower bound on a defined service event, and the validation bank shows
+how the plan did on days it had not seen. The reachability cap is a one-line
+change that removed most certified failures, and it should be applied to any method
+that adds buffers, robust models included.
 
-The evidence has clear limits. The instances are synthetic and the disturbance
-parameters are assumed; they have not been calibrated to vehicle GPS data, so
-the numbers are not forecasts for a real fleet. The protocols test
-repeatability within one generator and one delay model, and the Solomon and
-Gehring--Homberger checks are small. The OR-Tools generator is weaker than the
-state of the art, which is why protocol~2 repeated the test with HGS; two
-generators still do not show that the result holds for every solver. The robust
-comparison covers one budgeted model with one search configuration, and the
+The evidence is limited in several ways. The instances are synthetic, and the
+disturbance parameters are assumed and have not been estimated from vehicle GPS
+data,
+so the numbers should not be read as forecasts for a real fleet. The protocols
+test repeatability with one instance generator and one delay model, and the
+Solomon and Gehring--Homberger checks are small. The OR-Tools generator is weaker
+than the state of the art, which is why protocol~2 repeated the test with HGS. Even so,
+two generators cannot show that the result holds for every solver. The robust
+comparison covers one budgeted model with one search configuration, and
 distributionally robust and riskiness-index methods
-\citep{jaillet2016,zhang2019} are not compared. The advantage depends on the
-objective weights, and equal weights more than halved it. The Wilson bound is a
-per-candidate guarantee, not a simultaneous one over the grid. Finally, the
-evaluation keeps every departure fixed and excludes breakdowns, new orders and
-rolling-horizon replanning, so it is stricter than an operator who adjusts
-departures would face, and it says nothing about recovery once a delay occurs.
+\citep{jaillet2016,zhang2019} were not tested. The advantage depends on the
+objective weights, and equal weights more than halved it. The Wilson bound holds
+for each candidate separately and gives no simultaneous guarantee over the grid.
+Finally, keeping every departure fixed makes the evaluation harsher than an
+operator who adjusts departures would face. Breakdowns, new orders and
+rolling-horizon replanning are left out, so the study says nothing about how to
+recover once a delay has happened.
 
-Under the prespecified fallback rules, pooled service stayed below 95\% in
-every study because of instances on which nothing was admitted. The best-screened fallback narrows the gap, but closing it
-needs better candidates on those instances, which is where a stronger or
-stochastic generator could add most.
+Under the prespecified fallback rules, pooled service stayed below 95\% in every
+study, because some instances had no admitted plan. The best-screened fallback
+narrows that gap, but closing it needs better candidates on those instances,
+where a stronger or a stochastic generator could help most.
 
 \section{Conclusion}\label{sec:conclusion}
 
-Screening a family of buffered plans from a standard VRPTW solver gave more
-reliable service than uniform travel-time padding on matched synthetic
-instances, with OR-Tools and with HGS, and three timestamped protocols supported
-the main findings. One primary hypothesis was not confirmed: returning the
+On matched synthetic instances, screening a family of buffered plans from a
+standard VRPTW solver gave more reliable service than padding every trip, with
+OR-Tools and with HGS, and three timestamped protocols supported the main
+findings. One primary hypothesis was not confirmed. Returning the
 conservative-speed plan when nothing is admitted did not measurably help the
-capped OR-Tools procedure, while returning the best-screened candidate did.
+capped OR-Tools procedure, although returning the best-screened candidate did.
 Capping each customer's buffer at its direct-reachability limit removed a
-failure that also stops robust models from finding any plan. A budgeted-robust
-optimizer with that relief was more reliable still, but used more vehicles, and
-its advantage was not measurable at the comparator's fleet size. The screening
-layer and the reachability relief worked with every planner tested.
-Calibrated delay data and real road networks are the next test.
+failure that also prevents robust models from finding any plan. A
+budgeted-robust optimizer with the same relief was more reliable still, but it
+used more vehicles, and at the comparator's fleet size its advantage was not
+statistically detectable. The screening layer and the reachability relief worked with every
+planner tested. The study has yet to be repeated on a real road network with
+delay parameters estimated from fleet data.
 
 \section*{Data availability}
 All code, generated instances, raw records and analysis scripts are openly
