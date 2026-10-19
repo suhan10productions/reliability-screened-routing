@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" version="1.0" demote-non-dropping-particle="sort-only">
+  <!-- Online version: the complete reference in double parentheses at every citation. Derived from numbered superscript citations and the reference format of the NHSJS submission guidelines:
+       1. A. Author, B. Author. Title. Journal. Vol. X, pg. Y-Z, Year, DOI. -->
+  <info>
+    <title>NHSJS online publication citations (approximation)</title>
+    <id>nhsjs-online-approx</id>
+    <updated>2026-10-19T00:00:00+00:00</updated>
+  </info>
+  <macro name="author">
+    <names variable="author">
+      <name initialize-with=". " name-as-sort-order="none" delimiter=", " and="text" delimiter-precedes-last="never"/>
+      <substitute><names variable="editor"/><text variable="publisher"/></substitute>
+    </names>
+  </macro>
+  <macro name="link">
+    <choose>
+      <if variable="DOI"><text variable="DOI" prefix="https://doi.org/"/></if>
+      <else-if variable="URL"><text variable="URL"/></else-if>
+    </choose>
+  </macro>
+  <citation>
+    <layout prefix="((" suffix="))" delimiter="))((">
+      
+      <group delimiter=". ">
+        <text macro="author"/>
+        <choose>
+          <if type="book" match="any"><text variable="title" font-style="italic"/></if>
+          <else><text variable="title" text-case="capitalize-first"/></else>
+        </choose>
+      </group>
+      <choose>
+        <if type="article-journal">
+          <group prefix=". " delimiter=", ">
+            <group delimiter=" ">
+              <text variable="container-title" form="short" font-style="italic" suffix="."/>
+              <text variable="volume" prefix="Vol. " font-weight="bold"/>
+            </group>
+            <text variable="page" prefix="pg. "/>
+            <date variable="issued"><date-part name="year"/></date>
+            <text macro="link"/>
+          </group>
+        </if>
+        <else-if type="chapter paper-conference" match="any">
+          <group prefix=". " delimiter=", ">
+            <text variable="container-title" prefix="In: " font-style="italic"/>
+            <text variable="publisher"/>
+            <text variable="page" prefix="pg. "/>
+            <date variable="issued"><date-part name="year"/></date>
+            <text macro="link"/>
+          </group>
+        </else-if>
+        <else-if type="book">
+          <group prefix=". " delimiter=", ">
+            <text variable="edition" suffix=" ed."/>
+            <text variable="publisher"/>
+            <date variable="issued"><date-part name="year"/></date>
+            <text macro="link"/>
+          </group>
+        </else-if>
+        <else>
+          <group prefix=". " delimiter=", ">
+            <text variable="publisher"/>
+            <text variable="note"/>
+            <date variable="issued"><date-part name="year"/></date>
+            <text macro="link"/>
+          </group>
+        </else>
+      </choose>
+    </layout>
+  </citation>
+  <bibliography second-field-align="flush" entry-spacing="0">
+    <layout suffix=".">
+      <text variable="citation-number" suffix=". "/>
+      <group delimiter=". ">
+        <text macro="author"/>
+        <choose>
+          <if type="book" match="any"><text variable="title" font-style="italic"/></if>
+          <else><text variable="title" text-case="capitalize-first"/></else>
+        </choose>
+      </group>
+      <choose>
+        <if type="article-journal">
+          <group prefix=". " delimiter=", ">
+            <group delimiter=" ">
+              <text variable="container-title" form="short" font-style="italic" suffix="."/>
+              <text variable="volume" prefix="Vol. " font-weight="bold"/>
+            </group>
+            <text variable="page" prefix="pg. "/>
+            <date variable="issued"><date-part name="year"/></date>
+            <text macro="link"/>
+          </group>
+        </if>
+        <else-if type="chapter paper-conference" match="any">
+          <group prefix=". " delimiter=", ">
+            <text variable="container-title" prefix="In: " font-style="italic"/>
+            <text variable="publisher"/>
+            <text variable="page" prefix="pg. "/>
+            <date variable="issued"><date-part name="year"/></date>
+            <text macro="link"/>
+          </group>
+        </else-if>
+        <else-if type="book">
+          <group prefix=". " delimiter=", ">
+            <text variable="edition" suffix=" ed."/>
+            <text variable="publisher"/>
+            <date variable="issued"><date-part name="year"/></date>
+            <text macro="link"/>
+          </group>
+        </else-if>
+        <else>
+          <group prefix=". " delimiter=", ">
+            <text variable="publisher"/>
+            <text variable="note"/>
+            <date variable="issued"><date-part name="year"/></date>
+            <text macro="link"/>
+          </group>
+        </else>
+      </choose>
+    </layout>
+  </bibliography>
+</style>

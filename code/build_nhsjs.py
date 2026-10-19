@@ -3,8 +3,9 @@
 Writes, in paper_nhsjs/:
   routing_model_nhsjs.pdf           named PDF (for the author)
   <title>.pdf                       review PDF without identifying information (NHSJS file 1)
-  routing_model_nhsjs.docx          Word version with native tables and equations (NHSJS file 2)
-  routing_model_nhsjs_flat.tex      single LaTeX file (NHSJS file 3, uploaded as supplementary)
+  routing_model_nhsjs.docx          Word version, anonymized, native tables and equations, online-publication
+                                    citations (NHSJS file 2)
+  routing_model_nhsjs_flat.tex      single anonymized LaTeX file (NHSJS file 3, uploaded as supplementary)
   Fig1.png, FigPadding.png          figure images (uploaded as supplementary)
 
 Run after code/nhsjs_tables.py:
@@ -20,7 +21,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DIR = ROOT / "paper_nhsjs"
 MAIN = DIR / "routing_model_nhsjs.tex"
-REVIEW_NAME = "Checking delivery routes against traffic delays"
+# the journal asks for files named exactly as the title; a colon cannot appear in a file name
+REVIEW_NAME = "Checking delivery routes against traffic delays - statistical screening versus travel-time padding in vehicle routing"
 
 
 def write_bibs():
@@ -62,20 +64,31 @@ def inline(text: str) -> str:
 
 def flatten() -> str:
     tex = inline(MAIN.read_text())
-    tex = tex.replace("../paper/Fig1.pdf", "Fig1.pdf")
-    bbl = (DIR / "routing_model_nhsjs.bbl").read_text()
+    # the figures are uploaded as PNG images next to this file
+    tex = tex.replace("../paper/Fig1.pdf", "Fig1.png").replace("FigPadding.pdf", "FigPadding.png")
+    # the uploaded LaTeX file is the review version
+    assert tex.count("\\anonymousfalse") == 1
+    tex = tex.replace("\\anonymousfalse", "\\anonymoustrue")
+    # drop the named branches from the source itself, so no identifying text is uploaded
+    tex = re.sub(r"\\ifanonymous\\else\n.*?\\fi\n", "", tex, flags=re.S)
+    tex = re.sub(r"(?<!newif)\\ifanonymous\n(.*?)\\else\n.*?\\fi\n", r"\1", tex, flags=re.S)
+    bbl = (DIR / "review_copy.bbl").read_text()
     tex = re.sub(r"\\bibliographystyle\{unsrtnat\}\n\\bibliography\{\\refsfile\}", lambda m: bbl.rstrip("\n"), tex)
     assert "\\input{" not in tex and "../paper" not in tex
     return tex
 
 
 def for_pandoc(tex: str) -> str:
-    """The named version, without the review switch, with PNG figures and a plain bibliography call."""
+    """The review version, without the switch, with PNG figures, numbered equations and no bibliography."""
     # drop the review switch from the preamble (its lines end at the \\ifdefined\\anonbuild line) ...
     tex, n = re.subn(r"\\newif\\ifanonymous\n.*?\\ifdefined\\anonbuild[^\n]*\n", "", tex, flags=re.S)
     assert n == 1, "review switch not found"
-    # ... then keep the named branch of every \\ifanonymous ... \\else ... \\fi block
-    tex = re.sub(r"\\ifanonymous\n.*?\\else\n(.*?)\\fi\n", r"\1", tex, flags=re.S)
+    # ... then keep the review branch of every \\ifanonymous ... \\else ... \\fi block
+    tex = re.sub(r"\\ifanonymous\\else\n.*?\\fi\n", "", tex, flags=re.S)
+    tex = re.sub(r"(?<!newif)\\ifanonymous\n(.*?)\\else\n.*?\\fi\n", r"\1", tex, flags=re.S)
+    tex = tex.replace("\\author{}\n", "")
+    # online citations take a space before the opening parentheses
+    tex = re.sub(r"~?\\cite\{", " \\\\cite{", tex)
     tex = re.sub(r"\\begin\{thebibliography\}.*?\\end\{thebibliography\}", "", tex, flags=re.S)
     tex = tex.replace("Fig1.pdf", "Fig1.png").replace("FigPadding.pdf", "FigPadding.png")
     assert "\\ifanonymous" not in tex
@@ -103,6 +116,24 @@ def for_pandoc(tex: str) -> str:
     return tex
 
 
+def superscript_commas(path: Path):
+    """Between consecutive citations put a superscript comma: ))((  becomes  ))<sup>,</sup>((."""
+    import zipfile
+    tmp = path.with_suffix(".tmp")
+    with zipfile.ZipFile(path) as zin, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            data = zin.read(item.filename)
+            if item.filename == "word/document.xml":
+                xml = data.decode()
+                sup = ('))</w:t></w:r><w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>,</w:t></w:r>'
+                       '<w:r><w:t xml:space="preserve">((')
+                xml = xml.replace("))((", sup)
+                assert "))((" not in xml
+                data = xml.encode()
+            zout.writestr(item, data)
+    tmp.replace(path)
+
+
 def main():
     write_bibs()
     subprocess.run(["pdftoppm", "-r", "300", "-png", "-singlefile", str(ROOT / "paper" / "Fig1.pdf"),
@@ -115,8 +146,10 @@ def main():
     (DIR / "routing_model_nhsjs_flat.tex").write_text(flat)
     (DIR / "pandoc_input.tex").write_text(for_pandoc(flat))
     subprocess.run(["pandoc", "pandoc_input.tex", "-f", "latex", "-t", "docx", "--citeproc",
-                    "--bibliography=nhsjs_refs.bib", "--csl=nhsjs.csl", "-o", "routing_model_nhsjs.docx"],
+                    "--bibliography=nhsjs_refs_anon.bib", "--csl=nhsjs_online.csl",
+                    "-M", "suppress-bibliography=true", "-o", "routing_model_nhsjs.docx"],
                    cwd=DIR, check=True)
+    superscript_commas(DIR / "routing_model_nhsjs.docx")
     for name in ("routing_model_nhsjs.pdf", f"{review}.pdf", "routing_model_nhsjs.docx"):
         print("built", name)
 

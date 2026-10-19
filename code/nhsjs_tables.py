@@ -146,6 +146,7 @@ def main():
                                                  " on the 46 development instances where 20\\% padding found a plan"))
     (OUT / "tab_screen.tex").write_text(compact_screen(extract_table(PAPER / "results_summary_v7.tex", "tab:screen")))
     (OUT / "tab_primaries.tex").write_text(primaries_table())
+    (OUT / "tab_gh.tex").write_text(extract_table(PAPER / "gh_results.tex", "tab:gh"))
     table, macros = padding_outputs()
     (OUT / "tab_padding.tex").write_text(table)
     (OUT / "result_macros_nhsjs.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in macros.items()))

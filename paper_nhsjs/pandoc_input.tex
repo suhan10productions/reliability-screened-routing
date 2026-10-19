@@ -332,9 +332,6 @@
 
 \title{Checking delivery routes against traffic delays: statistical screening
 versus travel-time padding in vehicle routing}
-\author{Suhan Ali\\[2pt]
-\small Independent researcher, Lahore, Pakistan\\
-\small \href{mailto:syedsuhanali9@gmail.com}{syedsuhanali9@gmail.com}\quad ORCID 0009-0004-5079-7684}
 \date{}
 
 \begin{document}
@@ -368,15 +365,19 @@ uncertainty; simulation; Wilson interval; operations research
 
 \section{Introduction}
 
+\subsection{Background and context}
+
 A courier company that promises to deliver between 10:00 and 11:00 has to plan
 which driver visits which customers, and in what order, so that every visit falls
 inside its window. This is the vehicle routing problem with time windows (VRPTW),
-one of the most studied problems in operations research\cite{solomon1987,toth2014}.
+one of the most studied problems in operations research \cite{solomon1987,toth2014}.
 Planning software usually solves it with one fixed table of travel times. Real
 travel times are not fixed. Roads are slower in the morning rush, and random events
 such as an accident or a long wait at a door add delay. Because a driver visits
 customers one after another, a delay early in the day pushes every later visit
 towards the end of its window, and a plan that looked comfortable can fail.
+
+\subsection{Problem statement and rationale}
 
 The simplest protection, and a common one in practice, is to plan with a slower
 speed than expected. If every trip is assumed to take 20\% longer, the plan has room
@@ -384,9 +385,11 @@ to absorb delays. The drawback is that padding protects every trip equally, quie
 off-peak trips as much as rush-hour ones, so the plan uses extra distance and
 sometimes extra vehicles whether or not a route is at risk. Research methods that
 model uncertainty directly, through chance constraints or robust
-optimization\cite{errico2018,agra2013,gendreau2016}, spend that protection more
+optimization \cite{errico2018,agra2013,gendreau2016}, spend that protection more
 carefully, but they need a solver built for the purpose, which most companies do
 not have.
+
+\subsection{Significance and purpose}
 
 This study tests a middle path. The company keeps its ordinary solver, but asks it
 for several candidate plans, each planned against internal deadlines brought
@@ -396,6 +399,8 @@ days, and a statistical test decides whether it is reliable enough. The best pla
 that passes is used. Its reliability is reported from a second, independent set of
 simulated days, so the number reported is not the one used to choose the plan.
 
+\subsection{Objectives}
+
 The study makes three contributions. First, it describes this screening procedure
 and proves that a simple cap on the internal slack prevents a failure in which a
 customer becomes impossible to reach in time. Second, it compares the procedure
@@ -404,6 +409,29 @@ shows that no single padding level does as well across instances. Third, it
 repeats the main comparisons in three confirmatory studies whose hypotheses were
 fixed and published before the experiments were run, using two different routing
 solvers.
+
+\subsection{Scope and limitations}
+
+All instances are synthetic, and travel-time delays follow an assumed model rather
+than measured traffic data. The study therefore tests whether the procedure works
+under controlled conditions, not how a particular fleet would perform.
+
+\subsection{Theoretical framework and related work}
+
+Routing with random travel times has been studied for more than three
+decades \cite{laporte1992,gendreau1996,kenyon2003}. One line of work writes the
+requirement that customers are served on time as a chance constraint and solves the
+resulting stochastic program directly \cite{li2010,ehmke2015}; when the probability
+cannot be computed exactly, it can be estimated from sampled
+scenarios \cite{ahmed2008}. Other studies add time-dependent
+speeds \cite{tas2014,bomboi2022}, measure the risk of a route with an index instead
+of a probability \cite{jaillet2016,zhang2019}, or predict travel times from context
+such as the time of day \cite{serrano2026}. The internal deadlines used here are
+closest to self-imposed time windows, in which the carrier sets its own windows and
+places them so that the slack between them absorbs delays \cite{jabali2015,vareias2019}.
+These methods need a dedicated model or solver. The present study keeps the solver
+unchanged and adds only a sampling check with a known statistical
+guarantee \cite{wilson1927,brown2001}.
 
 \section{Methods}
 
@@ -418,10 +446,10 @@ vehicles, and slack deficit, which measures how close planned arrivals come to t
 end of their windows. The planner minimizes a weighted sum of these four
 quantities, each scaled to a comparable range, with the weights
 $(0.5693,0.2643,0.1055,0.0609)$ fixed before any experiment. Two solvers were used:
-OR-Tools from Google\cite{ortools}, a widely used routing library, and the
-hybrid genetic search (HGS) of the PyVRP package\cite{vidal2022,wouda2024}, which
+OR-Tools from Google \cite{ortools}, a widely used routing library, and the
+hybrid genetic search (HGS) of the PyVRP package \cite{vidal2022,wouda2024}, which
 finds shorter routes. The full mathematical formulation is given in the project
-archive\cite{ali2026archive}.
+archive \cite{ali2026archive}.
 
 \subsection{Travel times and random delays}
 
@@ -429,7 +457,7 @@ Each day runs from 06:00 with a free-flow speed of 40~km/h. Between 07:00 and 09
 speeds drop by a factor of 1.2, and between 06:00 and 07:00 they are slightly higher.
 Travel times are computed by integrating the speed over the time of the trip, so a
 vehicle that leaves later never arrives earlier, a property known as
-first-in-first-out\cite{ichoua2003}. On a simulated day, the time of each trip is
+first-in-first-out \cite{ichoua2003,ghiani2014}. On a simulated day, the time of each trip is
 multiplied by a random factor $\exp(\varepsilon)$ with
 \begin{equation}
  \varepsilon_{ij}=\sigma\bigl(\sqrt{\rho}\,\xi_0+\sqrt{1-\rho}\,\xi_{ij}\bigr),
@@ -452,14 +480,14 @@ would be on time on only about 13\% of days, because $0.99^{200}\approx0.134$.
 
 A plan's success rate on 1000 simulated days is only an estimate, so the test uses
 a lower confidence bound. If a plan succeeds on a share $\hat p$ of $N$ days, the
-one-sided Wilson lower bound\cite{wilson1927} at 95\% confidence is
+one-sided Wilson lower bound \cite{wilson1927} at 95\% confidence is
 \begin{equation}
  L(\hat p)=\frac{\hat p+\dfrac{z^2}{2N}-z\sqrt{\dfrac{\hat p(1-\hat p)}{N}+\dfrac{z^2}{4N^2}}}{1+\dfrac{z^2}{N}},
  \qquad z=1.645 .
  \qquad(2)
 \end{equation}
 The Wilson bound was chosen because the simpler normal-approximation interval is
-unreliable when the true probability is close to one\cite{brown2001}, which is
+unreliable when the true probability is close to one \cite{brown2001}, which is
 exactly the region of interest here. With $N=1000$ and $\hat p=0.966$, for example,
 $L\approx0.955$, so the plan passes; with $\hat p=0.955$, $L\approx0.943$ and it fails.
 
@@ -534,7 +562,7 @@ with the same solver budget, to compare cost at equal reliability. Padded plans 
 not screened; they are used as an operator would use them. The \emph{original}
 procedure screens contracted candidates without the cap, and the \emph{capped}
 procedure uses (3). A third comparison, described in the
-Results, used a budgeted robust optimization model\cite{bertsimas2004,agra2013}, a
+Results, used a budgeted robust optimization model \cite{bertsimas2004,agra2013}, a
 method that plans against a set of worst-case travel times.
 
 \subsection{Instances and statistics}
@@ -548,13 +576,20 @@ simulated days, differences are computed instance by instance, and intervals acr
 instances come from a paired bootstrap with 20,000 resamples. A configuration that
 finds no plan scores zero on that instance, so failures count against it.
 
+As an external check, the HGS procedure was also run on standard benchmark
+instances: the 20 Gehring--Homberger instances of classes R1 and RC1 with 200
+customers \cite{gehring1999}, which extend Solomon's classic test
+set \cite{solomon1987}. Their coordinates and times were rescaled so that the
+benchmark's travel matches 40~km/h and its horizon fits a 600-minute shift
+starting at 06:00, and the same delay model was added. This check was exploratory.
+
 \subsection{Confirmatory studies}
 
 The development study was exploratory: its results were used to design the
 method. To check that the findings were not a product of that tuning, three
 confirmatory studies were run on new instances. Before each one, its hypotheses,
 tests, decision rules and instance seeds were written down and published with a
-cryptographic fingerprint of the code\cite{ali2026freeze,ali2026freeze2,ali2026freeze3},
+cryptographic fingerprint of the code \cite{ali2026freeze,ali2026freeze2,ali2026freeze3},
 so the analysis could not be adjusted after seeing the results. Study~1 tested the
 OR-Tools procedures on 53 new instances; study~2 used 53 more instances and the
 HGS solver; and study~3 compared the procedures with the robust model on the 90
@@ -699,6 +734,33 @@ all with 20 or 50 customers, where no candidate passed and a fallback was used.
 Plans that passed averaged 97.4\% validated service, while the
 11 fallback plans averaged 45.2\%.
 
+\subsection{Standard benchmark instances}
+
+On R1\_2\_1 and R1\_2\_2, where all or most windows are only 10 time units wide,
+neither the solver runs that seed the procedure nor HGS at conservative speed found a
+plan, so the procedure could not run there. Screening admitted a plan on
+17 of the other 18 instances (Table~\ref{tab:gh}). On those
+18 instances the capped HGS procedure exceeded conservative speed by
+15.1 [11.0, 19.1] points, and over all 20 it pooled 87.2\%
+against 73.6\% for conservative speed. The gain on these harder, clustered
+benchmark instances is close to the one on the synthetic instances.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Gehring--Homberger instances with 200 customers (exploratory, HGS pipeline): instances, instances where the anchor solves found a plan, instances admitted by screening, and pooled validated service-event probability (\%) of the HGS nominal plan, HGS conservative speed and the HGS capped procedure with conservative fallback. A missing plan scores zero.}
+\label{tab:gh}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Class & Inst. & Anchors & Admitted & Nominal & Conservative & Capped\\
+\midrule
+R1 & 10 & 8 & 7 & 42.1 & 68.0 & 77.0\\
+RC1 & 10 & 10 & 10 & 27.6 & 79.3 & 97.4\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Confirmatory studies}
 
 Table~\ref{tab:primaries} lists the eight primary hypotheses. Seven were confirmed.
@@ -748,6 +810,8 @@ planner tested; its strength is that it works with any existing solver.
 
 \section{Discussion}
 
+\subsection{Key findings and implications}
+
 The results support a practical point. A company that already uses a routing solver
 can make its plans more reliable than a fixed 20\% padding without changing the
 solver, by asking it for a few buffered variants and keeping the best one that
@@ -760,9 +824,12 @@ large that many instances can no longer be planned. The reachability cap is a on
 Lemma~1 shows why it is safe; the same idea also rescued the robust
 model.
 
+\subsection{Limitations}
+
 The study has clear limits. The cities are synthetic squares and the delay model is
 assumed, not estimated from real traffic data, so the percentages are not forecasts
-for a real fleet. The confirmatory studies show that the findings repeat on new
+for a real fleet. The benchmark check shows the result is not specific to the
+instance generator, but those instances are also artificial. The confirmatory studies show that the findings repeat on new
 instances from the same generator; they do not show that they hold in a different
 city. The advantage also depends on the planner's objective: with equal weights on
 the four quantities it fell to 6.3 points, with an interval that
@@ -772,12 +839,14 @@ later fell short, while 1 new selection fell short, at a cost of at most
 2 admissions per study. Finally, vehicles always leave at their planned
 times, and breakdowns and same-day replanning are not modelled.
 
+\subsection{Recommendations}
+
 Pooled service stayed just below 95\% because of the few instances with no passing
 plan. Better candidates for those instances, for example from a solver that models
 uncertainty directly, are the clearest next step, together with a test on real
 travel-time data.
 
-\section{Conclusion}
+\subsection{Closing thought}
 
 On simulated delivery problems with 20 to 200 customers, screening a family of
 buffered plans from an ordinary solver gave more reliable service than padding every
@@ -788,14 +857,16 @@ on the buffer, proved safe in Lemma~1, removed a failure that also
 affects robust optimization. The method's main appeal is that it adds a measurable
 reliability guarantee to the tools companies already use.
 
-\section*{Acknowledgments}
-The author thanks the researchers who answered methodological questions by e-mail
-during the project. Generative AI assistants (OpenAI's ChatGPT and Anthropic's
-Claude) were used for code development, code review, checking the analysis, and
-drafting and editing text; every experiment was run from the archived code, every
-number regenerates from the archived records, and the author takes full
-responsibility for the content. All code, instances, records and analysis scripts
-are openly available\cite{ali2026archive}.
+
+\section*{AI Usage Disclosure}
+Two generative AI assistants were used: Anthropic's Claude and OpenAI's ChatGPT.
+They were used to write and debug the simulation and analysis code, to review that
+code, to run and check the statistical analyses, to search the literature, and to
+draft and revise the text of this manuscript, including its wording. The research
+question, the decisions on study design and the confirmatory protocols were the
+author's. Every experiment was run from the archived code, every reported number is
+regenerated from the archived records, and the author takes full responsibility for
+the content.
 
 
 
