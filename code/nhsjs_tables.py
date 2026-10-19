@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -139,6 +140,60 @@ def padding_outputs():
     return table, macros
 
 
+CITY_WORDS = {3: "three", 4: "four", 5: "five"}
+
+
+def amazon_outputs():
+    s = json.loads((ROOT / "results/amazon_summary.json").read_text())
+    rows, P = s["rows"], s["pooled"]
+    N = s["instances"]
+    assert N == 40
+    plans = {"nominal": s["plans"]["nominal"], "conservative": s["plans"]["conservative"],
+             "capped": sum(1 for r in rows if r["has_nominal"]), "screened_conservative": sum(1 for r in rows if r["has_nominal"])}
+    adm = {"capped": s["admitted"], "screened_conservative": s["screened_conservative_admitted"]}
+    names = [("nominal", "Nominal plan (no protection)"), ("conservative", "20\\% padding"),
+             ("capped", "Capped screening procedure"), ("screened_conservative", "Screened conservative")]
+    body = [f"{label} & {plans[k]}/{N} & {adm.get(k, '--') if k in adm else '--'} & "
+            f"{f1(P[k][0])} [{f1(P[k][1])}, {f1(P[k][2])}]\\\\" for k, label in names]
+    table = "\n".join([
+        r"\begin{table}[t]", r"\centering", r"\small",
+        r"\caption{Real delivery routes: " + str(N) + r" Amazon routes from " + CITY_WORDS[len({r['station'][:3] for r in rows})] + r" US cities (exploratory). "
+        r"\emph{Plans}: routes on which the configuration produced a plan; \emph{Admitted}: routes on which a "
+        r"candidate passed the screen. Pooled validated service probability (\%) with a 95\% bootstrap interval over "
+        r"routes; a route without a plan scores zero.}",
+        r"\label{tab:amazon}",
+        r"\begin{tabular}{@{}lccl@{}}", r"\toprule",
+        r"Configuration & Plans & Admitted & Pooled service\\", r"\midrule", *body,
+        r"\bottomrule", r"\end{tabular}", r"\end{table}", ""])
+    stops = sorted(r["stops"] for r in rows)
+    cust = sorted(r["customers"] for r in rows)
+    d1, d2 = s["capped_minus_conservative"], s["screened_conservative_minus_conservative"]
+    dw = s["capped_minus_conservative_where_planned"]
+    m = {"AmzRoutes": str(N), "AmzStations": str(len({r["station"] for r in rows})),
+         "AmzStopsMin": str(stops[0]), "AmzStopsMax": str(stops[-1]), "AmzStopsMed": str(int(np.median(stops))),
+         "AmzCustMin": str(cust[0]), "AmzCustMax": str(cust[-1]),
+         "AmzNomPlans": str(plans["nominal"]), "AmzConsPlans": str(plans["conservative"]),
+         "AmzNoPlan": str(N - plans["nominal"]),
+         "AmzCapAdmitted": str(adm["capped"]), "AmzScAdmitted": str(adm["screened_conservative"]),
+         "AmzCapAdmittedNinetyFive": str(s["capped_admitted_at_least_95"]),
+         "AmzCapOnAdmitted": f1(s["capped_on_admitted"]), "AmzScOnAdmitted": f1(s["screened_conservative_on_admitted"]),
+         "AmzFallbackRoutes": str(s["fallback_instances"]), "AmzCapOnFallback": f1(s["capped_on_fallback"]),
+         "AmzConsOnFallback": f1(s["conservative_on_fallback"]),
+         "AmzNom": f1(P["nominal"][0]), "AmzCons": f1(P["conservative"][0]), "AmzCap": f1(P["capped"][0]),
+         "AmzSc": f1(P["screened_conservative"][0]),
+         "AmzCapDiff": f1(d1[0]), "AmzCapDiffLo": f1(d1[1]), "AmzCapDiffHi": f1(d1[2]),
+         "AmzScDiff": f1(d2[0]), "AmzScDiffLo": f1(d2[1]), "AmzScDiffHi": f1(d2[2]),
+         "AmzBoth": str(s["where_planned"]), "AmzBothDiff": f1(dw[0]), "AmzBothDiffLo": f1(dw[1]), "AmzBothDiffHi": f1(dw[2]),
+         "AmzFleetDiff": f2(s["fleet_capped_minus_conservative"][0]),
+         "AmzConsNoPlan": str(N - plans["conservative"]),
+         "AmzNoPlanCustMin": str(s["no_plan_customers"][0]), "AmzNoPlanCustMax": str(s["no_plan_customers"][1]),
+         "AmzCities": CITY_WORDS[s["cities"]],
+         "AmzWindowShare": f"{100 * s['amazon_windows']['stops_with_window'] / s['amazon_windows']['stops']:.0f}",
+         "AmzWindowLo": f"{s['amazon_windows']['width_hours_quartiles'][0]:.0f}",
+         "AmzWindowHi": f"{s['amazon_windows']['width_hours_quartiles'][2]:.0f}"}
+    return table, m
+
+
 def main():
     OUT.mkdir(exist_ok=True)
     (OUT / "tab_paired.tex").write_text(extract_table(PAPER / "results_summary_v7.tex", "tab:paired")
@@ -149,6 +204,9 @@ def main():
     (OUT / "tab_gh.tex").write_text(extract_table(PAPER / "gh_results.tex", "tab:gh"))
     table, macros = padding_outputs()
     (OUT / "tab_padding.tex").write_text(table)
+    atable, amacros = amazon_outputs()
+    (OUT / "tab_amazon.tex").write_text(atable)
+    macros.update(amacros)
     (OUT / "result_macros_nhsjs.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in macros.items()))
     print("nhsjs tables ok")
 

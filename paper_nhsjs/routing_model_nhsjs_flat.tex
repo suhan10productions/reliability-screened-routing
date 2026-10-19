@@ -334,6 +334,46 @@
 \newcommand{\PadFiftyDist}{0.9}
 \newcommand{\PadFiftyDistAbs}{0.9}
 \newcommand{\PadFiftyFleet}{0.77}
+\newcommand{\AmzRoutes}{40}
+\newcommand{\AmzStations}{17}
+\newcommand{\AmzStopsMin}{80}
+\newcommand{\AmzStopsMax}{194}
+\newcommand{\AmzStopsMed}{150}
+\newcommand{\AmzCustMin}{10}
+\newcommand{\AmzCustMax}{36}
+\newcommand{\AmzNomPlans}{34}
+\newcommand{\AmzConsPlans}{28}
+\newcommand{\AmzNoPlan}{6}
+\newcommand{\AmzCapAdmitted}{24}
+\newcommand{\AmzScAdmitted}{25}
+\newcommand{\AmzCapAdmittedNinetyFive}{23}
+\newcommand{\AmzCapOnAdmitted}{97.4}
+\newcommand{\AmzScOnAdmitted}{97.9}
+\newcommand{\AmzFallbackRoutes}{10}
+\newcommand{\AmzCapOnFallback}{56.8}
+\newcommand{\AmzConsOnFallback}{62.9}
+\newcommand{\AmzNom}{41.4}
+\newcommand{\AmzCons}{59.0}
+\newcommand{\AmzCap}{72.6}
+\newcommand{\AmzSc}{75.3}
+\newcommand{\AmzCapDiff}{13.6}
+\newcommand{\AmzCapDiffLo}{3.9}
+\newcommand{\AmzCapDiffHi}{24.4}
+\newcommand{\AmzScDiff}{16.3}
+\newcommand{\AmzScDiffLo}{11.0}
+\newcommand{\AmzScDiffHi}{22.2}
+\newcommand{\AmzBoth}{28}
+\newcommand{\AmzBothDiff}{1.6}
+\newcommand{\AmzBothDiffLo}{$-$4.4}
+\newcommand{\AmzBothDiffHi}{7.2}
+\newcommand{\AmzFleetDiff}{$-$0.21}
+\newcommand{\AmzConsNoPlan}{12}
+\newcommand{\AmzNoPlanCustMin}{22}
+\newcommand{\AmzNoPlanCustMax}{36}
+\newcommand{\AmzCities}{five}
+\newcommand{\AmzWindowShare}{7}
+\newcommand{\AmzWindowLo}{7}
+\newcommand{\AmzWindowHi}{8}
 
 \title{Checking delivery routes against traffic delays: statistical screening
 versus travel-time padding in vehicle routing}
@@ -344,26 +384,27 @@ versus travel-time padding in vehicle routing}
 \maketitle
 
 \begin{abstract}
-\noindent\textbf{Background and objective.} Delivery companies promise customers a
-time window, but they plan routes on average travel times, and one delay can make a
+\noindent\textbf{Background and objective.} Delivery companies promise customers
+time windows but plan routes on average travel times, and one delay can make a
 driver miss several windows. The usual protection is to
 plan with slower speeds, padding every trip. This study asks whether a statistical
-check on an ordinary planner's routes is a better protection than padding. \textbf{Methods.} A standard solver produces candidate
+check on an ordinary planner's routes is better protection than padding. \textbf{Methods.} A standard solver produces candidate
 plans with extra internal slack, and each candidate is simulated on 1000
 days with time-of-day congestion and correlated random delays. A plan is accepted
 only if a one-sided 95\% Wilson lower bound on the chance that at least 95\% of
-customers are served on time reaches 0.95, and the accepted plan is then tested
+customers are served on time reaches 0.95, and the accepted plan is tested
 on 5000 new days. A cap on the slack keeps every customer reachable. The study
-used 53 synthetic instances with 20 to 200 customers, a padding sweep from 0 to
-50\%, and three confirmatory studies whose hypotheses were published before they
-were run. \textbf{Results.} Screening was \ProcConsRange{} percentage points more
+used 53 synthetic instances with 20 to 200 customers, \AmzRoutes{} real Amazon
+delivery routes, a padding sweep from 0 to 50\%, and three confirmatory studies
+with hypotheses published in advance. \textbf{Results.} Screening was \ProcConsRange{} percentage points more
 reliable than 20\% padding, although not significantly at 200 customers. No padding
 level matched it over all instances: the best, 30\%, pooled \PadThirtyPooled\%
-against \PadCapPooled\%, and heavier padding often found no plan at all. Seven of
+against \PadCapPooled\%, and heavier padding often found no plan. On the Amazon routes, screening padded
+plans raised service from \AmzCons\% to \AmzSc\%. Seven of
 eight prespecified primary hypotheses were confirmed. \textbf{Conclusions.} A
 simple statistical screen can make an existing planner's routes more reliable
-without changing the planner. The evidence comes from simulated cities and an
-assumed delay model, so it still needs testing on real traffic data.
+without changing the planner. The delay model is still assumed and needs testing on real
+traffic data.
 
 \medskip\noindent\textbf{Keywords:} vehicle routing; time windows; travel-time
 uncertainty; simulation; Wilson interval; operations research
@@ -418,9 +459,11 @@ solvers.
 
 \subsection{Scope and limitations}
 
-All instances are synthetic, and travel-time delays follow an assumed model rather
-than measured traffic data. The study therefore tests whether the procedure works
-under controlled conditions, not how a particular fleet would perform.
+Most instances are synthetic. A further test uses \AmzRoutes{} real Amazon delivery routes,
+with real stops, travel times and service times but assumed two-hour delivery
+windows. In every test the travel-time delays follow an assumed model rather than
+measured traffic data, so the study shows whether the procedure works under
+controlled conditions, not how a particular fleet would perform.
 
 \subsection{Theoretical framework and related work}
 
@@ -519,6 +562,12 @@ used to choose the plan, the reported reliability is an honest out-of-sample
 estimate. The average validated success rate over all instances, including those
 where the fallback was used, is called \emph{pooled service}.
 
+The main (capped) procedure plans its candidates at the normal speed with the
+planner's weighted objective. A second version, \emph{screened conservative},
+combines the screen with padding: it plans the candidates at the 20\% padded speed
+for the shortest distance, keeps the passing candidate with the shortest distance,
+and falls back to the 20\% padded plan when no candidate passes.
+
 \subsection{Keeping every customer reachable}
 
 Bringing deadlines forward can backfire. If customer $i$ is far from the depot, an
@@ -588,6 +637,26 @@ customers\cite{gehring1999}, which extend Solomon's classic test
 set\cite{solomon1987}. Their coordinates and times were rescaled so that the
 benchmark's travel matches 40~km/h and its horizon fits a 600-minute shift
 starting at 06:00, and the same delay model was added. This check was exploratory.
+
+The second external check uses real delivery routes from the public data set of
+the 2021 Amazon Last Mile Routing Research Challenge\cite{merchan2022}. The \AmzRoutes{} routes
+that Amazon rated as high quality were drawn with a fixed seed from
+\AmzStations{} depots in \AmzCities{} US cities; each is one van's day, with
+\AmzStopsMin{} to \AmzStopsMax{} stops (median \AmzStopsMed). The data give the
+travel time between every pair of stops, the planned service time and volume of
+every package, the van's capacity, its departure time and the order the driver
+actually drove. Consecutive stops in the same Amazon delivery zone were joined into
+one customer, giving \AmzCustMin{} to \AmzCustMax{} customers per route; the
+solver rounds every trip up to a whole minute, and on single stops a few hundred
+metres apart that rounding alone would add more than an hour per route. A
+customer's service time (its packages plus the walking and driving between its
+stops) was added to the trips leaving it, so it receives the same random delays as
+driving. In Amazon's data only \AmzWindowShare\% of these stops have a delivery window,
+and the middle half of those windows are \AmzWindowLo{} to \AmzWindowHi{} hours wide, so each customer was offered a two-hour window containing the time the
+driver actually arrived, placed at random around it. The shift starts at the real
+local departure time, lasts 1.3 times the actual route, and up to three vans of the
+real capacity may be used. The unchanged OR-Tools pipeline was run on each route.
+This check was also exploratory.
 
 \subsection{Confirmatory studies}
 
@@ -767,6 +836,43 @@ RC1 & 10 & 10 & 10 & 27.6 & 79.3 & 97.4\\
 \end{tabular}
 \end{table}
 
+\subsection{Real delivery routes}
+
+On the Amazon routes, both screened procedures were more reliable than 20\%
+padding (Table~\ref{tab:amazon}). Screened conservative pooled \AmzSc\% against
+\AmzCons\% for padding, a difference of \AmzScDiff{} [\AmzScDiffLo, \AmzScDiffHi]
+points, and the capped procedure pooled \AmzCap\%, \AmzCapDiff{} [\AmzCapDiffLo,
+\AmzCapDiffHi] points above padding. Part of the gap comes from planning: padding
+found no plan on \AmzConsNoPlan{} routes, against
+\AmzNoPlan{} for the other configurations. Where the capped procedure admitted a
+plan (\AmzCapAdmitted{} routes), its validated service averaged \AmzCapOnAdmitted\%,
+and on \AmzCapAdmittedNinetyFive{} of them it was at least 95\%. On the
+\AmzFallbackRoutes{} routes where no candidate passed, its fallback averaged
+\AmzCapOnFallback\% against \AmzConsOnFallback\% for padding, and on the
+\AmzBoth{} routes where both had a plan the two were not distinguishable
+(\AmzBothDiff{} [\AmzBothDiffLo, \AmzBothDiffHi] points). Screened conservative
+avoids that weakness because its fallback is the padded plan. On \AmzNoPlan{} routes
+with \AmzNoPlanCustMin{} to \AmzNoPlanCustMax{} customers no configuration found a plan within the time limit, even
+though the driver's own order is feasible by construction, so these failures are
+limits of the solver's search, not of the instances.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Real delivery routes: 40 Amazon routes from five US cities (exploratory). \emph{Plans}: routes on which the configuration produced a plan; \emph{Admitted}: routes on which a candidate passed the screen. Pooled validated service probability (\%) with a 95\% bootstrap interval over routes; a route without a plan scores zero.}
+\label{tab:amazon}
+\begin{tabular}{@{}lccl@{}}
+\toprule
+Configuration & Plans & Admitted & Pooled service\\
+\midrule
+Nominal plan (no protection) & 34/40 & -- & 41.4 [35.1, 47.1]\\
+20\% padding & 28/40 & -- & 59.0 [46.6, 70.8]\\
+Capped screening procedure & 34/40 & 24 & 72.6 [61.2, 82.9]\\
+Screened conservative & 34/40 & 25 & 75.3 [63.6, 85.7]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Confirmatory studies}
 
 Table~\ref{tab:primaries} lists the eight primary hypotheses. Seven were confirmed.
@@ -834,8 +940,9 @@ model.
 
 The study has clear limits. The cities are synthetic squares and the delay model is
 assumed, not estimated from real traffic data, so the percentages are not forecasts
-for a real fleet. The benchmark check shows the result is not specific to the
-instance generator, but those instances are also artificial. The confirmatory studies show that the findings repeat on new
+for a real fleet. The benchmark and Amazon checks show that the result is not specific to the
+instance generator, but even the Amazon routes use assumed delivery windows and an
+assumed delay model. The confirmatory studies show that the findings repeat on new
 instances from the same generator; they do not show that they hold in a different
 city. The advantage also depends on the planner's objective: with equal weights on
 the four quantities it fell to \WtEqualPCMean{} points, with an interval that
@@ -850,7 +957,10 @@ times, and breakdowns and same-day replanning are not modelled.
 Pooled service stayed just below 95\% because of the few instances with no passing
 plan. Better candidates for those instances, for example from a solver that models
 uncertainty directly, are the clearest next step, together with a test on real
-travel-time data.
+travel-time data. The Amazon routes also show that the fallback matters: when no
+candidate passes, returning the padded plan is safer than returning the
+unbuffered one, so a company adopting the screen should use the padded plan as its
+fallback.
 
 \subsection{Closing thought}
 
@@ -874,7 +984,7 @@ author's. Every experiment was run from the archived code, every reported number
 regenerated from the archived records, and the author takes full responsibility for
 the content.
 
-\begin{thebibliography}{31}
+\begin{thebibliography}{32}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -1069,6 +1179,14 @@ H.~Gehring and J.~Homberger.
 \newblock In K.~Miettinen, M.~M{\"a}kel{\"a}, and J.~Toivanen, editors,
   \emph{Proceedings of {EUROGEN99}}, pages 57--64, Jyv{\"a}skyl{\"a}, 1999.
   University of Jyv{\"a}skyl{\"a}.
+
+\bibitem[Merch{\'a}n et~al.(2022)Merch{\'a}n, Arora, Pachon, Konduri,
+  Winkenbach, Parks, and Noszek]{merchan2022}
+Daniel Merch{\'a}n, Jatin Arora, Julian Pachon, Karthik Konduri, Matthias
+  Winkenbach, Steven Parks, and Joseph Noszek.
+\newblock 2021 {Amazon} last mile routing research challenge: data set.
+\newblock \emph{Transp Sci}, 2022.
+\newblock \doi{10.1287/trsc.2022.1173}.
 
 \bibitem[{Anonymous}(2026{\natexlab{b}})]{ali2026freeze}
 {Anonymous}.
