@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Padding every trip by a fixed percentage on the 53 development instances (exploratory). \emph{Plans}: instances on which the padded planner found a plan. \emph{All}: pooled service over all instances, an instance without a plan scoring zero. The next three columns use only the instances with a padded plan: the padded plans' service, the capped screening procedure's service on the same instances, and the difference (padding minus screening, percentage points, 95\% paired bootstrap interval). Distance (\%) and vehicles are also padding minus screening on those instances. Over all instances the capped procedure pooled 86.6\%.}
+\label{tab:padding}
+\begin{tabular}{@{}rrrrrlrr@{}}
+\toprule
+ & & \multicolumn{1}{c}{All} & \multicolumn{3}{c}{Instances with a padded plan} & & \\
+\cmidrule(lr){3-3}\cmidrule(lr){4-6}
+Padding & Plans & Pooled & Padded & Screened & Difference & Distance & Vehicles\\
+\midrule
+0\% & 53/53 & 21.9 & 21.9 & 86.6 & $-$64.7 [$-$70.2, $-$58.8] & $-$7.1 & $-$0.89\\
+10\% & 51/53 & 43.7 & 45.4 & 88.4 & $-$42.9 [$-$48.0, $-$37.4] & $-$6.2 & $-$0.59\\
+20\% & 46/53 & 56.8 & 65.4 & 89.4 & $-$23.9 [$-$29.2, $-$18.2] & $-$4.8 & $-$0.22\\
+30\% & 43/53 & 66.7 & 82.2 & 90.3 & $-$8.1 [$-$13.1, $-$2.4] & $-$3.1 & 0.21\\
+40\% & 34/53 & 58.8 & 91.6 & 88.5 & 3.1 [$-$2.8, 10.0] & $-$1.0 & 0.47\\
+50\% & 26/53 & 47.1 & 96.1 & 87.9 & 8.2 [1.2, 16.1] & 0.9 & 0.77\\
+\bottomrule
+\end{tabular}
+\end{table}
