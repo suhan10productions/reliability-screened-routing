@@ -42,9 +42,18 @@ The unchanged OR-Tools pipeline (study_v6.run_instance, then study_v7.run) is
 run on each instance, exactly as for the Solomon check. The first 40 sampled
 routes are used; the other 20 are spares and were not run.
 
+Delay model (--delay)
+  assumed     the study's model (default; results/amazon, results/amazon_summary.json);
+  nyc_days    calibrated on New York taxi trips (code/nyc_calibration.py): the measured
+              time-of-day profile, sigma from the between-day variation of a fixed
+              zone pair and rho relative to it;
+  nyc_total   the same profile, sigma from all trip-to-trip variation and rho relative
+              to it.
+  Results go to results/amazon_<delay> and results/amazon_summary_<delay>.json.
+
 Usage (from the package root):
-  PYTHONPATH=code python code/amazon_benchmark.py --workers 4
-  PYTHONPATH=code python code/amazon_benchmark.py --summarise
+  PYTHONPATH=code python code/amazon_benchmark.py --workers 4 [--delay nyc_days]
+  PYTHONPATH=code python code/amazon_benchmark.py --summarise [--delay nyc_days]
 """
 from __future__ import annotations
 
@@ -68,6 +77,26 @@ from relscreen_v6 import InstanceData
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "amazon" / "amazon_sample.json.gz"
 OUT = ROOT / "results" / "amazon"
+DELAY = "assumed"
+
+
+def set_delay(name: str):
+    global OUT, DELAY
+    DELAY = name
+    OUT = ROOT / "results" / ("amazon" if name == "assumed" else f"amazon_{name}")
+
+
+def delay_settings(name: str):
+    """(params overrides, profile multipliers or None) for a delay model."""
+    if name == "assumed":
+        return {}, None
+    cal = json.loads((ROOT / "results" / "nyc_calibration.json").read_text())
+    mult = tuple(round(p["multiplier"], 4) for p in cal["profile"])
+    if name == "nyc_days":
+        return {"sigma": round(cal["sigma_between_days"], 4), "rho_log": round(cal["rho_between_days"], 4)}, mult
+    if name == "nyc_total":
+        return {"sigma": round(cal["sigma_total"], 4), "rho_log": round(cal["rho_total"], 4)}, mult
+    raise ValueError(name)
 N_USED = 40
 SEED_BASE = 95_000            # pseudo-seeds 95001 ... outside every other study's range
 WINDOW = 120                  # minutes
@@ -143,14 +172,21 @@ def _patched_params_factory(overrides):
 
 def install(rid: str, seed: int):
     data, overrides, info = build(rid, seed)
+    extra, mult = delay_settings(DELAY)
+    overrides = {**overrides, **extra}
     loader = lambda customers, vehicles, s, *a, **k: data  # noqa: E731
     for mod in (study_v6, study_v7):
         mod.make_synthetic_instance = loader
         mod.ModelParams = _patched_params_factory(overrides)
+        if mult is not None:
+            mod.SpeedProfile = lambda m=mult: relscreen_v6.SpeedProfile(congestion_multiplier=m)
+    info = {**info, "delay_model": DELAY, "profile_multipliers": mult}
     return data, overrides, info
 
 
-def run_one(k: int, seconds: float, anchor_seconds: float, screen: int, validation: int) -> str:
+def run_one(k: int, seconds: float, anchor_seconds: float, screen: int, validation: int,
+            delay: str = "assumed") -> str:
+    set_delay(delay)
     rid = route_ids()[k]
     seed = SEED_BASE + k + 1
     data, overrides, info = install(rid, seed)
@@ -239,7 +275,8 @@ def summarise():
     nop = [x["customers"] for x in rows if not x["has_nominal"]]
     out["no_plan_customers"] = [min(nop), max(nop)] if nop else None
     out["cities"] = len({x["station"][:3] for x in rows})
-    (ROOT / "results" / "amazon_summary.json").write_text(json.dumps(out, indent=1))
+    out["delay_model"] = DELAY
+    (ROOT / "results" / ("amazon_summary.json" if DELAY == "assumed" else f"amazon_summary_{DELAY}.json")).write_text(json.dumps(out, indent=1))
     print(json.dumps({k: v for k, v in out.items() if k != "rows"}, indent=1))
 
 
@@ -252,13 +289,15 @@ def main():
     ap.add_argument("--screen-scenarios", type=int, default=1000)
     ap.add_argument("--validation-scenarios", type=int, default=5000)
     ap.add_argument("--summarise", action="store_true")
+    ap.add_argument("--delay", choices=("assumed", "nyc_days", "nyc_total"), default="assumed")
     a = ap.parse_args()
+    set_delay(a.delay)
     if a.summarise:
         return summarise()
     ks = a.only if a.only is not None else list(range(N_USED))
     with ProcessPoolExecutor(max_workers=a.workers) as pool:
         futs = {pool.submit(run_one, k, a.seconds, a.anchor_seconds, a.screen_scenarios,
-                            a.validation_scenarios): k for k in ks}
+                            a.validation_scenarios, a.delay): k for k in ks}
         for f in as_completed(futs):
             k = futs[f]
             try:

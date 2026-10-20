@@ -144,55 +144,93 @@ CITY_WORDS = {3: "three", 4: "four", 5: "five"}
 
 
 def amazon_outputs():
-    s = json.loads((ROOT / "results/amazon_summary.json").read_text())
-    rows, P = s["rows"], s["pooled"]
+    runs = {"": "amazon_summary.json", "D": "amazon_summary_nyc_days.json", "T": "amazon_summary_nyc_total.json"}
+    S = {k: json.loads((ROOT / "results" / f).read_text()) for k, f in runs.items()}
+    s, rows = S[""], S[""]["rows"]
     N = s["instances"]
-    assert N == 40
+    for k, v in S.items():
+        assert v["instances"] == N == 40, (k, v["instances"])
+        assert v["plans"] == s["plans"], k                 # planning does not depend on the delay model
     plans = {"nominal": s["plans"]["nominal"], "conservative": s["plans"]["conservative"],
              "capped": sum(1 for r in rows if r["has_nominal"]), "screened_conservative": sum(1 for r in rows if r["has_nominal"])}
-    adm = {"capped": s["admitted"], "screened_conservative": s["screened_conservative_admitted"]}
     names = [("nominal", "Nominal plan (no protection)"), ("conservative", "20\\% padding"),
              ("capped", "Capped screening procedure"), ("screened_conservative", "Screened conservative")]
-    body = [f"{label} & {plans[k]}/{N} & {adm.get(k, '--') if k in adm else '--'} & "
-            f"{f1(P[k][0])} [{f1(P[k][1])}, {f1(P[k][2])}]\\\\" for k, label in names]
+    cell = lambda v, k: f"{f1(v['pooled'][k][0])} [{f1(v['pooled'][k][1])}, {f1(v['pooled'][k][2])}]"  # noqa: E731
+    body = [f"{label} & {plans[k]}/{N} & {cell(S[''], k)} & {cell(S['D'], k)} & {cell(S['T'], k)}\\\\"
+            for k, label in names]
+    adm = lambda key: " & ".join(str(S[x][key]) for x in ("", "D", "T"))  # noqa: E731
+    body += [r"\midrule", r"Admitted, capped procedure & & " + adm("admitted") + r"\\",
+             r"Admitted, screened conservative & & " + adm("screened_conservative_admitted") + r"\\"]
     table = "\n".join([
-        r"\begin{table}[t]", r"\centering", r"\small",
-        r"\caption{Real delivery routes: " + str(N) + r" Amazon routes from " + CITY_WORDS[len({r['station'][:3] for r in rows})] + r" US cities (exploratory). "
-        r"\emph{Plans}: routes on which the configuration produced a plan; \emph{Admitted}: routes on which a "
-        r"candidate passed the screen. Pooled validated service probability (\%) with a 95\% bootstrap interval over "
-        r"routes; a route without a plan scores zero.}",
+        r"\begin{table}[t]", r"\centering", r"\small", r"\setlength{\tabcolsep}{4pt}",
+        r"\caption{Real delivery routes: " + str(N) + r" Amazon routes from " + CITY_WORDS[s["cities"]] +
+        r" US cities (exploratory), under the assumed delay model and under the two delay models fitted to New York "
+        r"taxi trips (Table~\ref{tab:nyc}). \emph{Plans}: routes on which the configuration produced a plan (the "
+        r"same under every delay model). Pooled validated service probability (\%) with a 95\% bootstrap interval "
+        r"over routes; a route without a plan scores zero. \emph{Admitted}: routes on which a candidate passed the "
+        r"screen.}",
         r"\label{tab:amazon}",
-        r"\begin{tabular}{@{}lccl@{}}", r"\toprule",
-        r"Configuration & Plans & Admitted & Pooled service\\", r"\midrule", *body,
+        r"\begin{tabular}{@{}lclll@{}}", r"\toprule",
+        r" & & \multicolumn{3}{c}{Pooled service under the delay model} \\",
+        r"Configuration & Plans & Assumed & NYC, day to day & NYC, all variation\\", r"\midrule", *body,
         r"\bottomrule", r"\end{tabular}", r"\end{table}", ""])
     stops = sorted(r["stops"] for r in rows)
     cust = sorted(r["customers"] for r in rows)
-    d1, d2 = s["capped_minus_conservative"], s["screened_conservative_minus_conservative"]
-    dw = s["capped_minus_conservative_where_planned"]
     m = {"AmzRoutes": str(N), "AmzStations": str(len({r["station"] for r in rows})),
          "AmzStopsMin": str(stops[0]), "AmzStopsMax": str(stops[-1]), "AmzStopsMed": str(int(np.median(stops))),
          "AmzCustMin": str(cust[0]), "AmzCustMax": str(cust[-1]),
          "AmzNomPlans": str(plans["nominal"]), "AmzConsPlans": str(plans["conservative"]),
-         "AmzNoPlan": str(N - plans["nominal"]),
-         "AmzCapAdmitted": str(adm["capped"]), "AmzScAdmitted": str(adm["screened_conservative"]),
-         "AmzCapAdmittedNinetyFive": str(s["capped_admitted_at_least_95"]),
-         "AmzCapOnAdmitted": f1(s["capped_on_admitted"]), "AmzScOnAdmitted": f1(s["screened_conservative_on_admitted"]),
-         "AmzFallbackRoutes": str(s["fallback_instances"]), "AmzCapOnFallback": f1(s["capped_on_fallback"]),
-         "AmzConsOnFallback": f1(s["conservative_on_fallback"]),
-         "AmzNom": f1(P["nominal"][0]), "AmzCons": f1(P["conservative"][0]), "AmzCap": f1(P["capped"][0]),
-         "AmzSc": f1(P["screened_conservative"][0]),
-         "AmzCapDiff": f1(d1[0]), "AmzCapDiffLo": f1(d1[1]), "AmzCapDiffHi": f1(d1[2]),
-         "AmzScDiff": f1(d2[0]), "AmzScDiffLo": f1(d2[1]), "AmzScDiffHi": f1(d2[2]),
-         "AmzBoth": str(s["where_planned"]), "AmzBothDiff": f1(dw[0]), "AmzBothDiffLo": f1(dw[1]), "AmzBothDiffHi": f1(dw[2]),
-         "AmzFleetDiff": f2(s["fleet_capped_minus_conservative"][0]),
-         "AmzConsNoPlan": str(N - plans["conservative"]),
+         "AmzNoPlan": str(N - plans["nominal"]), "AmzConsNoPlan": str(N - plans["conservative"]),
          "AmzNoPlanCustMin": str(s["no_plan_customers"][0]), "AmzNoPlanCustMax": str(s["no_plan_customers"][1]),
          "AmzCities": CITY_WORDS[s["cities"]],
          "AmzWindowShare": f"{100 * s['amazon_windows']['stops_with_window'] / s['amazon_windows']['stops']:.0f}",
          "AmzWindowLo": f"{s['amazon_windows']['width_hours_quartiles'][0]:.0f}",
          "AmzWindowHi": f"{s['amazon_windows']['width_hours_quartiles'][2]:.0f}"}
-    return table, m
-
+    for t, v in S.items():
+        P = v["pooled"]
+        d1, d2, dw = v["capped_minus_conservative"], v["screened_conservative_minus_conservative"], v["capped_minus_conservative_where_planned"]
+        m.update({f"Amz{t}Nom": f1(P["nominal"][0]), f"Amz{t}Cons": f1(P["conservative"][0]),
+                  f"Amz{t}Cap": f1(P["capped"][0]), f"Amz{t}Sc": f1(P["screened_conservative"][0]),
+                  f"Amz{t}CapDiff": f1(d1[0]), f"Amz{t}CapDiffLo": f1(d1[1]), f"Amz{t}CapDiffHi": f1(d1[2]),
+                  f"Amz{t}ScDiff": f1(d2[0]), f"Amz{t}ScDiffLo": f1(d2[1]), f"Amz{t}ScDiffHi": f1(d2[2]),
+                  f"Amz{t}Both": str(v["where_planned"]), f"Amz{t}BothDiff": f1(dw[0]),
+                  f"Amz{t}BothDiffLo": f1(dw[1]), f"Amz{t}BothDiffHi": f1(dw[2]),
+                  f"Amz{t}FleetDiff": f2(v["fleet_capped_minus_conservative"][0]),
+                  f"Amz{t}CapAdmitted": str(v["admitted"]), f"Amz{t}ScAdmitted": str(v["screened_conservative_admitted"]),
+                  f"Amz{t}CapAdmittedNinetyFive": str(v["capped_admitted_at_least_95"]),
+                  f"Amz{t}CapOnAdmitted": f1(v["capped_on_admitted"]),
+                  f"Amz{t}FallbackRoutes": str(v["fallback_instances"]),
+                  f"Amz{t}CapOnFallback": "--" if v["capped_on_fallback"] is None else f1(v["capped_on_fallback"]),
+                  f"Amz{t}ConsOnFallback": "--" if v["conservative_on_fallback"] is None else f1(v["conservative_on_fallback"])})
+    diffs = [S[t]["capped_minus_conservative"][0] for t in S]
+    m.update({"AmzCapDiffMin": f1(min(diffs)), "AmzCapDiffMax": f1(max(diffs))})
+    # the New York calibration
+    c = json.loads((ROOT / "results/nyc_calibration.json").read_text())
+    prof = c["profile"]
+    label = lambda p: f"{p['from_hour']:02d}:00--{p['to_hour']:02d}:00"  # noqa: E731
+    nrows = [f"{label(p)} & {p['assumed']:.1f} & {p['multiplier']:.2f} & {p['zone_pairs']:,}\\\\".replace(",", "{,}")
+             for p in prof]
+    ntable = "\n".join([
+        r"\begin{table}[t]", r"\centering", r"\small",
+        r"\caption{The delay model fitted to " + f"{c['trips_used'] / 1e6:.1f}" + r" million weekday New York "
+        r"yellow-taxi trips (January--March 2024). Time-of-day multipliers of travel time relative to "
+        r"09:00--17:00, from zone pairs with at least 20 trips in both periods; the spread $\sigma$ and the "
+        r"day-common share $\rho$ of the random factor are estimated in two ways (see text).}",
+        r"\label{tab:nyc}",
+        r"\begin{tabular}{@{}lccr@{}}", r"\toprule",
+        r"Period & Assumed & Fitted & Zone pairs\\", r"\midrule", *nrows, r"\midrule",
+        f"$\\sigma$ & 0.20 & {c['sigma_between_days']:.2f} (day to day), {c['sigma_total']:.2f} (all) & \\\\",
+        f"$\\rho$ & 0.50 & {c['rho_between_days']:.2f} (day to day), {c['rho_total']:.2f} (all) & \\\\",
+        r"\bottomrule", r"\end{tabular}", r"\end{table}", ""])
+    m.update({"NycTripsM": f"{c['trips_used'] / 1e6:.1f}", "NycRawM": f"{c['trips_raw'] / 1e6:.1f}",
+              "NycWeekdays": str(c["weekdays"]),
+              "NycEarly": f"{prof[0]['multiplier']:.2f}", "NycAm": f"{prof[1]['multiplier']:.2f}",
+              "NycPm": f"{prof[3]['multiplier']:.2f}", "NycLate": f"{prof[4]['multiplier']:.2f}",
+              "NycAmFaster": f"{100 * (1 - prof[1]['multiplier']):.0f}",
+              "NycPmFaster": f"{100 * (1 - prof[3]['multiplier']):.0f}",
+              "NycSigmaDays": f"{c['sigma_between_days']:.2f}", "NycSigmaTotal": f"{c['sigma_total']:.2f}",
+              "NycRhoDays": f"{c['rho_between_days']:.2f}", "NycRhoTotal": f"{c['rho_total']:.2f}"})
+    return table, ntable, m
 
 def main():
     OUT.mkdir(exist_ok=True)
@@ -204,8 +242,9 @@ def main():
     (OUT / "tab_gh.tex").write_text(extract_table(PAPER / "gh_results.tex", "tab:gh"))
     table, macros = padding_outputs()
     (OUT / "tab_padding.tex").write_text(table)
-    atable, amacros = amazon_outputs()
+    atable, ntable, amacros = amazon_outputs()
     (OUT / "tab_amazon.tex").write_text(atable)
+    (OUT / "tab_nyc.tex").write_text(ntable)
     macros.update(amacros)
     (OUT / "result_macros_nhsjs.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in macros.items()))
     print("nhsjs tables ok")

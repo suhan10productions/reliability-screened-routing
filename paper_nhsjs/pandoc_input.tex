@@ -370,6 +370,64 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \title{Checking delivery routes against traffic delays: statistical screening
 versus travel-time padding in vehicle routing}
 \date{}
@@ -393,12 +451,11 @@ delivery routes, a padding sweep from 0 to 50\%, and three confirmatory studies
 with hypotheses published in advance. \textbf{Results.} Screening was 8.3--21.4 percentage points more
 reliable than 20\% padding, although not significantly at 200 customers. No padding
 level matched it over all instances: the best, 30\%, pooled 66.7\%
-against 86.6\%, and heavier padding often found no plan. On the Amazon routes, screening padded
-plans raised service from 59.0\% to 75.3\%. Seven of
-eight prespecified primary hypotheses were confirmed. \textbf{Conclusions.} A
-simple statistical screen can make an existing planner's routes more reliable
-without changing the planner. The delay model is still assumed and needs testing on real
-traffic data.
+against 86.6\%, and heavier padding often found no plan. On the Amazon routes, with delays assumed or
+fitted to 6.2 million New York taxi trips, screening beat padding by
+13.6 to 20.6 points. Seven of
+eight primary hypotheses were confirmed. \textbf{Conclusions.} A
+simple statistical screen can make an existing planner's routes more reliable without changing it. Delivery windows were assumed.
 
 \medskip\noindent\textbf{Keywords:} vehicle routing; time windows; travel-time
 uncertainty; simulation; Wilson interval; operations research
@@ -455,9 +512,9 @@ solvers.
 
 Most instances are synthetic. A further test uses 40 real Amazon delivery routes,
 with real stops, travel times and service times but assumed two-hour delivery
-windows. In every test the travel-time delays follow an assumed model rather than
-measured traffic data, so the study shows whether the procedure works under
-controlled conditions, not how a particular fleet would perform.
+windows. The delay model is assumed in the main studies and fitted to New York taxi trips
+in the Amazon test, so the study shows whether the procedure works under
+realistic conditions, not how a particular fleet would perform.
 
 \subsection{Theoretical framework and related work}
 
@@ -652,6 +709,21 @@ local departure time, lasts 1.3 times the actual route, and up to three vans of 
 real capacity may be used. The unchanged OR-Tools pipeline was run on each route.
 This check was also exploratory.
 
+Because the delay model is assumed, it was also fitted to real traffic. New York
+City publishes every yellow-taxi trip \cite{nyctlc2024}; of the 9.6 million
+trips from January to March 2024, 6.2 million weekday trips between two
+different taxi zones passed basic checks (0.5 to 30 miles, 1 to 120 minutes and 1
+to 60 miles per hour). Each trip's time per mile was used, so that longer and
+shorter trips between the same two zones can be compared. The time-of-day
+multipliers compare the same pairs of zones in each period with 09:00--17:00. The
+spread $\sigma$ was estimated in two ways: from all variation between trips on the
+same pair of zones in the same period, which also contains differences between
+addresses inside a zone and so overstates the variation of one fixed trip, and from
+the variation between days only, which understates it. The day-common share $\rho$
+is the variance of the daily mean divided by each of these. The Amazon check was
+repeated under both fitted models; the screen and the validation then simulate the
+fitted model, and nothing else changes.
+
 \subsection{Confirmatory studies}
 
 The development study was exploratory: its results were used to design the
@@ -832,37 +904,83 @@ RC1 & 10 & 10 & 10 & 27.6 & 79.3 & 97.4\\
 
 \subsection{Real delivery routes}
 
-On the Amazon routes, both screened procedures were more reliable than 20\%
-padding (Table~\ref{tab:amazon}). Screened conservative pooled 75.3\% against
-59.0\% for padding, a difference of 16.3 [11.0, 22.2]
-points, and the capped procedure pooled 72.6\%, 13.6 [3.9,
-24.4] points above padding. Part of the gap comes from planning: padding
-found no plan on 12 routes, against
-6 for the other configurations. Where the capped procedure admitted a
-plan (24 routes), its validated service averaged 97.4\%,
-and on 23 of them it was at least 95\%. On the
+Under the assumed delay model, both screened procedures were more reliable than
+20\% padding (Table~\ref{tab:amazon}). The capped procedure pooled 72.6\%
+against 59.0\% for padding, a difference of 13.6 [3.9,
+24.4] points, and screened conservative pooled 75.3\%, 16.3
+[11.0, 22.2] points above padding. Part of the gap comes from
+planning: padding found no plan on 12 routes, against 6 for
+the other configurations. Where the capped procedure admitted a plan
+(24 routes), its validated service averaged 97.4\%, and
+23 of these plans reached at least 95\%. On the
 10 routes where no candidate passed, its fallback averaged
 56.8\% against 62.9\% for padding, and on the
 28 routes where both had a plan the two were not distinguishable
 (1.6 [$-$4.4, 7.2] points). Screened conservative
-avoids that weakness because its fallback is the padded plan. On 6 routes
-with 22 to 36 customers no configuration found a plan within the time limit, even
-though the driver's own order is feasible by construction, so these failures are
-limits of the solver's search, not of the instances.
+avoids that weakness because its fallback is the padded plan.
+
+The fitted delay model differs from the assumed one in one important way: in New
+York the rush hours were not slower than the middle of the day. Trips between
+07:00 and 09:00 were 16\% faster, and trips between 17:00 and 19:00
+6\% faster, than trips between 09:00 and 17:00 (Table~\ref{tab:nyc}). The
+assumed spread of 0.20 lies between the two fitted values. Under both fitted models
+the capped procedure stayed more reliable than padding over all routes, by
+13.9 [3.8, 26.2] points with day-to-day variation
+and by 20.6 [10.9, 31.4] points with all variation.
+With day-to-day variation the delays are small: the screen admitted a plan on
+34 of the 34 routes with a plan and
+33 of them reached 95\%, but on the 28 routes
+where padding also had a plan, padding was slightly more reliable (screening minus
+padding $-$1.2 [$-$1.9, $-$0.6] points). Under that
+model the advantage of screening comes from planning routes that padding could
+not. With all variation the delays are larger, and screening was also more
+reliable on the routes where both had a plan (8.8 [4.6,
+13.3] points).
+
+On 6 routes with 22 to 36 customers no
+configuration found a plan within the time limit, even though the driver's own
+order is feasible by construction, so these failures are limits of the solver's
+search, not of the instances.
 
 \begin{table}[t]
 \centering
 \small
-\caption{Real delivery routes: 40 Amazon routes from five US cities (exploratory). \emph{Plans}: routes on which the configuration produced a plan; \emph{Admitted}: routes on which a candidate passed the screen. Pooled validated service probability (\%) with a 95\% bootstrap interval over routes; a route without a plan scores zero.}
-\label{tab:amazon}
-\begin{tabular}{@{}lccl@{}}
+\caption{The delay model fitted to 6.2 million weekday New York yellow-taxi trips (January--March 2024). Time-of-day multipliers of travel time relative to 09:00--17:00, from zone pairs with at least 20 trips in both periods; the spread $\sigma$ and the day-common share $\rho$ of the random factor are estimated in two ways (see text).}
+\label{tab:nyc}
+\begin{tabular}{@{}lccr@{}}
 \toprule
-Configuration & Plans & Admitted & Pooled service\\
+Period & Assumed & Fitted & Zone pairs\\
 \midrule
-Nominal plan (no protection) & 34/40 & -- & 41.4 [35.1, 47.1]\\
-20\% padding & 28/40 & -- & 59.0 [46.6, 70.8]\\
-Capped screening procedure & 34/40 & 24 & 72.6 [61.2, 82.9]\\
-Screened conservative & 34/40 & 25 & 75.3 [63.6, 85.7]\\
+00:00--07:00 & 0.9 & 0.62 & 2{,}669\\
+07:00--09:00 & 1.2 & 0.84 & 2{,}424\\
+09:00--17:00 & 1.0 & 1.00 & 4{,}603\\
+17:00--19:00 & 1.3 & 0.94 & 3{,}237\\
+19:00--24:00 & 0.9 & 0.76 & 3{,}865\\
+\midrule
+$\sigma$ & 0.20 & 0.11 (day to day), 0.27 (all) & \\
+$\rho$ & 0.50 & 0.40 (day to day), 0.06 (all) & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Real delivery routes: 40 Amazon routes from five US cities (exploratory), under the assumed delay model and under the two delay models fitted to New York taxi trips (Table~\ref{tab:nyc}). \emph{Plans}: routes on which the configuration produced a plan (the same under every delay model). Pooled validated service probability (\%) with a 95\% bootstrap interval over routes; a route without a plan scores zero. \emph{Admitted}: routes on which a candidate passed the screen.}
+\label{tab:amazon}
+\begin{tabular}{@{}lclll@{}}
+\toprule
+ & & \multicolumn{3}{c}{Pooled service under the delay model} \\
+Configuration & Plans & Assumed & NYC, day to day & NYC, all variation\\
+\midrule
+Nominal plan (no protection) & 34/40 & 41.4 [35.1, 47.1] & 64.9 [55.4, 73.5] & 46.9 [39.6, 53.8]\\
+20\% padding & 28/40 & 59.0 [46.6, 70.8] & 69.5 [54.7, 82.2] & 59.5 [46.8, 71.8]\\
+Capped screening procedure & 34/40 & 72.6 [61.2, 82.9] & 83.4 [71.3, 93.3] & 80.1 [68.5, 90.2]\\
+Screened conservative & 34/40 & 75.3 [63.6, 85.7] & 83.2 [71.3, 93.3] & 77.3 [65.9, 87.5]\\
+\midrule
+Admitted, capped procedure & & 24 & 34 & 30\\
+Admitted, screened conservative & & 25 & 28 & 26\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -932,11 +1050,12 @@ model.
 
 \subsection{Limitations}
 
-The study has clear limits. The cities are synthetic squares and the delay model is
-assumed, not estimated from real traffic data, so the percentages are not forecasts
-for a real fleet. The benchmark and Amazon checks show that the result is not specific to the
-instance generator, but even the Amazon routes use assumed delivery windows and an
-assumed delay model. The confirmatory studies show that the findings repeat on new
+The study has clear limits. In the main studies the cities are synthetic squares and the
+delay model is assumed, so the percentages are not forecasts for a real fleet. The benchmark and Amazon checks show that the result is not specific to the
+instance generator or to the assumed delay model, but the Amazon routes use
+assumed delivery windows, and their delays were fitted in New York, not in the
+cities where the routes were driven. The New York data also show that the assumed
+rush-hour slowdown was wrong for that city. The confirmatory studies show that the findings repeat on new
 instances from the same generator; they do not show that they hold in a different
 city. The advantage also depends on the planner's objective: with equal weights on
 the four quantities it fell to 6.3 points, with an interval that
@@ -950,8 +1069,8 @@ times, and breakdowns and same-day replanning are not modelled.
 
 Pooled service stayed just below 95\% because of the few instances with no passing
 plan. Better candidates for those instances, for example from a solver that models
-uncertainty directly, are the clearest next step, together with a test on real
-travel-time data. The Amazon routes also show that the fallback matters: when no
+uncertainty directly, are the clearest next step, together with delays measured in the
+cities where the routes run. The Amazon routes also show that the fallback matters: when no
 candidate passes, returning the padded plan is safer than returning the
 unbuffered one, so a company adopting the screen should use the padded plan as its
 fallback.
