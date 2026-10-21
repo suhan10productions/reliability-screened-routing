@@ -54,12 +54,12 @@ reliable the plan is. We add a reliability layer to an existing routing solver
 without changing it. The solver plans with internal deadlines brought forward by up
 to an hour, capped so that no customer becomes unreachable; the plans are
 simulated under correlated, time-dependent delays; and the chosen plan is
-certified on independent simulated days with an exact binomial bound. We prove
+certified on independent simulated days with an exact binomial bound. We show
 that a certified plan misses the reliability target with probability at most 5\%,
 whatever the solver and selection rule. Across a development study, three confirmatory
 studies with published hypotheses, benchmark instances and \AmzRoutes{} Amazon
 delivery routes with delays fitted to New York taxi trips, none of \CertTotal{} certified
-plans failed its certificate on fresh days, while 20\% padding was never certified
+plans failed its certificate on fresh simulated days, while 20\% padding was never certified
 on a synthetic instance. A plan reaching 95\% reliability existed on
 \FrBufNinetyFive{} of \FrN{} instances with buffers and on \FrPadNinetyFive{} with
 padding from 0 to 50\%, using fewer vehicles. The certificate is only as good as
@@ -107,11 +107,13 @@ probability of a successful day reaches the target.
 
 The paper makes four contributions.
 \begin{enumerate}
-\item \emph{A solver-independent certificate.} We prove that the probability that
-a certified plan misses the reliability target is at most the chosen error level,
+\item \emph{A solver-independent certificate.} We show, by an elementary argument
+borrowed from sampled chance-constrained programming, that the probability that a
+certified plan misses the reliability target is at most the chosen error level,
 for any solver, candidate family, selection rule or fallback, including a
 simheuristic used as the solver (Theorem~\ref{thm:cert}). On fresh simulated days,
-none of the \CertTotal{} certified plans in our studies failed its certificate.
+none of the \CertTotal{} certified plans in our studies failed its certificate, and
+we measure how the certificate fares when the delay model is wrong.
 \item \emph{A reachability cap.} Bringing deadlines forward can make a distant
 customer impossible to reach; we give a capped deadline that never does this
 (Lemma~\ref{lem:cap}), and show that it removes most screening failures and also
@@ -338,7 +340,9 @@ expectation over $\mathcal F$ gives the claim.
 \end{proof}
 
 \begin{remark}
-The theorem places no condition on the solver, the buffer family, the selection
+The argument is elementary: it is the a posteriori feasibility check used for sampled
+chance-constrained programs \citep{luedtke2008}, applied to a routing plan. Its
+value here is practical. It places no condition on the solver, the buffer family, the selection
 rule or the fallback; the candidates may even be chosen by a simheuristic that has
 simulated thousands of scenarios of its own. It does not say that a plan is
 reliable on real roads: $p(X)$ is defined by the delay model. Section~\ref{sec:wrong}
@@ -518,7 +522,12 @@ Figure~\ref{fig:padding} repeat the comparison with padding from 0 to 50\%. Over
 instances no level came close to the capped procedure: the best, \PadBestLevel\%,
 pooled \PadBestPooled\% against \PadCapPooled\%. More padding did not keep helping,
 because heavy padding makes many instances impossible to plan; at 50\% the padded
-planner found a plan on only \PadFiftyPlans{} of \PadInstances{} instances. Where it
+planner found a plan on only \PadFiftyPlans{} of \PadInstances{} instances. These
+failures are mostly real rather than failures of the search: of the \PfMissing{}
+missing padded plans across all levels, \PfProven{} are provably infeasible, because at
+the padded speed some customer cannot be reached within its window or within the
+shift (at 50\%, \PfFiftyProven{} of \PfFiftyMissing); the other \PfUnresolved{} are
+unresolved. Where it
 did find one, the plan was reliable: on those instances 50\% padding served
 \PadFiftyOnPlans\% against \PadFiftyCapOnPlans\% for screening, and used
 \PadFiftyFleet{} more vehicles. A planner who fixes one padding level must choose
@@ -549,6 +558,9 @@ the table, \CertTotal{} plans were certified. On 5000 fresh days, none of them f
 its certificate, and only \CertBelow{} had a fresh success rate below 0.95, all
 within sampling error of it. The theorem would have allowed about 5\% failures; the
 observed rate is lower because most certified plans are well above the target.
+Because the fresh days come from the same delay model, this test checks the
+implementation and the statistics, not the model; the test that matters in
+practice is the one in Section~\ref{sec:wrong}.
 
 \input{tab_certify}
 

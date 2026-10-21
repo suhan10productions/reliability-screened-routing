@@ -241,6 +241,11 @@ def main():
     for mdl, tag in (("incidents", "Inc"), ("strong_peak", "Peak")):
         m[f"Wr{tag}Pad"] = f"{resc[mdl]['ort_conservative']['mean']:.1f}"
         m[f"Wr{tag}PadN"] = str(resc[mdl]["ort_conservative"]["instances"])
+    pf = json.loads((ROOT / "results/padding_feasibility.json").read_text())
+    m.update({"PfMissing": str(pf["missing_total"]), "PfProven": str(pf["proven_total"]),
+              "PfFiftyMissing": str(pf["levels"]["50"]["missing"]), "PfFiftyProven": str(pf["levels"]["50"]["proven_infeasible"]),
+              "PfTwentyMissing": str(pf["levels"]["20"]["missing"]), "PfTwentyProven": str(pf["levels"]["20"]["proven_infeasible"]),
+              "PfUnresolved": str(pf["missing_total"] - pf["proven_total"])})
     sc = ROOT / "results/amazon_search_check.json"
     if sc.exists():
         m.update(search_macros(json.loads(sc.read_text())))
