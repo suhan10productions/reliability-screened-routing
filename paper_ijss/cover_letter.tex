@@ -1,0 +1,87 @@
+%% Cover letter for IJSS: Operations & Logistics. Numbers come from the manuscript's macros.
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{mathptmx}
+\usepackage[hidelinks]{hyperref}
+\pagestyle{empty}
+\input{../paper/result_macros_v7.tex}
+\input{../paper/result_macros_v12.tex}
+\input{result_macros_nhsjs.tex}
+\input{result_macros_ijss.tex}
+\setlength{\parskip}{0.6em}
+\setlength{\parindent}{0pt}
+\begin{document}
+\today
+
+The Editor-in-Chief\\
+\emph{International Journal of Systems Science: Operations \& Logistics}
+
+Dear Editor,
+
+I submit the manuscript \emph{Certified reliability for any routing solver: screening
+buffered plans against travel-time uncertainty, with evidence from real delivery routes}
+for consideration as a research article.
+
+Delivery firms promise time windows, but most plan with fixed travel times and protect
+themselves by padding every trip, which says nothing about how often the plan will be on
+time. Methods that model the uncertainty directly need a solver built for that model. The
+manuscript takes the systems view of a firm that keeps its existing solver and adds a
+reliability layer around it: the solver produces plans with capped internal buffers, the
+plans are screened by simulation, and the chosen plan is certified on independent
+simulated days.
+
+The contributions are:
+\begin{itemize}
+\item a certificate that holds for any solver and selection rule (Theorem 1), together with
+two results on when it survives a wrong delay model: it carries over to any real delays
+no worse than modelled (Proposition 1), and certifying against a set of models guarantees
+each of them (Proposition 2);
+\item evidence that this works: none of \CertTotal{} certified plans failed its
+certificate on fresh days, and when certificates under one model failed under harsher
+delays, certifying against five models removed every failure at a cost of about
+\StOFleet{} vehicles per instance;
+\item a cost-of-reliability comparison with padding: a plan reaching 95\% reliability
+existed on \FrBufNinetyFive{} of \FrN{} instances with buffers and on \FrPadNinetyFive{}
+with any padding up to 50\%, and used fewer vehicles;
+\item tests beyond synthetic data, on benchmark instances and on \AmzRoutes{} real Amazon
+delivery routes with delays fitted to \NycTripsM{} million New York taxi trips.
+\end{itemize}
+
+The closest work is the robust data-driven routing of Zhang, Zhang, Lim and Sim
+(\emph{Operations Research}, 2021), which also reduces to deadlines brought forward by a
+buffer. Their bound holds over a Wasserstein ambiguity set inside a dedicated solver; ours
+is a finite-sample certificate that needs no change to the solver. Simheuristics rank
+solutions by simulated reliability within their own search; our certificate can be added
+on top of any of them. These differences are set out in Section~2.
+
+I believe the paper fits the journal's interest in operations research for logistics and
+in reliability. The main claims were tested in three confirmatory studies whose hypotheses
+were fixed and publicly timestamped before they were run, and all code, instances and
+records are openly available. The limitations are stated plainly. On the real routes, with
+the HGS solver, screening was more reliable than padding by \AmzHBothDiff{} and
+\AmzHTBothDiff{} points under two of the three delay models, at the same number of
+vehicles; under the mildest model padding was already reliable and slightly ahead.
+
+The manuscript is not under consideration elsewhere and has not been published. Generative
+AI was used for code, analysis, literature search and drafting, as disclosed in the
+manuscript; the author takes full responsibility for the content. There are no competing
+interests and no funding to declare.
+
+Suggested reviewers, none of whom has any connection with the author:
+\begin{itemize}
+\item Prof.\ Jan Fabian Ehmke, Department of Business Decisions and Analytics, University of
+Vienna (\href{mailto:jan.ehmke@univie.ac.at}{jan.ehmke@univie.ac.at}), for service levels in
+routing with stochastic travel times;
+\item Dr.\ Ola Jabali, Operations Research Group, DEIB, Politecnico di Milano, for
+self-imposed time windows and routing under uncertainty;
+\item Prof.\ Angel A.\ Juan, Universitat Polit\`ecnica de Val\`encia, for simheuristics.
+\end{itemize}
+
+Thank you for considering the manuscript.
+
+Yours sincerely,
+
+Suhan Ali\\
+Independent researcher, Lahore, Pakistan\\
+\href{mailto:syedsuhanali9@gmail.com}{syedsuhanali9@gmail.com} \quad ORCID 0009-0004-5079-7684
+\end{document}

@@ -199,6 +199,90 @@ def wrong_outputs(w):
     return table, m
 
 
+def stress_outputs(st):
+    S = st["summary"]
+    show = ("incidents", "strong_peak", "peak_noise", "heavy_tails", "baseline")
+    head = {"incidents": "Incid.", "strong_peak": "Peak", "peak_noise": "Noise", "heavy_tails": "Tails", "baseline": "Assumed"}
+    body = []
+    for proc, label in (("capped_ortools", "Capped (OR-Tools)"), ("capped_hgs", "Capped (HGS)")):
+        v = S[proc]
+        body.append(r"\multicolumn{7}{@{}l}{\emph{" + label + "}}\\\\")
+        for key, lab in (("single_cert_baseline", "Ordinary screen, certified under the assumed model"),
+                         ("single_cert_all", "Ordinary screen, certified under all five models"),
+                         ("stress_cert_all", "Stress screen, certified under all five models")):
+            c = v[key]
+            body.append(f"\\quad {lab} & {c['certified']}/{v['instances']} & " +
+                        " & ".join(str(c["fails_by_model"][m]) for m in show) + "\\\\")
+    table = "\n".join([
+        r"\begin{table}[t]", r"\centering", r"\small", r"\setlength{\tabcolsep}{4pt}",
+        r"\caption{Certifying against several delay models, on the synthetic instances of the development and "
+        r"confirmatory studies. \emph{Certified}: plans certified, out of all instances. The other columns count "
+        r"certified plans that failed their certificate on 5000 fresh days under each true delay model: random "
+        r"incidents, a stronger morning peak, more noise in the peaks, heavy-tailed delays, and the assumed model. "
+        r"The stress screen admits a candidate only if it passes under all five models.}",
+        r"\label{tab:stress}",
+        r"\begin{tabular}{@{}>{\raggedright\arraybackslash}p{6.6cm}cccccc@{}}", r"\toprule",
+        r" & & \multicolumn{5}{c}{Failed certificates under the true model}\\", r"\cmidrule(lr){3-7}",
+        "Configuration & Certified & " + " & ".join(head[m] for m in show) + r"\\", r"\midrule",
+        *body, r"\bottomrule", r"\end{tabular}", r"\end{table}", ""])
+    o, h = S["capped_ortools"], S["capped_hgs"]
+    m = {"StOInst": str(o["instances"]), "StHInst": str(h["instances"]),
+         "StOSingle": str(o["single_cert_baseline"]["certified"]), "StHSingle": str(h["single_cert_baseline"]["certified"]),
+         "StOSingleIncFail": str(o["single_cert_baseline"]["fails_by_model"]["incidents"]),
+         "StOSinglePeakFail": str(o["single_cert_baseline"]["fails_by_model"]["strong_peak"]),
+         "StHSingleIncFail": str(h["single_cert_baseline"]["fails_by_model"]["incidents"]),
+         "StHSinglePeakFail": str(h["single_cert_baseline"]["fails_by_model"]["strong_peak"]),
+         "StOSingleAll": str(o["single_cert_all"]["certified"]), "StHSingleAll": str(h["single_cert_all"]["certified"]),
+         "StOStress": str(o["stress_cert_all"]["certified"]), "StHStress": str(h["stress_cert_all"]["certified"]),
+         "StStressFails": str(sum(sum(S[p]["stress_cert_all"]["fails_by_model"].values()) for p in S)),
+         "StOFleet": f2(o["stress_minus_single_fleet"]), "StHFleet": f2(h["stress_minus_single_fleet"]),
+         "StODist": f1(o["stress_minus_single_distance_pct"]), "StHDist": f1(h["stress_minus_single_distance_pct"]),
+         "StOBoth": str(o["both_selected"]), "StHBoth": str(h["both_selected"]),
+         "StOIncServ": f1(o["stress_cert_all"]["mean_test_success"]["incidents"]),
+         "StOPeakServ": f1(o["stress_cert_all"]["mean_test_success"]["strong_peak"])}
+    return table, m
+
+
+def amazon_hgs_outputs(h):
+    labels = {"assumed": "Assumed", "nyc_days": "NYC, day to day", "nyc_total": "NYC, all variation"}
+    body, m = [], {}
+    for mdl, tag in (("assumed", ""), ("nyc_days", "D"), ("nyc_total", "T")):
+        v = h["models"][mdl]
+        P = v["pooled"]
+        dboth, fl = v["capped_minus_padding_both"], v["fleet_capped_minus_padding_both"]
+        dfb = v["capped_with_fallback_minus_padding"]
+        body.append(f"{labels[mdl]} & {f1(P['hgs_conservative'][0])} & {f1(v['capped_with_fallback_pooled'][0])} & "
+                    f"{f1(dfb[0])} [{f1(dfb[1])}, {f1(dfb[2])}] & {f1(dboth[0])} [{f1(dboth[1])}, {f1(dboth[2])}] & "
+                    f"{f2(fl[0])} & {v['certified']['hgs_conservative']} & {v['certified']['hgs_capped_cons']}\\\\")
+        m.update({f"AmzH{tag}Pad": f1(P["hgs_conservative"][0]), f"AmzH{tag}CapFb": f1(v["capped_with_fallback_pooled"][0]),
+                  f"AmzH{tag}FbDiff": f1(dfb[0]), f"AmzH{tag}FbDiffLo": f1(dfb[1]), f"AmzH{tag}FbDiffHi": f1(dfb[2]),
+                  f"AmzH{tag}Both": str(v["both"]), f"AmzH{tag}BothDiff": f1(dboth[0]),
+                  f"AmzH{tag}BothDiffLo": f1(dboth[1]), f"AmzH{tag}BothDiffHi": f1(dboth[2]),
+                  f"AmzH{tag}Fleet": f2(fl[0]), f"AmzH{tag}CertPad": str(v["certified"]["hgs_conservative"]),
+                  f"AmzH{tag}CertCap": str(v["certified"]["hgs_capped_cons"]), f"AmzH{tag}Fails": str(v["fails_certificate"]),
+                  f"AmzH{tag}Admitted": str(v["admitted"])})
+    a = h["models"]["assumed"]
+    m.update({"AmzHRoutes": str(h["routes"]), "AmzHPadPlans": str(a["plans"]["hgs_conservative"]),
+              "AmzHNotRun": str(a["screen_not_run"])})
+    for mdl in h["models"].values():
+        assert mdl["screen_not_run"] == a["screen_not_run"] and mdl["plans"]["hgs_conservative"] == a["plans"]["hgs_conservative"]
+    table = "\n".join([
+        r"\begin{table}[t]", r"\centering", r"\small", r"\setlength{\tabcolsep}{3.5pt}",
+        r"\caption{The " + str(h["routes"]) + r" Amazon routes with the HGS solver (exploratory). \emph{Padding} and "
+        r"\emph{Capped}: pooled validated reliability (\%) of 20\% padding and of the capped HGS procedure, which "
+        r"falls back to padding on the " + str(a["screen_not_run"]) + r" routes where its scaling solves failed and the "
+        r"screen could not run. \emph{All}: capped minus padding over all routes; \emph{Both}: the same on the routes "
+        r"where the screen ran, with the difference in vehicles. \emph{Certified}: plans certified, padding and capped. "
+        r"95\% bootstrap intervals.}",
+        r"\label{tab:amazonhgs}",
+        r"\begin{tabular}{@{}lccllccc@{}}", r"\toprule",
+        r" & & & \multicolumn{2}{c}{Capped minus padding} & & \multicolumn{2}{c}{Certified}\\",
+        r"\cmidrule(lr){4-5}\cmidrule(lr){7-8}",
+        r"Delay model & Padding & Capped & All & Both & Vehicles & Pad. & Cap.\\", r"\midrule",
+        *body, r"\bottomrule", r"\end{tabular}", r"\end{table}", ""])
+    return table, m
+
+
 def search_macros(s):
     m = {"SrchSeconds": str(int(s["seconds_per_attempt"])),
          "SrchNomMissing": str(s["nominal_missing"]), "SrchNomFound": str(s["nominal_found"]),
@@ -241,6 +325,14 @@ def main():
     for mdl, tag in (("incidents", "Inc"), ("strong_peak", "Peak")):
         m[f"Wr{tag}Pad"] = f"{resc[mdl]['ort_conservative']['mean']:.1f}"
         m[f"Wr{tag}PadN"] = str(resc[mdl]["ort_conservative"]["instances"])
+    st_table, st_m = stress_outputs(json.loads((ROOT / "results/stress_certify_summary.json").read_text()))
+    (OUT / "tab_stress.tex").write_text(st_table)
+    m.update(st_m)
+    hp = ROOT / "results/amazon_hgs_summary.json"
+    if hp.exists():
+        ht, hm = amazon_hgs_outputs(json.loads(hp.read_text()))
+        (OUT / "tab_amazon_hgs.tex").write_text(ht)
+        m.update(hm)
     pf = json.loads((ROOT / "results/padding_feasibility.json").read_text())
     m.update({"PfMissing": str(pf["missing_total"]), "PfProven": str(pf["proven_total"]),
               "PfFiftyMissing": str(pf["levels"]["50"]["missing"]), "PfFiftyProven": str(pf["levels"]["50"]["proven_infeasible"]),
