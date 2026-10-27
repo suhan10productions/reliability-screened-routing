@@ -3,7 +3,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23185704.svg)](https://doi.org/10.5281/zenodo.23185704)
 
 All versions: DOI 10.5281/zenodo.23185704. The current manuscript (`paper_ijss/`) uses
-version v4.1 and later; see "Manuscript versions" at the end of this file.
+version v4.2 and later; see "Manuscript versions" at the end of this file.
 
 **Naming note.** The code modules are named `relscreen_v5`, `relscreen_v6` and
 `relscreen_v7`. The `"schema"` identifiers inside result files are data-format tags from an
@@ -303,7 +303,7 @@ from the same records. Only one has been under review at any time.
   The exploratory analyses added for it are `code/certify.py`, `code/frontier.py`,
   `code/wrong_model.py`, `code/stress_certify.py`, `code/amazon_hgs.py`,
   `code/amazon_search_check.py`, `code/padding_feasibility.py`, `code/hgs_ablation.py`,
-  `code/hgs_weights.py` and `code/fixed_order.py`. The real-operations evidence uses the LaDe data
+  `code/hgs_weights.py`, `code/fixed_order.py` and `code/slowdown_margin.py`. The real-operations evidence uses the LaDe data
   (Cainiao; https://huggingface.co/datasets/Cainiao-AI/LaDe-P and Cainiao-AI/LaDe, not copied here):
   `code/lade.py` (dispatch-record delay model), `code/lade_traj_extract.py` (reads the trajectory
   pickle opcode by opcode, without unpickling), `code/lade_traj.py` (direct GPS trips),

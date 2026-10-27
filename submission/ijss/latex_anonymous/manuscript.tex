@@ -128,7 +128,9 @@ exist; this compares what the families can reach, not what the procedure selects
 \item \emph{Certificates under a wrong delay model.} A certificate carries over to real
 delays no worse than modelled (Proposition~\ref{prop:transfer}), and certifying against
 a set of models guarantees each of them (Proposition~\ref{prop:multi}); this removed
-every failure under harsher delays, at a measured cost.
+every failure under harsher delays, at a measured cost. A certified slowdown margin
+(Proposition~\ref{prop:margin}) says how much slower than modelled every trip may be
+before a certificate breaks, and shows why most certificates were fragile.
 \item \emph{Evidence beyond synthetic data.} Three confirmatory studies with
 hypotheses published in advance, benchmark instances, \AmzRoutes{} real Amazon routes with
 delays fitted to New York taxi trips, and ablations that separate the screen from the
@@ -397,9 +399,9 @@ Theorem~\ref{thm:cert} applies.
 The monotonicity condition holds whenever $1+f\tau'_{ij}(t)\ge0$; with the
 piecewise-constant speed profile used here $\tau'_{ij}\ge-(1-0.9/1.3)$, so it holds
 for every delay factor $f\le3.2$, and it can fail only in the rare case of a very
-large delay at the end of the evening peak. The proposition explains which
-certificates should survive: those whose model is pessimistic relative to reality.
-It suggests certifying against several models at once.
+large delay at the end of the evening peak. Certificates should therefore survive
+when the model is pessimistic relative to reality, which suggests certifying against
+several models at once.
 
 \begin{proposition}\label{prop:multi}
 Let $\mathcal M=\{m_1,\ldots,m_M\}$ be delay models, and certify a plan under
@@ -419,10 +421,9 @@ implies $p_m(X)<\tau$ for some $m$, and the union bound over the $M$ models give
 the second claim.
 \end{proof}
 
-A firm that is unsure of its delay model can therefore choose a small set of
-plausible models, for example its fitted model together with incidents and a
-stronger peak, and screen and certify against all of them. The price is that
-fewer plans pass; Section~\ref{sec:wrong} measures it.
+A firm unsure of its model can screen and certify against a small set, for example
+its fitted model with incidents and a stronger peak; Section~\ref{sec:wrong} measures
+the price.
 
 The certificate can also do without a delay model, if a firm validates on its own
 past days instead of simulated ones. This removes the model, but it changes what
@@ -472,8 +473,30 @@ probability at most $\alpha$ by Theorem~\ref{thm:cert}. A plan chosen from the
 certified candidates is one of them.
 \end{proof}
 
-This is the fixed-sequence principle of multiple testing \citep{maurer1995} applied
-to a buffer family; Section~\ref{sec:cert-results} reports how it compares with certifying the
+The same principle gives a certificate an interpretable margin. For $\lambda\ge0$ let
+$p_\lambda(x)$ be the reliability of $x$ when every travel time is multiplied by
+$1+\lambda$, with the random delay factors unchanged.
+
+\begin{proposition}\label{prop:margin}
+For a plan $x$, test $0=\lambda_0<\lambda_1<\cdots$ in this order on its validation
+bank, certifying $\lambda_j$ when $L_{CP}\ge\tau$, and stop at the first value not
+certified; let $\lambda^*$, the \emph{certified slowdown margin}, be the last certified
+value. Then $\Pr(x\text{ is certified and }p_\lambda(x)<\tau\text{ for some
+}\lambda\le\lambda^*)\le\alpha$, and under the conditions of
+Proposition~\ref{prop:transfer} the plan is then at least $\tau$-reliable under any
+real delays pointwise no worse than the model slowed by $\lambda^*$.
+\end{proposition}
+
+\begin{proof}
+The slowed models form a fixed order, so Proposition~\ref{prop:order} covers the tested
+values. Slowing every trip makes each arrival map pointwise later, so $p_\lambda(x)$
+does not increase with $\lambda$ (the argument of Proposition~\ref{prop:transfer}),
+which covers the values in between; the last claim is Proposition~\ref{prop:transfer}
+applied to the slowed model.
+\end{proof}
+
+Proposition~\ref{prop:order} is the fixed-sequence principle of multiple testing
+\citep{maurer1995} applied to a buffer family; Section~\ref{sec:cert-results} reports how it compares with certifying the
 screened plan.
 
 Here the screen uses the Wilson bound and the guarantee comes from the separate
@@ -542,41 +565,28 @@ unit-speed travel matches 40~km/h and its horizon fits a 600-minute shift from
 \subsection{Real delivery routes}\label{sec:amazon-design}
 
 The third set comes from the public data of the 2021 Amazon Last Mile Routing
-Research Challenge \citep{merchan2022}. We drew \AmzRoutes{} routes that Amazon
-rated as high quality, with a fixed seed and at most five per depot, from
-\AmzStations{} depots in \AmzCities{} US cities. Each route is one van's day, with
-\AmzStopsMin{} to \AmzStopsMax{} stops (median \AmzStopsMed). The data give the
-travel time between every pair of stops, the planned service time and volume of
-every package, the van's capacity and departure time, and the order in which the
-driver actually drove. Consecutive stops in the same Amazon delivery zone were
-joined into one customer, giving \AmzCustMin{} to \AmzCustMax{} customers per
-route, because rounding every trip up to a whole minute would add more than an
-hour to a route of 150 stops that are often less than a minute apart. A customer's
-service time, its packages plus the travel between its stops, was added to the
-trips leaving it, so service receives the same random delays as driving. Only
-\AmzWindowShare\% of these stops have a delivery window in the data, and the middle
-half of those windows are \AmzWindowLo{} to \AmzWindowHi{} hours wide, so each
-customer was offered a two-hour window containing the time the driver actually
-arrived, placed at random around it. The shift starts at the real local departure
-time and lasts 1.3 times the actual route, and up to three vans of the real
-capacity may be used. The unchanged OR-Tools pipeline was run on every route.
+Research Challenge \citep{merchan2022}: \AmzRoutes{} routes rated high quality, drawn
+with a fixed seed from \AmzStations{} depots in \AmzCities{} US cities, each one van's day
+with \AmzStopsMin{} to \AmzStopsMax{} stops. The data give the travel time between every
+pair of stops, service times, package volumes, the van's capacity and departure time,
+and the order the driver drove. Consecutive stops in one delivery zone were joined into
+one customer (\AmzCustMin{} to \AmzCustMax{} per route), whose service time was added to
+the trips leaving it. Only \AmzWindowShare\% of stops have a window in the data, and
+most of those are \AmzWindowLo{} to \AmzWindowHi{} hours wide, so each customer was
+offered a two-hour window placed at random around the driver's actual arrival. The
+shift starts at the real departure time and lasts 1.3 times the actual route, with up to
+three vans.
 
 \subsection{Delays fitted to real traffic}\label{sec:nyc}
 
-To replace the assumed delay model with one estimated from data, we used the yellow
-taxi trip records published by New York City \citep{nyctlc2024}. Of the \NycRawM{}
-million trips from January to March 2024, \NycTripsM{} million weekday trips
-between two different taxi zones passed basic checks (0.5 to 30 miles, 1 to 120
-minutes, 1 to 60 miles per hour). We used each trip's time per mile so that trips
-of different length between the same zones are comparable. The time-of-day
-multipliers compare the same pairs of zones in each period with 09:00--17:00. The
-spread $\sigma$ was estimated in two ways: from all variation between trips on the
-same pair of zones and period, which includes differences between addresses inside
-a zone and so overstates the variation of one fixed trip, and from the variation
-between days only, which understates it. The day-common share $\rho$ is the
-variance of the daily mean divided by each. The Amazon experiment was repeated
-under both fitted models, with the screen and the certificate simulating the
-fitted model.
+To estimate a delay model from data we used New York's yellow taxi records
+\citep{nyctlc2024}: \NycTripsM{} million weekday trips between different zones from
+January to March 2024 that passed basic checks. Time-of-day multipliers compare the same
+zone pairs in each period with 09:00--17:00, using time per mile. The spread $\sigma$
+was estimated from all variation between trips on a zone pair and period, which
+overstates the variation of one fixed trip, and from variation between days only,
+which understates it; $\rho$ is the share of the daily mean in each. The Amazon
+experiments were repeated under both fitted models.
 
 \subsection{Ethics and data use}
 
@@ -635,9 +645,8 @@ found a passing plan on every instance. The confirmatory studies repeated these
 findings (Table~\ref{tab:primaries}). Seven of eight primary hypotheses were
 confirmed: screening beat 20\% padding by \ConfHOneMean{} points on new instances,
 capping added \ConfHTwoMean{} points, and with HGS the capped procedure beat padding
-by \CtwoGOneMean{} points. The one hypothesis not confirmed (G2) was that falling
-back to 20\% padding instead of the slack-aware plan would help the capped OR-Tools
-procedure; it rarely needed a fallback. The best-screened fallback, tested in study
+by \CtwoGOneMean{} points. The one not confirmed (G2), that a padded
+fallback would help the capped OR-Tools procedure, failed because it rarely needed one. The best-screened fallback, tested in study
 3B, raised pooled service by \PbFOne{} and \PbFTwo{} points for the two solvers.
 
 \input{tab_screen}
@@ -667,14 +676,10 @@ A 20\% pad may simply be the wrong amount, so Table~\ref{tab:padding} and
 Figure~\ref{fig:padding} repeat the comparison with padding from 0 to 50\%. Over all
 instances no level came close to the capped procedure: the best, \PadBestLevel\%,
 pooled \PadBestPooled\% against \PadCapPooled\%. More padding did not keep helping,
-because heavy padding makes many instances impossible to plan; at 50\% the padded
-planner found a plan on only \PadFiftyPlans{} of \PadInstances{} instances. These
-failures are mostly real rather than failures of the search: of the \PfMissing{}
-missing padded plans across all levels, \PfProven{} are provably infeasible, because at
-the padded speed some customer cannot be reached within its window or within the
-shift (at 50\%, \PfFiftyProven{} of \PfFiftyMissing); the other \PfUnresolved{} are
-unresolved. Where it
-did find one, the plan was reliable: on those instances 50\% padding served
+because heavy padding makes many instances impossible to plan: at 50\% the padded
+planner found a plan on only \PadFiftyPlans{} of \PadInstances{} instances, and of the
+\PfMissing{} missing padded plans across all levels \PfProven{} are provably infeasible
+(the other \PfUnresolved{} are unresolved). Where it did find one, the plan was reliable: on those instances 50\% padding served
 \PadFiftyOnPlans\% against \PadFiftyCapOnPlans\% for screening, and used
 \PadFiftyFleet{} more vehicles. A planner who fixes one padding level must choose
 between unreliable plans at low levels and missing plans at high ones.
@@ -708,19 +713,15 @@ the fresh days come from the same model, this checks the implementation and the
 statistics, not the model, which Section~\ref{sec:wrong} tests.
 
 Fixed-order certification (Proposition~\ref{prop:order}) was applied to the capped
-families of the OR-Tools procedure in the development study and the first two
-confirmatory studies, and of the HGS procedure in the development study and study~2,
-testing candidates from the largest buffer down and returning the
-certified candidate with the lowest score. It certified a plan on \FoFixed{} of
+families of both solvers in every study where they ran, testing candidates from the
+largest buffer down and returning the certified candidate with the lowest score. It certified a plan on \FoFixed{} of
 \FoInst{} instances against \FoProc{} for the screened plan: \FoFixedOnly{} instances
 gained a certificate and \FoProcOnly{} lost one. Where both certified a plan, the
 fixed-order plan used \FoFleetLess{} fewer vehicles [\FoFleetLessLo, \FoFleetLessHi] and
 \FoDistLess\% less distance [\FoDistLessLo, \FoDistLessHi] than the screened plan, both
 intervals including zero, so the screen had already found nearly the cheapest
 certifiable plan. None of the fixed-order
-certificates failed on fresh days. The rule is therefore a modest but free
-improvement: it certifies more instances and lets a firm choose among certified
-plans without weakening the guarantee.
+certificates failed on fresh days: a modest but free improvement.
 
 \input{tab_certify}
 
@@ -828,6 +829,23 @@ vehicles and \StODist\% more distance (HGS: \StHFleet{} and \StHDist\%), and a p
 was certified on \StOStress{} of \StOInst{} instances instead of \StOSingle{} (HGS:
 \StHStress{} of \StHInst{} instead of \StHSingle).
 
+The certified slowdown margin (Proposition~\ref{prop:margin}) shows why
+single-model certificates broke. Testing slowdowns from 2.5\% to 50\% on each plan's
+validation days (\texttt{code/slowdown\_margin.py}), the median margin of the
+\SmPlans{} plans certified under the assumed model was only \SmMedian\%, and
+\SmZeroShare\% had none: the cheapest passing plan is, almost by construction, only
+just good enough. The margin predicted which certificates survived. Of \SmLowN{}
+plans with a margin below 5\%, \SmLowInc{} kept their certificate under random
+incidents and \SmLowPeak{} under the stronger peak, against \SmMidInc{} and
+\SmMidPeak{} of \SmMidN{} with 5 to 10\%, and all \SmHighN{} plans with at least 10\%
+kept it under all four harsher models (areas under the ROC curve \SmAucInc{} and
+\SmAucPeak). The margin translates rather than adds information, since the
+validated success estimate predicted survival as well (\SmAucValInc{} and
+\SmAucValPeak); its value is the unit, which a firm can compare with how wrong it
+believes its model to be. The stronger peak slows only morning trips, by one sixth,
+so the proposition guarantees every plan with a margin of at least one sixth; all
+\SmCovered{} such plans survived, too few to test the guarantee.
+
 \input{tab_stress}
 
 \subsection{Comparison with robust optimization}
@@ -858,7 +876,10 @@ down and use the cheapest certified plan (Proposition~\ref{prop:order}); this ce
 \FoFixed{} of \FoInst{} instances against \FoProc{} for the screened plan, at no
 measurable cost. Fifth, certify against delay models at least as harsh as reality,
 for example a fitted model together with incidents and a stronger peak
-(Propositions~\ref{prop:transfer} and~\ref{prop:multi}), and accept the extra vehicles.
+(Propositions~\ref{prop:transfer} and~\ref{prop:multi}), and accept the extra vehicles,
+or at least require a certified slowdown margin as large as the error the firm expects
+in its model (Proposition~\ref{prop:margin}); plans with a margin of 10\% or more
+survived every harsher model we tried.
 Sixth, fit the delay model to measured trips, such as GPS tracks, not to the gaps in
 dispatch logs, which record the couriers' choices (Appendix~\ref{sec:real-ops}); a
 certificate resting on history alone needs at least \LfDaysZero{} distinct days
@@ -987,30 +1008,21 @@ the weights.
 \section{OR-Tools on the Amazon routes}\label{app:amazon-ortools}
 \setcounter{table}{0}
 
-On the Amazon routes (Table~\ref{tab:amazon}), the capped procedure was more
-reliable than 20\% padding under every delay model: by \AmzCapDiff{}
-[\AmzCapDiffLo, \AmzCapDiffHi] points under the assumed model, \AmzDCapDiff{}
-[\AmzDCapDiffLo, \AmzDCapDiffHi] with the fitted day-to-day variation and
-\AmzTCapDiff{} [\AmzTCapDiffLo, \AmzTCapDiffHi] with all fitted variation. Much of
-this gap comes from planning: padding produced no plan on \AmzConsNoPlan{} routes,
-against \AmzNoPlan{} for the other configurations. On the \AmzBoth{} routes where
-both had a plan, the two were level under the assumed model (\AmzBothDiff{}
-[\AmzBothDiffLo, \AmzBothDiffHi] points), screening was ahead with all fitted
-variation (\AmzTBothDiff{} [\AmzTBothDiffLo, \AmzTBothDiffHi]), and with the
-milder day-to-day variation padding was slightly more reliable (\AmzDBothDiff{}
-[\AmzDBothDiffLo, \AmzDBothDiffHi]); under that model \CertAmzDPad{} of the
-\CertAmzDPadN{} padded plans were certified (Table~\ref{tab:certify}). When no candidate passed, the capped procedure's
-slack-aware fallback was weaker than padding (\AmzCapOnFallback\% against
-\AmzConsOnFallback\% under the assumed model), which screened conservative avoids
-because its fallback is the padded plan.
-
-On \AmzNoPlan{} routes no configuration found a plan, although the driver's own order
-is feasible, so these are limits of the 5-second search. With \SrchSeconds{} seconds,
-OR-Tools found a padded plan on \SrchConsFound{} of the \SrchConsMissing{} routes where
-padding had none; re-scoring padding with them, the capped procedure's lead became
-\SrchDiff{} [\SrchDiffLo, \SrchDiffHi], \SrchDDiff{} [\SrchDDiffLo, \SrchDDiffHi] and
-\SrchTDiff{} [\SrchTDiffLo, \SrchTDiffHi] points under the three delay models. With
-OR-Tools the real-route comparison is therefore clouded by the search.
+With OR-Tools (Table~\ref{tab:amazon}), the capped procedure was more reliable than
+20\% padding under every delay model: by \AmzCapDiff{} [\AmzCapDiffLo, \AmzCapDiffHi],
+\AmzDCapDiff{} [\AmzDCapDiffLo, \AmzDCapDiffHi] and \AmzTCapDiff{} [\AmzTCapDiffLo,
+\AmzTCapDiffHi] points under the assumed model, the day-to-day and the full fitted
+model. Much of this gap comes from planning: padding had no plan on \AmzConsNoPlan{}
+routes, against \AmzNoPlan{} for the others. On the \AmzBoth{} routes where both had a
+plan they were level under the assumed model (\AmzBothDiff{} [\AmzBothDiffLo,
+\AmzBothDiffHi]), screening was ahead under the full fitted model (\AmzTBothDiff{}
+[\AmzTBothDiffLo, \AmzTBothDiffHi]) and padding slightly ahead under the day-to-day
+model (\AmzDBothDiff{} [\AmzDBothDiffLo, \AmzDBothDiffHi]). The \AmzNoPlan{} routes
+without any plan are limits of the 5-second search, since the driver's own order is
+feasible. With \SrchSeconds{} seconds OR-Tools found a padded plan on \SrchConsFound{} of
+the \SrchConsMissing{} routes where padding had none, and re-scored with them the
+capped procedure's lead became \SrchDiff{} [\SrchDiffLo, \SrchDiffHi], \SrchDDiff{}
+[\SrchDDiffLo, \SrchDDiffHi] and \SrchTDiff{} [\SrchTDiffLo, \SrchTDiffHi] points.
 
 \input{tab_amazon}
 
@@ -1027,7 +1039,7 @@ GPS tracks, and how the instances of the third finding are built, each from the 
 orders of three couriers of one station on one day, with the real promised windows and
 three vehicles starting from the centre of their customers.}
 
-First, \emph{dispatch records are not delay data}. The gap between two pickups is
+First, \emph{dispatch records are not delay data}: the gap between two pickups is
 largely the courier's choice. Replaying each courier's real gaps in the real order
 reproduces the observed lateness exactly; the same gaps in random order made
 \LfShuMin\% to \LfShuMax\% of \LfCourierDays{} busy courier-days late, against \LfObsMin\%
@@ -1040,10 +1052,9 @@ and the last ten days, in every city. Third, \emph{the promised windows do not b
 a VRPTW assumes}: couriers picked up \LfEarlyHz\% of Hangzhou orders early, and planned
 as hard windows at the measured times, \LfInfeasHz\% of \LfTeamsHz{} real three-courier
 teams in Hangzhou and \LfInfeasYt\% of \LfTeamsYt{} in Yantai had no feasible plan. A
-comparison of the layer with padding on these data would therefore depend on how the
-relaxation of the windows is modelled, and we do not report one. Finally, with only 31
-days of tracks, Proposition~\ref{prop:days} rules out a certificate without a delay
-model: at 95\% it needs at least \LfDaysZero{} days.
+comparison of the layer with padding would depend on how that relaxation is modelled,
+so we do not report one. Finally, 31 days of tracks are too few for a certificate
+without a delay model, which needs \LfDaysZero{} (Proposition~\ref{prop:days}).
 
 \input{tab_lade}
 

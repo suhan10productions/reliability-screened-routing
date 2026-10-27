@@ -15,6 +15,7 @@ import json
 import shutil
 from pathlib import Path
 
+import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -509,6 +510,28 @@ def lade_outputs(F):
     return table, m
 
 
+def margin_macros(sm):
+    rows = sm["rows"]
+    mg = np.array([r["margin"] for r in rows])
+    inc, pk = sm["incidents"], sm["strong_peak"]
+    band = lambda d, k: d["by_margin"][k]  # noqa: E731
+    lo, mid, hi1, hi2 = "0.000-0.050", "0.050-0.100", "0.100-0.167", "0.167-0.250"
+    high_n = band(inc, hi1)[0] + band(inc, hi2)[0] + band(inc, "0.250-9.000")[0]
+    high_all = sum(all(r["survives"].values()) for r in rows if r["margin"] >= 0.10 - 1e-12)
+    m = {"SmPlans": str(sm["plans"]), "SmMedian": f1(100 * float(np.median(mg))),
+         "SmZeroShare": str(round(100 * float((mg == 0).mean()))), "SmZero": str(int((mg == 0).sum())),
+         "SmLowN": str(band(inc, lo)[0]), "SmLowInc": str(band(inc, lo)[1]), "SmLowPeak": str(band(pk, lo)[1]),
+         "SmMidN": str(band(inc, mid)[0]), "SmMidInc": str(band(inc, mid)[1]), "SmMidPeak": str(band(pk, mid)[1]),
+         "SmHighN": str(high_n), "SmHighAll": str(high_all),
+         "SmCovered": str(pk["covered"]), "SmCoveredSurv": str(pk["covered_survived"]),
+         "SmAucInc": f"{inc['auc_margin']:.2f}", "SmAucPeak": f"{pk['auc_margin']:.2f}",
+         "SmAucValInc": f"{inc['auc_validated']:.2f}", "SmAucValPeak": f"{pk['auc_validated']:.2f}"}
+    # the text assumes: every plan with margin >= 10% survived every harsher model; the success estimate
+    # predicts survival at least as well as the margin; every plan covered by the strong-peak guarantee survived
+    assert high_all == high_n and inc["auc_validated"] >= inc["auc_margin"] - 0.01 and pk["covered_survived"] == pk["covered"]
+    return m
+
+
 def _frac(x):
     from fractions import Fraction
     q = Fraction(float(x)).limit_denominator(9)
@@ -583,6 +606,9 @@ def main():
     hw = ROOT / "results/hgs_weights_summary.json"
     if hw.exists():
         m.update(hgs_weights_macros(json.loads(hw.read_text())))
+    smp = ROOT / "results/slowdown_margin_summary.json"
+    if smp.exists():
+        m.update(margin_macros(json.loads(smp.read_text())))
     fo = ROOT / "results/fixed_order_summary.json"
     if fo.exists():
         m.update(fixed_order_macros(json.loads(fo.read_text())))
