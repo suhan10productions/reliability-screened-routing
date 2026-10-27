@@ -532,6 +532,22 @@ def margin_macros(sm):
     return m
 
 
+def shift_seq_macros(q):
+    sh = q["shift"]
+    mc = sh["margin_counts"]
+    m = {"SqCert": str(q["sequential_certified"]), "SqFixed": str(q["fixed_certified"]),
+         "SqLost": str(q["fixed_only"]), "SqGained": str(q["sequential_only"]),
+         "SqStopFirst": str(q["stop_counts"]["1000"]), "SqMeanDays": f"{q['mean_days_fixed_certified_plans']:,.0f}".replace(",", "{,}"),
+         "SqSaved": str(round(100 * q["days_saved_share"])), "SqFreshFails": str(q["sequential_fresh_fails"]),
+         "ShMedian": f"{sh['margin_median']:g}", "ShZero": str(mc["0.0"]),
+         "ShZeroShare": str(round(100 * mc["0.0"] / sh["plans"])), "ShTen": str(mc["10.0"]),
+         "ShRhoHalf": f"{100 * sh['rho_median']['0.5']:.2f}",
+         "ShAucInc": f"{sh['predictive']['auc_incidents']:.2f}", "ShAucPeak": f"{sh['predictive']['auc_strong_peak']:.2f}",
+         "ShPlans": str(sh["plans"])}
+    assert q["sequential_only"] == 0 and q["sequential_fresh_fails"] == 0
+    return m
+
+
 def _frac(x):
     from fractions import Fraction
     q = Fraction(float(x)).limit_denominator(9)
@@ -606,6 +622,9 @@ def main():
     hw = ROOT / "results/hgs_weights_summary.json"
     if hw.exists():
         m.update(hgs_weights_macros(json.loads(hw.read_text())))
+    ssp = ROOT / "results/shift_sequential_summary.json"
+    if ssp.exists():
+        m.update(shift_seq_macros(json.loads(ssp.read_text())))
     smp = ROOT / "results/slowdown_margin_summary.json"
     if smp.exists():
         m.update(margin_macros(json.loads(smp.read_text())))
