@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Certifying against several delay models, on the synthetic instances of the development and confirmatory studies. \emph{Certified}: plans certified, out of all instances. The other columns count certified plans that failed their certificate on 5000 fresh days under each true delay model: random incidents, a stronger morning peak, more noise in the peaks, heavy-tailed delays, and the assumed model. The stress screen admits a candidate only if it passes under all five models.}
+\label{tab:stress}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{6.6cm}cccccc@{}}
+\toprule
+ & & \multicolumn{5}{c}{Failed certificates under the true model}\\
+\cmidrule(lr){3-7}
+Configuration & Certified & Incid. & Peak & Noise & Tails & Assumed\\
+\midrule
+\multicolumn{7}{@{}l}{\emph{Capped (OR-Tools)}}\\
+\quad Ordinary screen, certified under the assumed model & 131/159 & 90 & 82 & 27 & 0 & 0\\
+\quad Ordinary screen, certified under all five models & 15/159 & 0 & 0 & 0 & 0 & 0\\
+\quad Stress screen, certified under all five models & 76/159 & 0 & 0 & 0 & 0 & 0\\
+\multicolumn{7}{@{}l}{\emph{Capped (HGS)}}\\
+\quad Ordinary screen, certified under the assumed model & 90/106 & 69 & 69 & 24 & 0 & 0\\
+\quad Ordinary screen, certified under all five models & 12/106 & 0 & 0 & 0 & 0 & 0\\
+\quad Stress screen, certified under all five models & 42/106 & 0 & 0 & 0 & 0 & 0\\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,23 @@
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Sensitivity to the objective weights on the 53 development instances (exploratory). Weights in the order distance, slack deficit, driver time, vehicles. \emph{Adm.}: instances where screening admitted a plan; \emph{Pooled}: pooled validated reliability (\%) of the original procedure; \emph{Advantage}: its paired advantage over 20\% padding in percentage points on the 46 instances where padding has a plan, with 95\% bootstrap intervals. OR-Tools stops at a time limit, so results are compared within a run; the two runs were made on different machines.}
+\label{tab:weights}
+\begin{tabular}{@{}llccl@{}}
+\toprule
+Weights & Vector & Adm. & Pooled & Advantage\\
+\midrule
+\multicolumn{5}{@{}l}{\emph{First run}}\\
+\quad AHP (original) & (0.5693, 0.2643, 0.1055, 0.0609) & 31 & 77.5 & 16.2 [9.4, 22.8]\\
+\quad Slack first & (0.2643, 0.5693, 0.1055, 0.0609) & 30 & 77.4 & 16.0 [9.7, 22.2]\\
+\quad Distance heavy & (0.8, 0.1, 0.05, 0.05) & 29 & 74.3 & 12.7 [5.2, 19.8]\\
+\quad Equal & (0.25, 0.25, 0.25, 0.25) & 23 & 68.7 & 6.3 [$-$1.1, 13.6]\\
+\multicolumn{5}{@{}l}{\emph{Second run, another machine}}\\
+\quad AHP (original) & (0.5693, 0.2643, 0.1055, 0.0609) & 32 & 78.7 & 17.5 [10.8, 23.9]\\
+\quad Equal & (0.25, 0.25, 0.25, 0.25) & 24 & 70.2 & 8.1 [1.1, 15.1]\\
+\quad Vehicle weight raised & (0.4546, 0.2111, 0.0843, 0.25) & 27 & 73.2 & 11.7 [4.7, 18.6]\\
+\quad Driver-time weight raised & (0.4773, 0.2216, 0.25, 0.0511) & 25 & 69.9 & 7.4 [$-$0.6, 15.4]\\
+\bottomrule
+\end{tabular}
+\end{table}

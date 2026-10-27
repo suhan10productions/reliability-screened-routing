@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\small
+\caption{The eight primary hypotheses of the three confirmatory studies. Each was fixed and publicly timestamped before its instances were solved. Estimates are differences in validated service probability (percentage points) with 97.5\% paired bootstrap intervals over instances; a hypothesis is confirmed when its interval lies above zero.}
+\label{tab:primaries}
+\begin{tabular}{@{}cl>{\raggedright\arraybackslash}p{7.2cm}>{\raggedright\arraybackslash}p{2.9cm}l@{}}
+\toprule
+Study & & Contrast & Estimate [interval] & Decision\\
+\midrule
+1 & H1 & Original procedure minus 20\% padding (\ConfCommon{} instances) & \ConfHOneMean{} [\ConfHOneLo, \ConfHOneHi] & confirmed\\
+1 & H2 & Capped minus original procedure (\ConfInstances{} instances) & \ConfHTwoMean{} [\ConfHTwoLo, \ConfHTwoHi] & confirmed\\
+2 & G1 & Capped procedure with HGS minus 20\% padding with HGS (\CtwoCommon{} instances) & \CtwoGOneMean{} [\CtwoGOneLo, \CtwoGOneHi] & confirmed\\
+2 & G2 & Conservative minus slack-aware fallback, capped OR-Tools procedure & \CtwoGTwoMean{} [\CtwoGTwoLo, \CtwoGTwoHi] & not confirmed\\
+3A & R1 & Screened robust model minus capped OR-Tools procedure (\PaInstances{} instances) & \PaROne{} [\PaROneLo, \PaROneHi] & confirmed\\
+3A & R2 & Screened robust model minus capped HGS procedure (45 instances) & \PaRTwo{} [\PaRTwoLo, \PaRTwoHi] & confirmed\\
+3B & F1 & Best-screened minus default fallback, capped OR-Tools procedure & \PbFOne{} [\PbFOneLo, \PbFOneHi] & confirmed\\
+3B & F2 & Best-screened minus default fallback, capped HGS procedure & \PbFTwo{} [\PbFTwoLo, \PbFTwoHi] & confirmed\\
+\bottomrule
+\end{tabular}
+\end{table}

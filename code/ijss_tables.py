@@ -30,9 +30,11 @@ STUDY_COLS = (("development", "Dev."), ("confirmatory 1", "Conf.\\ 1"), ("confir
 
 
 def certify_table(c):
-    rows = [("conservative", "20\\% padding (OR-Tools)"), ("procedure", "Original procedure"),
+    rows = [("nominal", "Nominal plan (OR-Tools)"), ("conservative", "20\\% padding (OR-Tools)"),
+            ("procedure", "Original procedure"),
             ("capped_procedure", "Capped procedure"), ("screened_conservative", "Screened conservative"),
-            ("hgs_conservative", "20\\% padding (HGS)"), ("hgs_capped_cons", "Capped procedure (HGS)")]
+            ("hgs_nominal", "Nominal plan (HGS)"), ("hgs_conservative", "20\\% padding (HGS)"),
+            ("hgs_capped_cons", "Capped procedure (HGS)")]
     body = []
     for key, label in rows:
         cells = []
@@ -67,7 +69,12 @@ def certify_table(c):
         r"\begin{tabular}{@{}l" + "c" * len(STUDY_COLS) + r"@{}}", r"\toprule",
         "Configuration & " + " & ".join(h for _, h in STUDY_COLS) + r"\\", r"\midrule",
         *body, r"\bottomrule", r"\end{tabular}", r"\end{table}", ""])
+    tab_total = sum(c["studies"][s][k]["certified"] for s, _ in STUDY_COLS for k, _ in rows if k in c["studies"][s])
+    assert tab_total == c["all_certified"], (tab_total, c["all_certified"])
     return table, m
+
+
+CAP_CERT_DEV = None    # set in main() from the certification summary
 
 
 def frontier_outputs(fr):
@@ -88,8 +95,11 @@ def frontier_outputs(fr):
         r"50\%) contain a plan whose validated success probability reaches it, and, where both do, the paired "
         r"difference in cost between the cheapest such plans (buffers minus padding): distance in percent of the "
         r"plain distance plan, and vehicles. 95\% bootstrap intervals over instances. \emph{Exact bound}: the "
-        r"Clopper--Pearson lower bound, rather than the estimate, must reach 95\%; because the plan is chosen on the "
-        r"same days, this row is descriptive and is not a certificate in the sense of Theorem~\ref{thm:cert}.}",
+        r"Clopper--Pearson lower bound, rather than the estimate, must reach 95\%. Every row is descriptive: the "
+        r"qualifying plan is found with the same validation days that judge it, so the counts show what each family "
+        r"can reach, not what a procedure would select and certify (the capped procedure certified " + str(CAP_CERT_DEV) +
+        r" of the " + str(N) + r" instances; Table~\ref{tab:certify}), and no row is a certificate in the sense of "
+        r"Theorem~\ref{thm:cert}.}",
         r"\label{tab:frontier}",
         r"\begin{tabular}{@{}lccclll@{}}", r"\toprule",
         r" & \multicolumn{2}{c}{Instances reached} & & \multicolumn{2}{c}{Buffers minus padding} \\",
@@ -283,6 +293,214 @@ def amazon_hgs_outputs(h):
     return table, m
 
 
+def weights_outputs(ws, wb):
+    """Appendix table: the advantage of the original procedure over 20% padding under the weight vectors tried."""
+    from weight_bracketing import WEIGHTS as WB
+    run1 = (("baseline_rerun", "AHP (original)", (0.5693, 0.2643, 0.1055, 0.0609)),
+            ("slack_first", "Slack first", (0.2643, 0.5693, 0.1055, 0.0609)),
+            ("distance_heavy", "Distance heavy", (0.80, 0.10, 0.05, 0.05)),
+            ("equal", "Equal", (0.25, 0.25, 0.25, 0.25)))
+    run2 = (("original_here", "AHP (original)"), ("equal_here", "Equal"),
+            ("fleet_up", "Vehicle weight raised"), ("duration_up", "Driver-time weight raised"))
+    iv = lambda v: f"{f1(v[0])} [{f1(v[1])}, {f1(v[2])}]"  # noqa: E731
+    wf = lambda w: ", ".join(f"{x:.4f}".rstrip("0").rstrip(".") for x in w)  # noqa: E731
+    body = [r"\multicolumn{5}{@{}l}{\emph{First run}}\\"]
+    for k, lab, w in run1:
+        v = ws[k]
+        body.append(rf"\quad {lab} & ({wf(w)}) & {v['selected']} & {f1(v['pooled_P_pp'])} & {iv(v['P_minus_C_pp'])}\\")
+    body.append(r"\multicolumn{5}{@{}l}{\emph{Second run, another machine}}\\")
+    for k, lab in run2:
+        v = wb[k]
+        body.append(rf"\quad {lab} & ({wf(WB[k])}) & {v['adm']} & {f1(v['pooled'])} & {iv(v['adv'])}\\")
+    table = "\n".join([
+        r"\begin{table}[h]", r"\centering", r"\small", r"\setlength{\tabcolsep}{4pt}",
+        r"\caption{Sensitivity to the objective weights on the 53 development instances (exploratory). Weights in the "
+        r"order distance, slack deficit, driver time, vehicles. \emph{Adm.}: instances where screening admitted a plan; "
+        r"\emph{Pooled}: pooled validated reliability (\%) of the original procedure; \emph{Advantage}: its paired "
+        r"advantage over 20\% padding in percentage points on the " + str(ws["equal"]["P_minus_C_common"]) +
+        r" instances where padding has a plan, with 95\% bootstrap intervals. OR-Tools stops at a time limit, so "
+        r"results are compared within a run; the two runs were made on different machines.}",
+        r"\label{tab:weights}",
+        r"\begin{tabular}{@{}llccl@{}}", r"\toprule",
+        r"Weights & Vector & Adm. & Pooled & Advantage\\", r"\midrule",
+        *body, r"\bottomrule", r"\end{tabular}", r"\end{table}", ""])
+    adv = [ws[k]["P_minus_C_pp"] for k, *_ in run1] + [wb[k]["adv"] for k, _ in run2]
+    m = {"WgEqOneMean": f1(ws["equal"]["P_minus_C_pp"][0]), "WgEqOneLo": f1(ws["equal"]["P_minus_C_pp"][1]),
+         "WgEqOneHi": f1(ws["equal"]["P_minus_C_pp"][2]),
+         "WgEqTwoMean": f1(wb["equal_here"]["adv"][0]), "WgEqTwoLo": f1(wb["equal_here"]["adv"][1]),
+         "WgEqTwoHi": f1(wb["equal_here"]["adv"][2]),
+         "WgDurMean": f1(wb["duration_up"]["adv"][0]), "WgDurLo": f1(wb["duration_up"]["adv"][1]),
+         "WgDurHi": f1(wb["duration_up"]["adv"][2]),
+         "WgFleetMean": f1(wb["fleet_up"]["adv"][0]), "WgFleetLo": f1(wb["fleet_up"]["adv"][1]),
+         "WgFleetHi": f1(wb["fleet_up"]["adv"][2]),
+         "WgDistMean": f1(ws["distance_heavy"]["P_minus_C_pp"][0]), "WgDistLo": f1(ws["distance_heavy"]["P_minus_C_pp"][1]),
+         "WgDistHi": f1(ws["distance_heavy"]["P_minus_C_pp"][2]),
+         "WgSlackMean": f1(ws["slack_first"]["P_minus_C_pp"][0]),
+         "WgLowMean": f1(min(a[0] for a in adv)), "WgHighMean": f1(max(a[0] for a in adv))}
+    # the text assumes: equal weights include zero in the first run but not the second; driver-time-raised includes zero
+    assert ws["equal"]["P_minus_C_pp"][1] < 0 < wb["equal_here"]["adv"][1] and wb["duration_up"]["adv"][1] < 0
+    assert sum(a[1] < 0 for a in adv) == 2
+    return table, m
+
+
+def ablation_outputs(a):
+    """HGS ablation: separate the weighted objective from the buffers and the screen."""
+    C = a["configs"]
+    rows = (("hgs_conservative", r"20\% padding (distance objective, padded speed)"),
+            ("hgs_weighted_noscreen", r"Weighted objective, no buffer, no screen"),
+            ("hgs_distance_capped", r"Distance objective, capped buffers, screened"),
+            ("hgs_capped_cons", r"Capped procedure (weighted, capped buffers, screened)"))
+    iv = lambda v: f"{f1(v[0])} [{f1(v[1])}, {f1(v[2])}]"  # noqa: E731
+    body = []
+    for k, lab in rows:
+        v = C[k]
+        if k == "hgs_conservative":
+            body.append(f"{lab} & {f1(v['pooled_common'][0])} & -- & -- & -- & {v['certified_common']}\\\\")
+        else:
+            body.append(f"{lab} & {f1(v['pooled_common'][0])} & {iv(v['minus_padding'])} & "
+                        f"{f2(v['fleet_minus_padding'][0])} & {f1(v['distance_pct_minus_padding'][0])} & "
+                        f"{v['certified_common']}\\\\")
+    n = a["common"]
+    table = "\n".join([
+        r"\begin{table}[t]", r"\centering", r"\small", r"\setlength{\tabcolsep}{4pt}",
+        r"\caption{HGS ablation on the " + str(n) + r" synthetic instances of the development study and the second "
+        r"confirmatory study where every configuration has a plan (exploratory). \emph{Pooled}: pooled validated "
+        r"reliability (\%); \emph{Minus padding}: paired difference from 20\% padding in percentage points, with "
+        r"95\% bootstrap intervals; \emph{Veh.} and \emph{Dist.}: mean difference from padding in vehicles and in "
+        r"distance (\%); \emph{Cert.}: plans certified. The screened configurations share the buffer grid, the "
+        r"screening days, the admission rule and the fallback to 20\% padding.}",
+        r"\label{tab:ablation}",
+        r"\begin{tabular}{@{}>{\raggedright\arraybackslash}p{5.6cm}clrrc@{}}", r"\toprule",
+        r"Configuration & Pooled & Minus padding & Veh. & Dist. & Cert.\\", r"\midrule",
+        *body, r"\bottomrule", r"\end{tabular}", r"\end{table}", ""])
+    m = {"AbN": str(n), "AbInst": str(a["instances"]), "AbDistSel": str(a["distance_selected_common"])}
+    for k, tag in (("hgs_conservative", "Pad"), ("hgs_weighted_noscreen", "W"), ("hgs_distance_capped", "D"),
+                   ("hgs_capped_cons", "Full")):
+        v = C[k]
+        m[f"Ab{tag}Pooled"] = f1(v["pooled_common"][0])
+        m[f"Ab{tag}Cert"] = str(v["certified_common"])
+        if k != "hgs_conservative":
+            for j, s in enumerate(("", "Lo", "Hi")):
+                m[f"Ab{tag}Diff{s}"] = f1(v["minus_padding"][j])
+            m[f"Ab{tag}Fleet"] = f2(v["fleet_minus_padding"][0])
+            m[f"Ab{tag}Dist"] = f1(v["distance_pct_minus_padding"][0])
+    for key, tag in (("full_minus_distance_capped", "FullD"), ("full_minus_weighted_noscreen", "FullW")):
+        for j, s in enumerate(("", "Lo", "Hi")):
+            m[f"Ab{tag}{s}"] = f1(a[key][j])
+    full, dist = C["hgs_capped_cons"], C["hgs_distance_capped"]
+    m["AbFullDFleetAbs"] = f2(dist["fleet_minus_padding"][0] - full["fleet_minus_padding"][0])
+    # the text assumes: screening with either objective beats padding; the two screened versions are level;
+    # the weighted plan without screening is worse than padding; the weighted objective uses fewer vehicles
+    assert dist["minus_padding"][1] > 0 and full["minus_padding"][1] > 0
+    assert a["full_minus_distance_capped"][1] < 0 < a["full_minus_distance_capped"][2]
+    assert C["hgs_weighted_noscreen"]["minus_padding"][2] < 0
+    assert full["fleet_minus_padding"][0] < dist["fleet_minus_padding"][0]
+    return table, m
+
+
+def fixed_order_macros(fo):
+    t = fo["total"]
+    fl, di = t["fleet_fixed_minus_procedure"], t["distance_pct_fixed_minus_procedure"]
+    m = {"FoInst": str(t["instances"]), "FoProc": str(t["procedure_certified"]), "FoFixed": str(t["fixed_order_certified"]),
+         "FoFixedOnly": str(t["fixed_only"]), "FoProcOnly": str(t["procedure_only"]), "FoBoth": str(t["both"]),
+         "FoFails": str(t["fresh_fails"]), "FoBelow": str(t["fresh_below_target"]),
+         "FoFleet": f2(fl[0]), "FoFleetLo": f2(fl[1]), "FoFleetHi": f2(fl[2]),
+         "FoDist": f2(di[0]), "FoDistLo": f2(di[1]), "FoDistHi": f2(di[2])}
+    # the text assumes: more certified, no fresh failures, cost differences indistinguishable from zero
+    assert t["fixed_order_certified"] > t["procedure_certified"] and t["fresh_fails"] == 0
+    assert fl[1] < 0 < fl[2] and di[1] < 0 < di[2]
+    return m
+
+
+def hgs_weights_macros(h):
+    m = {}
+    for name, tag in (("equal", "Eq"), ("duration_up", "Dur")):
+        v = h["vectors"][name]
+        for key, short in (("minus_padding", "Pad"), ("minus_original_weights", "Orig"),
+                           ("fleet_minus_original_weights", "Fleet"), ("original_minus_padding", "OrigPad")):
+            fmt = f2 if short == "Fleet" else f1
+            for j, s in enumerate(("", "Lo", "Hi")):
+                m[f"Hw{tag}{short}{s}"] = fmt(v[key][j])
+        m[f"Hw{tag}N"] = str(v["common"])
+        m[f"Hw{tag}Pooled"] = f1(v["pooled"][0])
+        assert v["minus_padding"][1] > 10        # the text: the capped HGS procedure stays well ahead of padding
+    return m
+
+
+LADE_NAMES = {"jl": "Jilin", "sh": "Shanghai", "hz": "Hangzhou", "cq": "Chongqing", "yt": "Yantai"}
+
+
+def lade_outputs(F):
+    pct = lambda x: f1(100 * x)  # noqa: E731
+    rs, gps = F["replay_shuffle"], F["gps"]
+    body = []
+    for c in ("hz", "cq", "yt", "sh", "jl"):
+        r, g = rs[f"{c}_traj"], gps[c]
+        body.append(f"{LADE_NAMES[c]} & {r['courier_days']} & {pct(r['observed_late'])} & {pct(r['replay_late'])} & "
+                    f"{pct(r['shuffled_late'])} & {pct(g['direct_share'])} & {g['history']['pace_median']:.3f} & "
+                    f"{g['future']['pace_median']:.3f} & {g['history']['still_median'] / 60:.1f} & "
+                    f"{g['future']['still_median'] / 60:.1f}\\\\")
+    table = "\n".join([
+        r"\begin{table}[t]", r"\centering", r"\small", r"\setlength{\tabcolsep}{3.5pt}",
+        r"\caption{Real pickup operations in five Chinese cities, 21 March to 20 April 2022 (LaDe; exploratory). "
+        r"Left: busy courier-days (at least " + str(F["busy"]) + r" pickups) and the share (\%) with a pickup after "
+        r"its promised window: observed, replayed with the courier's real gaps between pickups in the real order, and "
+        r"with the same gaps in random order (mean of " + str(F["shuffles"]) + r" permutations). Right: direct trips "
+        r"between consecutive pickups measured from GPS, their share of all trips (\%), and the median pace (seconds of "
+        r"movement per metre) and median time stationary (minutes) in the first 21 days (\emph{H}) and the last 10 "
+        r"(\emph{F}). Shanghai was under lockdown for most of the period.}",
+        r"\label{tab:lade}",
+        r"\begin{tabular}{@{}lrrrrrcccc@{}}", r"\toprule",
+        r" & \multicolumn{4}{c}{Lateness of real routes} & \multicolumn{5}{c}{Direct trips (GPS)}\\",
+        r"\cmidrule(lr){2-5}\cmidrule(lr){6-10}",
+        r" & & & & & & \multicolumn{2}{c}{Pace} & \multicolumn{2}{c}{Stationary}\\",
+        r"\cmidrule(lr){7-8}\cmidrule(lr){9-10}",
+        r"City & Days & Obs. & Replay & Shuffled & Share & H & F & H & F\\", r"\midrule",
+        *body, r"\bottomrule", r"\end{tabular}", r"\end{table}", ""])
+    allr = list(rs.values())
+    m = {"LfCourierDays": f"{sum(r['courier_days'] for r in allr):,}".replace(",", "{,}"),
+         "LfShuMin": pct(min(r["shuffled_late"] for r in allr)), "LfShuMax": pct(max(r["shuffled_late"] for r in allr)),
+         "LfObsMin": pct(min(r["observed_late"] for r in allr)), "LfObsMax": pct(max(r["observed_late"] for r in allr)),
+         "LfJlMainDays": str(rs["jl_main"]["courier_days"]), "LfJlMainObs": pct(rs["jl_main"]["observed_late"]),
+         "LfJlMainShu": pct(rs["jl_main"]["shuffled_late"]),
+         "LfShMainDays": str(rs["sh_main"]["courier_days"]), "LfShMainObs": pct(rs["sh_main"]["observed_late"]),
+         "LfShMainShu": pct(rs["sh_main"]["shuffled_late"]),
+         "LfLogsN": str(F["logs_model"]["courier_days"]), "LfLogsPred": pct(F["logs_model"]["predicted_late"]),
+         "LfLogsObs": pct(F["logs_model"]["observed_late"]),
+         "LfDaysZero": str(F["days_needed"]["failures_0"]), "LfDaysOne": str(F["days_needed"]["failures_1"]),
+         "LfDaysTwo": str(F["days_needed"]["failures_2"]), "LfBoundTwentyOne": f"{F['days_needed']['bound_21_of_21']:.3f}",
+         "LfDirectMin": pct(min(g["direct_share"] for g in gps.values())),
+         "LfDirectMax": pct(max(g["direct_share"] for g in gps.values())),
+         "LfDirectLegs": str(sum(g["direct_legs"] for g in gps.values())),
+         "LfSpeedHz": f"{gps['hz']['speed_ms_median']:.1f}"}
+    for c, tag in (("yt", "Yt"), ("hz", "Hz")):
+        t = F["teams"][c]
+        m[f"LfTeams{tag}"] = str(t["teams"])
+        m[f"LfInfeas{tag}"] = pct(t["infeasible_share"])
+        m[f"LfEarly{tag}"] = pct(t["early_pickup_share"])
+        m[f"LfLate{tag}"] = pct(t["late_pickup_share"])
+    # the text assumes: the replay reproduces the observed lateness exactly; shuffling makes most routes late;
+    # the logs model overpredicts lateness by an order of magnitude
+    assert all(abs(r["replay_late"] - r["observed_late"]) < 1e-12 for r in allr)
+    assert min(r["shuffled_late"] for r in allr) > 0.5
+    assert F["logs_model"]["predicted_late"] > 10 * F["logs_model"]["observed_late"]
+    # "barely moved": median pace and still time within 6% between the two periods in every city
+    for g in gps.values():
+        for k in ("pace_median", "still_median"):
+            assert abs(g["future"][k] / g["history"][k] - 1) < 0.06, (k, g)
+    m["LfPaceMaxChange"] = f1(100 * max(abs(g["future"]["pace_median"] / g["history"]["pace_median"] - 1)
+                                     for g in gps.values()))
+    m["LfStillMaxChange"] = f1(100 * max(abs(g["future"]["still_median"] / g["history"]["still_median"] - 1)
+                                      for g in gps.values()))
+    return table, m
+
+
+def _frac(x):
+    from fractions import Fraction
+    q = Fraction(float(x)).limit_denominator(9)
+    return str(q.numerator) if q.denominator == 1 else f"{q.numerator}/{q.denominator}"
+
+
 def search_macros(s):
     m = {"SrchSeconds": str(int(s["seconds_per_attempt"])),
          "SrchNomMissing": str(s["nominal_missing"]), "SrchNomFound": str(s["nominal_found"]),
@@ -312,6 +530,8 @@ def main():
         assert t.count(old) == 1, f
         (OUT / f).write_text(t.replace(old, new))
     c = json.loads((ROOT / "results/certify_summary.json").read_text())
+    global CAP_CERT_DEV
+    CAP_CERT_DEV = c["studies"]["development"]["capped_procedure"]["certified"]
     fr = json.loads((ROOT / "results/frontier_summary.json").read_text())
     w = json.loads((ROOT / "results/wrong_model_summary.json").read_text())
     t1, m = certify_table(c)
@@ -341,6 +561,33 @@ def main():
     sc = ROOT / "results/amazon_search_check.json"
     if sc.exists():
         m.update(search_macros(json.loads(sc.read_text())))
+    lf = ROOT / "results/lade_findings.json"
+    if lf.exists():
+        lt_, lm = lade_outputs(json.loads(lf.read_text()))
+        (OUT / "tab_lade.tex").write_text(lt_)
+        m.update(lm)
+    hw = ROOT / "results/hgs_weights_summary.json"
+    if hw.exists():
+        m.update(hgs_weights_macros(json.loads(hw.read_text())))
+    fo = ROOT / "results/fixed_order_summary.json"
+    if fo.exists():
+        m.update(fixed_order_macros(json.loads(fo.read_text())))
+    ab = ROOT / "results/hgs_ablation_summary.json"
+    if ab.exists():
+        at, am = ablation_outputs(json.loads(ab.read_text()))
+        (OUT / "tab_ablation.tex").write_text(at)
+        m.update(am)
+    wt, wm = weights_outputs(json.loads((ROOT / "results/weight_sensitivity_summary.json").read_text()),
+                             json.loads((ROOT / "results/weight_bracketing_summary.json").read_text()))
+    (OUT / "tab_weights.tex").write_text(wt)
+    m.update(wm)
+    from ahp_weights import A, main as _ahp  # noqa: F401
+    rows = [" & ".join(_frac(x) for x in row) for row in A]
+    (OUT / "tab_ahp.tex").write_text("\n".join([
+        r"\begin{tabular}{@{}lcccc@{}}", r"\toprule",
+        r" & Distance & Slack deficit & Driver time & Vehicles\\", r"\midrule",
+        *[f"{lab} & {r}\\\\" for lab, r in zip(("Distance", "Slack deficit", "Driver time", "Vehicles"), rows)],
+        r"\bottomrule", r"\end{tabular}", ""]))
     (OUT / "tab_certify.tex").write_text(t1)
     (OUT / "tab_frontier.tex").write_text(t2)
     (OUT / "tab_wrong.tex").write_text(t3)

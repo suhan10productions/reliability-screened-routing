@@ -1,8 +1,9 @@
 # Reliability-screened routing: research code and evidence archive
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23265196.svg)](https://doi.org/10.5281/zenodo.23265196)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23185704.svg)](https://doi.org/10.5281/zenodo.23185704)
 
-Archived version for the submitted manuscript: v3.0, DOI 10.5281/zenodo.23265196.
+All versions: DOI 10.5281/zenodo.23185704. The current manuscript (`paper_ijss/`) uses
+version v4.1 and later; see "Manuscript versions" at the end of this file.
 
 **Naming note.** The project's earlier working name was "routeops". The code
 modules are now named `relscreen_v5`, `relscreen_v6` and `relscreen_v7`. The
@@ -284,3 +285,29 @@ writes the self-contained upload (`paper_itor/upload.zip`). Build with
 
     cd code && PYTHONPATH=. python3 itor_tables.py && python3 build_itor_si.py
     cd ../paper_itor && ./build.sh && cd ../code && python3 package_itor.py
+
+## Manuscript versions
+
+The archive keeps every manuscript prepared from this study, so that each one can be rebuilt
+from the same records. Only one has been under review at any time.
+
+- `paper/routing_model_orf.tex`: submitted to Operations Research Forum; desk-rejected.
+- `paper_itor/`: submitted to International Transactions in Operational Research; rejected.
+- `paper_nhsjs/`: a shorter draft prepared for the National High School Journal of Science;
+  never submitted.
+- `paper_ijss/`: the current manuscript, for the International Journal of Systems Science:
+  Operations & Logistics. Build with
+
+      cd code && PYTHONPATH=. python3 nhsjs_tables.py && PYTHONPATH=. python3 ijss_tables.py
+      python3 build_ijss.py
+
+  The exploratory analyses added for it are `code/certify.py`, `code/frontier.py`,
+  `code/wrong_model.py`, `code/stress_certify.py`, `code/amazon_hgs.py`,
+  `code/amazon_search_check.py`, `code/padding_feasibility.py`, `code/hgs_ablation.py`,
+  `code/hgs_weights.py` and `code/fixed_order.py`. The real-operations evidence uses the LaDe data
+  (Cainiao; https://huggingface.co/datasets/Cainiao-AI/LaDe-P and Cainiao-AI/LaDe, not copied here):
+  `code/lade.py` (dispatch-record delay model), `code/lade_traj_extract.py` (reads the trajectory
+  pickle opcode by opcode, without unpickling), `code/lade_traj.py` (direct GPS trips),
+  `code/lade_field.py` (real team instances) and `code/lade_findings.py` (every number in the
+  manuscript's real-operations section). Put the downloaded files in `data/lade/` as the scripts
+  describe.

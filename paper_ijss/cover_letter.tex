@@ -19,8 +19,8 @@ The Editor-in-Chief\\
 Dear Editor,
 
 I submit the manuscript \emph{Certified reliability for any routing solver: screening
-buffered plans against travel-time uncertainty, with evidence from real delivery routes}
-for consideration as a research article.
+buffered plans against travel-time uncertainty} for consideration as a research
+article.
 
 Delivery firms promise time windows, but most plan with fixed travel times and protect
 themselves by padding every trip, which says nothing about how often the plan will be on
@@ -32,19 +32,32 @@ simulated days.
 
 The contributions are:
 \begin{itemize}
-\item a certificate that holds for any solver and selection rule (Theorem 1), together with
-two results on when it survives a wrong delay model: it carries over to any real delays
-no worse than modelled (Proposition 1), and certifying against a set of models guarantees
-each of them (Proposition 2);
+\item a reliability layer that works with an unchanged solver, with a certificate that, under
+the modelled delays, holds for any solver and selection rule (Theorem 1). The guarantee
+applies a standard a posteriori result from sampled chance-constrained programming; the
+contribution is the layer and the evidence, not new statistical theory. Two further results
+say when a certificate survives a wrong delay model: it carries over to any real delays no
+worse than modelled (Proposition 1), and certifying against a set of models guarantees each
+of them (Proposition 2);
 \item evidence that this works: none of \CertTotal{} certified plans failed its
-certificate on fresh days, and when certificates under one model failed under harsher
-delays, certifying against five models removed every failure at a cost of about
-\StOFleet{} vehicles per instance;
-\item a cost-of-reliability comparison with padding: a plan reaching 95\% reliability
-existed on \FrBufNinetyFive{} of \FrN{} instances with buffers and on \FrPadNinetyFive{}
-with any padding up to 50\%, and used fewer vehicles;
-\item tests beyond synthetic data, on benchmark instances and on \AmzRoutes{} real Amazon
-delivery routes with delays fitted to \NycTripsM{} million New York taxi trips.
+certificate on fresh days. Certificates under one model often failed under harsher delays;
+certifying against five models removed every failure, at a cost the paper reports in full:
+a plan was certified on \StOStress{} of \StOInst{} instances instead of \StOSingle{}, with
+\StOFleet{} more vehicles where both screens selected one;
+\item an ablation with the HGS solver showing that the gain comes from the buffers and the
+screen, not from the planner's objective: capped buffers planned for distance alone and
+screened were \AbDDiff{} points more reliable than 20\% padding, as reliable as the full
+procedure, while the weighted plan without buffers or screening was less reliable than
+padding;
+\item fixed-order certification (Proposition 4), which lets a firm certify the cheapest
+good plan instead of the screened one with the same guarantee, and a count of how many real
+days of history a certificate without a delay model needs (\LfDaysZero{} at 95\%,
+Proposition 3);
+\item tests beyond synthetic data: benchmark instances; real Amazon delivery routes with
+delays fitted to \NycTripsM{} million New York taxi trips, an illustration on real routes
+with assumed windows; and real pickup operations with real windows and GPS tracks in five
+Chinese cities, which show that dispatch records cannot serve as delay data while
+travel and handling measured from GPS are stable over time.
 \end{itemize}
 
 The closest work is the robust data-driven routing of Zhang, Zhang, Lim and Sim
@@ -62,10 +75,15 @@ the HGS solver, screening was more reliable than padding by \AmzHBothDiff{} and
 \AmzHTBothDiff{} points under two of the three delay models, at the same number of
 vehicles; under the mildest model padding was already reliable and slightly ahead.
 
-The manuscript is not under consideration elsewhere and has not been published. Generative
-AI was used for code, analysis, literature search and drafting, as disclosed in the
-manuscript; the author takes full responsibility for the content. There are no competing
-interests and no funding to declare.
+The manuscript is not under consideration elsewhere and has not been published. The public
+archive keeps the earlier drafts prepared from the same study, so that each can be rebuilt
+from the same records; none of them is under review or published. Generative AI (Claude and DeepSeek) was used
+for code, analysis, literature search and drafting, as disclosed in the manuscript; the author
+takes full responsibility for the content. There are no competing interests and no funding to
+declare.
+
+I am an independent researcher without an institutional affiliation, so I use a personal
+e-mail address; my ORCID record (0009-0004-5079-7684) identifies me.
 
 Suggested reviewers, none of whom has any connection with the author:
 \begin{itemize}

@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Certified plans: plans whose exact one-sided 95\% lower bound on the success probability, from the 5000 validation days, is at least 0.95, out of the plans the configuration produced. Dev., Conf.~1 and Conf.~2: development and first two confirmatory studies (53 instances each); Amazon: 40 routes under the assumed delay model and under the two models fitted to New York traffic. On a further 5000 fresh days, none of the 666 certified plans in the table failed its certificate (exact one-sided 95\% upper bound below 0.95).}
+\label{tab:certify}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Configuration & Dev. & Conf.\ 1 & Conf.\ 2 & Amazon & NYC d. & NYC all\\
+\midrule
+Nominal plan (OR-Tools) & 0/53 & 0/53 & 0/53 & 0/34 & 3/34 & 0/34\\
+20\% padding (OR-Tools) & 0/46 & 0/50 & 0/45 & 0/28 & 28/28 & 4/28\\
+Original procedure & 30/53 & 31/53 & 28/53 & 22/34 & 33/34 & 29/34\\
+Capped procedure & 40/53 & 45/53 & 45/53 & 22/34 & 33/34 & 29/34\\
+Screened conservative & 25/53 & 28/53 & 26/53 & 24/34 & 30/34 & 23/34\\
+Nominal plan (HGS) & 0/53 & -- & 0/53 & -- & -- & --\\
+20\% padding (HGS) & 0/48 & -- & 0/49 & -- & -- & --\\
+Capped procedure (HGS) & 46/53 & -- & 42/53 & -- & -- & --\\
+\bottomrule
+\end{tabular}
+\end{table}
