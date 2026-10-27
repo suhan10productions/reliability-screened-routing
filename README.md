@@ -5,12 +5,11 @@
 All versions: DOI 10.5281/zenodo.23185704. The current manuscript (`paper_ijss/`) uses
 version v4.1 and later; see "Manuscript versions" at the end of this file.
 
-**Naming note.** The project's earlier working name was "routeops". The code
-modules are now named `relscreen_v5`, `relscreen_v6` and `relscreen_v7`. The
-`"schema"` identifiers inside result files (for example
-`"routeops-v7-instance-1"`) are data-format tags and are deliberately unchanged,
-so that the archived records remain byte-identical to the original runs and new
-runs stay format-compatible with them.
+**Naming note.** The code modules are named `relscreen_v5`, `relscreen_v6` and
+`relscreen_v7`. The `"schema"` identifiers inside result files are data-format tags from an
+earlier working name of the project; they are deliberately unchanged, so that the archived
+records remain byte-identical to the original runs and new runs stay format-compatible with
+them.
 
 The manuscript and raw records implement the fixed protocol in
 `EXPERIMENT_PROTOCOL_V7.md`. The revision corrects mixed-denominator

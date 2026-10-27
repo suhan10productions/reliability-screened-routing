@@ -1,10 +1,9 @@
-# V15: project renamed from "routeops" to "relscreen"
+# V15: project renamed to "relscreen"
 
-- Modules renamed: `routeops_v5/v6/v7.py` -> `relscreen_v5/v6/v7.py`; tests
+- Modules renamed from the earlier working name to `relscreen_v5/v6/v7.py`; tests
   renamed accordingly; all imports, the freeze-manifest file list, docstrings
   and document titles updated.
-- Unchanged by design: the `"schema"` format tags (e.g.
-  `"routeops-v7-instance-1"`) in the 70 archived result files and in the code
+- Unchanged by design: the `"schema"` format tags in the 70 archived result files and in the code
   that writes them, so archived records stay byte-identical and new runs stay
   format-compatible. The README's naming note explains this.
 - The manuscripts never used the name and are unchanged.

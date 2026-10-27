@@ -406,6 +406,10 @@ def fixed_order_macros(fo):
          "FoFails": str(t["fresh_fails"]), "FoBelow": str(t["fresh_below_target"]),
          "FoFleet": f2(fl[0]), "FoFleetLo": f2(fl[1]), "FoFleetHi": f2(fl[2]),
          "FoDist": f2(di[0]), "FoDistLo": f2(di[1]), "FoDistHi": f2(di[2])}
+    # reductions, for wording such as "0.05 fewer vehicles [-0.01, 0.11]"
+    m.update({"FoFleetLess": f2(-fl[0]), "FoFleetLessLo": f2(-fl[2]), "FoFleetLessHi": f2(-fl[1]),
+              "FoDistLess": f2(-di[0]), "FoDistLessLo": f2(-di[2]), "FoDistLessHi": f2(-di[1])})
+    assert fl[0] < 0 and di[0] < 0
     # the text assumes: more certified, no fresh failures, cost differences indistinguishable from zero
     assert t["fixed_order_certified"] > t["procedure_certified"] and t["fresh_fails"] == 0
     assert fl[1] < 0 < fl[2] and di[1] < 0 < di[2]

@@ -109,8 +109,8 @@ files; and your computer's processor, memory and operating system.
 2. **AI tool names.** Check the exact model names in each app's settings and
    correct the AI paragraph if needed.
 3. **Competing interests.** The journal's test: would an undeclared interest
-   embarrass you if it became public after publication? If RouteOps Engine
-   has users or revenue, declare it.
+   embarrass you if it became public after publication? Declare any
+   commercial interest related to the work.
 4. **Suggested reviewers** (3 to 5). Each must be independent: not anyone you
    emailed about this work, not anyone acknowledged, not a co-author of yours.
    Search your sent mail before choosing. Good sources are the authors of

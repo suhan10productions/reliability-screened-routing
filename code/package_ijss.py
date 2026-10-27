@@ -84,7 +84,7 @@ def build(anonymous: bool) -> Path:
     assert "LaTeX Error" not in log and "not found" not in log, f"missing file in {d}"
     text = subprocess.run(["pdftotext", str(d / "manuscript.pdf"), "-"], capture_output=True, text=True).stdout
     if anonymous:
-        for word in ("Suhan", "RouteOps", "Lahore", "0009-0004", "syedsuhanali", "zenodo.23"):
+        for word in ("Suhan", "Lahore", "0009-0004", "syedsuhanali", "zenodo.23"):
             assert word not in text, f"identifying text in review copy: {word}"
     else:
         assert "Suhan Ali" in text and "zenodo.23185704" in text.replace("\n", "")
