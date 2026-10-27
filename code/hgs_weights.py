@@ -96,7 +96,8 @@ def summarise():
         c, p = r["configurations"].get("hgs_capped_cons"), r["configurations"].get("hgs_conservative")
         val = lambda x: None if x is None else 100 * successes(x["validation"])[0] / successes(x["validation"])[1]  # noqa: E731
         base[r["instance_seed"]] = {"capped": val(c), "padding": val(p),
-                                    "fleet": None if c is None else c["plan"]["metrics"]["fleet"]}
+                                    "fleet": None if c is None else c["plan"]["metrics"]["fleet"],
+                                    "selected": bool(r["selected"].get("capped"))}
     out = {"vectors": {}}
     for name in VECTORS:
         R = {json.loads(Path(f).read_text())["instance_seed"]: json.loads(Path(f).read_text())
@@ -110,7 +111,9 @@ def summarise():
             "minus_original_weights": boot([R[s]["capped"]["service"] - base[s]["capped"] for s in common]),
             "fleet_minus_original_weights": boot([R[s]["capped"]["fleet"] - base[s]["fleet"] for s in common]),
             "original_minus_padding": boot([base[s]["capped"] - base[s]["padding"] for s in common]),
-            "certified": sum(R[s]["capped"]["certified"] for s in common)}
+            "certified": sum(R[s]["capped"]["certified"] for s in common),
+            "original_pooled": boot([base[s]["capped"] for s in common]),
+            "original_selected": sum(base[s]["selected"] for s in common)}
     (ROOT / "results" / "hgs_weights_summary.json").write_text(json.dumps(out, indent=1))
     print(json.dumps(out, indent=1))
 

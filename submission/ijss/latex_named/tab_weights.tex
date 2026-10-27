@@ -2,7 +2,7 @@
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\caption{Sensitivity to the objective weights on the 53 development instances (exploratory). Weights in the order distance, slack deficit, driver time, vehicles. \emph{Adm.}: instances where screening admitted a plan; \emph{Pooled}: pooled validated reliability (\%) of the original procedure; \emph{Advantage}: its paired advantage over 20\% padding in percentage points on the 46 instances where padding has a plan, with 95\% bootstrap intervals. OR-Tools stops at a time limit, so results are compared within a run; the two runs were made on different machines.}
+\caption{Sensitivity to the objective weights on the 53 development instances (exploratory). Weights in the order distance, slack deficit, driver time, vehicles. \emph{Adm.}: instances where screening admitted a plan; \emph{Pooled}: pooled validated reliability (\%) of the original procedure; \emph{Advantage}: its paired advantage over 20\% padding in percentage points on the 46 instances where padding has a plan, with 95\% bootstrap intervals. OR-Tools stops at a time limit, so results are compared within a run; the two runs were made on different machines. Last block: the capped HGS procedure (code/hgs\_weights.py) on the development instances where both it and padding have a plan; HGS stops after a fixed number of iterations, so these rows do not depend on the machine.}
 \label{tab:weights}
 \begin{tabular}{@{}llccl@{}}
 \toprule
@@ -18,6 +18,10 @@ Weights & Vector & Adm. & Pooled & Advantage\\
 \quad Equal & (0.25, 0.25, 0.25, 0.25) & 24 & 70.2 & 8.1 [1.1, 15.1]\\
 \quad Vehicle weight raised & (0.4546, 0.2111, 0.0843, 0.25) & 27 & 73.2 & 11.7 [4.7, 18.6]\\
 \quad Driver-time weight raised & (0.4773, 0.2216, 0.25, 0.0511) & 25 & 69.9 & 7.4 [$-$0.6, 15.4]\\
+\multicolumn{5}{@{}l}{\emph{Capped HGS procedure, 48 instances}}\\
+\quad AHP (original) & (0.5693, 0.2643, 0.1055, 0.0609) & 43 & 93.7 & 27.0 [23.5, 30.4]\\
+\quad Equal & (0.25, 0.25, 0.25, 0.25) & 37 & 89.1 & 22.4 [18.2, 26.4]\\
+\quad Driver-time weight raised & (0.4773, 0.2216, 0.25, 0.0511) & 41 & 92.3 & 25.5 [21.8, 29.2]\\
 \bottomrule
 \end{tabular}
 \end{table}

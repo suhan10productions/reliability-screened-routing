@@ -204,7 +204,8 @@ def wrong_outputs(w):
                   f"Wr{tag}ScCert": str(s["assumed:screened_conservative"]["certified_when_chosen"])})
     for mdl, tag in (("incidents", "Inc"), ("strong_peak", "Peak"), ("heavy_tails", "Tail"), ("peak_noise", "Noise")):
         c, h = syn[mdl]["capped_procedure"], syn[mdl]["hgs_capped_cons"]
-        m.update({f"Wr{tag}Kept": str(c["kept"]), f"Wr{tag}Cert": str(c["certified"]), f"Wr{tag}Serv": f1(c["mean_service"]),
+        m.update({f"Wr{tag}Failed": str(c["certified"] - c["kept"]),
+                  f"Wr{tag}Kept": str(c["kept"]), f"Wr{tag}Cert": str(c["certified"]), f"Wr{tag}Serv": f1(c["mean_service"]),
                   f"Wr{tag}HKept": str(h["kept"]), f"Wr{tag}HCert": str(h["certified"]), f"Wr{tag}HServ": f1(h["mean_service"])})
     return table, m
 
@@ -293,7 +294,7 @@ def amazon_hgs_outputs(h):
     return table, m
 
 
-def weights_outputs(ws, wb):
+def weights_outputs(ws, wb, hw=None):
     """Appendix table: the advantage of the original procedure over 20% padding under the weight vectors tried."""
     from weight_bracketing import WEIGHTS as WB
     run1 = (("baseline_rerun", "AHP (original)", (0.5693, 0.2643, 0.1055, 0.0609)),
@@ -312,6 +313,13 @@ def weights_outputs(ws, wb):
     for k, lab in run2:
         v = wb[k]
         body.append(rf"\quad {lab} & ({wf(WB[k])}) & {v['adm']} & {f1(v['pooled'])} & {iv(v['adv'])}\\")
+    if hw is not None:
+        e, d = hw["vectors"]["equal"], hw["vectors"]["duration_up"]
+        body.append(r"\multicolumn{5}{@{}l}{\emph{Capped HGS procedure, " + str(e["common"]) + r" instances}}\\")
+        body.append(rf"\quad AHP (original) & ({wf((0.5693, 0.2643, 0.1055, 0.0609))}) & {e['original_selected']} & "
+                    rf"{f1(e['original_pooled'][0])} & {iv(e['original_minus_padding'])}\\")
+        for v, lab in ((e, "Equal"), (d, "Driver-time weight raised")):
+            body.append(rf"\quad {lab} & ({wf(v['weights'])}) & {v['selected']} & {f1(v['pooled'][0])} & {iv(v['minus_padding'])}\\")
     table = "\n".join([
         r"\begin{table}[h]", r"\centering", r"\small", r"\setlength{\tabcolsep}{4pt}",
         r"\caption{Sensitivity to the objective weights on the 53 development instances (exploratory). Weights in the "
@@ -319,7 +327,9 @@ def weights_outputs(ws, wb):
         r"\emph{Pooled}: pooled validated reliability (\%) of the original procedure; \emph{Advantage}: its paired "
         r"advantage over 20\% padding in percentage points on the " + str(ws["equal"]["P_minus_C_common"]) +
         r" instances where padding has a plan, with 95\% bootstrap intervals. OR-Tools stops at a time limit, so "
-        r"results are compared within a run; the two runs were made on different machines.}",
+        r"results are compared within a run; the two runs were made on different machines. Last block: the capped HGS "
+        r"procedure (code/hgs\_weights.py) on the development instances where both it and padding have a plan; "
+        r"HGS stops after a fixed number of iterations, so these rows do not depend on the machine.}",
         r"\label{tab:weights}",
         r"\begin{tabular}{@{}llccl@{}}", r"\toprule",
         r"Weights & Vector & Adm. & Pooled & Advantage\\", r"\midrule",
@@ -445,7 +455,7 @@ def lade_outputs(F):
                     f"{g['future']['pace_median']:.3f} & {g['history']['still_median'] / 60:.1f} & "
                     f"{g['future']['still_median'] / 60:.1f}\\\\")
     table = "\n".join([
-        r"\begin{table}[t]", r"\centering", r"\small", r"\setlength{\tabcolsep}{3.5pt}",
+        r"\begin{table}[h!]", r"\centering", r"\small", r"\setlength{\tabcolsep}{3.5pt}",
         r"\caption{Real pickup operations in five Chinese cities, 21 March to 20 April 2022 (LaDe; exploratory). "
         r"Left: busy courier-days (at least " + str(F["busy"]) + r" pickups) and the share (\%) with a pickup after "
         r"its promised window: observed, replayed with the courier's real gaps between pickups in the real order, and "
@@ -581,8 +591,10 @@ def main():
         at, am = ablation_outputs(json.loads(ab.read_text()))
         (OUT / "tab_ablation.tex").write_text(at)
         m.update(am)
+    hwp = ROOT / "results/hgs_weights_summary.json"
     wt, wm = weights_outputs(json.loads((ROOT / "results/weight_sensitivity_summary.json").read_text()),
-                             json.loads((ROOT / "results/weight_bracketing_summary.json").read_text()))
+                             json.loads((ROOT / "results/weight_bracketing_summary.json").read_text()),
+                             json.loads(hwp.read_text()) if hwp.exists() else None)
     (OUT / "tab_weights.tex").write_text(wt)
     m.update(wm)
     from ahp_weights import A, main as _ahp  # noqa: F401

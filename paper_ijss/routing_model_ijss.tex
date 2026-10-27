@@ -49,21 +49,22 @@ against travel-time uncertainty}
 \onehalfspacing
 
 \begin{abstract}
-\noindent Delivery firms promise time windows but plan with fixed travel times;
+\noindent Delivery firms promise time windows but plan with fixed travel times, and
 padding every trip says nothing about how reliable a plan is. We add a reliability
-layer to an unchanged routing solver. The solver plans with internal deadlines
-brought forward by up to an hour, capped so that no customer becomes unreachable;
-plans are simulated under correlated, time-dependent delays; and a plan is certified
-on independent simulated days with an exact binomial bound. Under the modelled
-delays, a certified plan misses the target with probability at most 5\%, whatever
-the solver; testing candidates in a fixed order certifies the cheapest qualifying plan
-with the same guarantee. In four studies (three preregistered), on benchmark
-instances and Amazon routes with assumed windows and delays fitted to New York
-taxi data, none of the \CertTotal{} plans certified in the main analysis failed on fresh
-days, while 20\% padding was never certified on a synthetic instance. The gain came
-from the buffers and the screen, not the objective. Certifying against five delay
-models removed failures under harsher delays, but certified \StOStress{} of
-\StOInst{} instances instead of \StOSingle{} and used \StOFleet{} more vehicles.
+layer to an unchanged routing solver. The solver plans
+with internal deadlines brought forward by up to an hour, capped so that no customer
+becomes unreachable; plans are simulated under correlated, time-dependent delays; and
+a plan is certified on independent simulated days with an exact binomial bound, so
+that it misses the target with probability at most 5\%, whatever the solver. The
+guarantee is only as good as the delay model: under random incidents or a stronger
+morning peak, \WrIncFailed{} and \WrPeakFailed{} of \WrIncCert{} certificates failed.
+Certifying against five models removed every failure but certified \StOStress{} of
+\StOInst{} instances instead of \StOSingle{}, with \StOFleet{} more vehicles. Under the
+modelled delays, in four studies (three preregistered), none of the \CertTotal{}
+certified plans failed on fresh days, 20\% padding was never certified on a synthetic
+instance, and the gain came from the buffers and the screen, not the objective.
+Testing candidates in a fixed order certifies the cheapest qualifying plan with the
+same guarantee.
 
 \medskip\noindent\textbf{Keywords:} vehicle routing; time windows; travel-time
 uncertainty; simulation; chance constraints; reliability certification
@@ -79,10 +80,9 @@ fixed table of travel times, but real travel times change with the time of day a
 with random events, and because a driver serves customers one after another, an
 early delay pushes every later visit towards the end of its window.
 
-The common protection is to plan with a slower speed than expected, for example
-assuming that every trip takes 20\% longer. Padding is simple and works with any
-solver, but it spends the same protection on quiet and congested trips, and it
-says nothing about the result: a planner who pads by 20\% does not know whether
+The common protection is padding: planning as if every trip took, say, 20\% longer.
+It works with any solver, but it spends the same protection on quiet and congested
+trips, and it says nothing about the result: a planner who pads by 20\% does not know whether
 the plan will be on time on 60\% of days or on 99\%. Methods that model the
 uncertainty directly, through chance constraints, recourse or robust optimization,
 spend protection more carefully
@@ -103,6 +103,14 @@ congestion and correlated random delays, and one plan is selected. The selected
 plan is then simulated on 5000 further days that were not used to produce or
 choose it, and it is \emph{certified} if an exact binomial lower bound on its
 probability of a successful day reaches the target.
+
+The certificate is a statement about the simulated delay model, and this is the
+layer's main vulnerability. When real delays are harsher than modelled, certificates
+fail: under random incidents and under a stronger morning peak, \WrIncFailed{} and
+\WrPeakFailed{} of \WrIncCert{} certificates failed on fresh days. Certifying against
+several models at once removes these failures, but fewer instances then receive a
+certificate and the plans use more vehicles (Section~\ref{sec:wrong}). We report both
+sides throughout.
 
 The contribution is a practical, reproducible reliability layer and the evidence
 for it, not new statistical theory: the guarantees rest on standard results, which
@@ -133,14 +141,9 @@ every failure under harsher delays, at a measured cost.
 hypotheses published in advance, benchmark instances, \AmzRoutes{} real Amazon routes with
 delays fitted to New York taxi trips, and ablations that separate the screen from the
 objective. Real pickup operations with GPS tracks show which records a certificate can
-rest on, and how many days of history a certificate without a delay model needs
-(Proposition~\ref{prop:days}).
+rest on (Appendix~\ref{sec:real-ops}), and Proposition~\ref{prop:days} says how many
+days of history a certificate without a delay model needs.
 \end{enumerate}
-Two limits frame all of this. The certificate is a statement about the simulated
-delay model, and Section~\ref{sec:wrong} measures how far it carries over. And the
-Amazon experiments illustrate the layer on real routes but are not a field
-validation: their windows are assumed and their delays are fitted to another city.
-
 \section{Related work}\label{sec:related}
 
 Routing with random travel times has been studied for more than three decades
@@ -264,7 +267,10 @@ on time would be unrealistic on large instances: with 200 customers each on time
 with probability 0.99 independently, all would be on time on only 13\% of days. The
 \emph{reliability} of plan $x$ is the probability $p(x)$ of a successful day, and
 the target is $p(x)\ge\tau=0.95$. A plan's reliability is a property of the plan
-and the delay model, not of any particular bank.
+and the delay model, not of any particular bank. We use this day-level criterion,
+rather than a chance constraint for each customer, because a dispatcher judges a
+day's plan as a whole and because many per-customer constraints say little about the
+day jointly; the share $\kappa$ and the target $\tau$ are choices a firm can change.
 
 \section{Screen and certify}\label{sec:method}
 
@@ -700,17 +706,14 @@ study. The capped procedure was certified on \CertDevCap{} of 53 development
 instances and on \CertConeCap{} and \CertCtwoCap{} of 53 in the two confirmatory
 studies; its HGS version on \CertDevHCap{} and \CertCtwoHCap. Twenty percent padding
 was never certified on a synthetic instance (0 of \CertPadSynN{} plans): its plans
-are often good, but rarely good enough to show 95\% with confidence. On the Amazon
-routes the picture depends on the delay model, which we return to below. Across
+are often good, but rarely good enough to show 95\% with confidence. Across
 Table~\ref{tab:certify}, \CertTotal{} plans were certified; the fixed-order, stress and
 ablation analyses below certify further plans, which are counted separately. On 5000
 fresh days, none of the \CertTotal{} failed
 its certificate, and only \CertBelow{} had a fresh success rate below 0.95, all
-within sampling error of it. The theorem would have allowed about 5\% failures; the
-observed rate is lower because most certified plans are well above the target.
-Because the fresh days come from the same delay model, this test checks the
-implementation and the statistics, not the model; the test that matters in
-practice is the one in Section~\ref{sec:wrong}.
+within sampling error of it; most certified plans are well above the target. Because
+the fresh days come from the same model, this checks the implementation and the
+statistics, not the model, which Section~\ref{sec:wrong} tests.
 
 Fixed-order certification (Proposition~\ref{prop:order}) was applied to the capped
 families of the OR-Tools procedure in the development study and the first two
@@ -779,6 +782,227 @@ The assumed spread of 0.20 lies between the two fitted values.
 
 \input{tab_nyc}
 
+We compare the procedures on these routes with the HGS solver
+(Table~\ref{tab:amazonhgs}); the OR-Tools comparison on the first 40 routes is in
+Appendix~\ref{app:amazon-ortools}, because its 5-second search missed feasible plans.
+HGS found a 20\% padded plan on all \AmzHRoutes{} sampled routes. On \AmzHNotRun{} of them
+the short solves that set the objective's scaling ranges failed, so the procedure
+returned its fallback, the padded plan. On the \AmzHBoth{} routes where the screen ran,
+the capped HGS procedure was \AmzHBothDiff{} [\AmzHBothDiffLo, \AmzHBothDiffHi] points more
+reliable than padding under the assumed model and \AmzHTBothDiff{} [\AmzHTBothDiffLo,
+\AmzHTBothDiffHi] with all fitted variation, with practically the same number of
+vehicles. With the milder day-to-day variation padding was slightly ahead
+(\AmzHDBothDiff{} [\AmzHDBothDiffLo, \AmzHDBothDiffHi] points): \AmzHDCertPad{} of
+\AmzHPadPlans{} padded plans were certified, which leaves little for screening to add.
+Over all routes, counting the fallback, the differences were \AmzHFbDiff, \AmzHDFbDiff{}
+and \AmzHTFbDiff{} points, and no certified plan failed on fresh days. Screening helps
+when delays are large enough to matter; when they are not, padding is already reliable
+and the certificate says so.
+
+\input{tab_amazon_hgs}
+
+\subsection{When the delay model is wrong}\label{sec:wrong}
+
+A firm screens with the delay model it has, and real delays differ. Judged under the
+models fitted to New York traffic, the Amazon plans chosen under the assumed model
+stayed ahead of padding at the same budget (top of Table~\ref{tab:wrong}), screening
+with the right model added only \WrDGain{} [\WrDGainLo, \WrDGainHi] and \WrTGain{}
+[\WrTGainLo, \WrTGainHi] points, and every certificate still held. This is the
+favourable direction: the assumed model is harsher than New York traffic in the
+morning.
+
+The bottom of the table shows the other direction, on the synthetic instances, with
+delay models chosen before the analysis. Certificates survived heavy-tailed delays
+(\WrTailKept{} of \WrTailCert) and mostly survived more noise in the peaks
+(\WrNoiseKept{} of \WrNoiseCert). They often failed when 3\% of trips suffered an
+incident that doubled their time (\WrIncFailed{} of \WrIncCert{} failed) and when the
+morning peak was stronger than planned (\WrPeakFailed{} of \WrPeakCert{}), although
+the certified plans still averaged \WrIncServ\% and \WrPeakServ\% reliability, against
+\WrIncPad\% and \WrPeakPad\% for 20\% padding. The certificate is exactly as good as
+the delay model's pessimism, as Proposition~\ref{prop:transfer} leads one to expect.
+
+\input{tab_wrong}
+
+Proposition~\ref{prop:multi} offers a remedy (Table~\ref{tab:stress}). Granted on the
+5000-day banks of this analysis, the ordinary certificate covers \StOSingle{} OR-Tools
+plans, of which \StOSingleIncFail{} failed under random incidents and
+\StOSinglePeakFail{} under the stronger peak. The \emph{stress screen} admits a candidate
+only if it passes under all five models and then certifies it under all five. It
+certified \StOStress{} OR-Tools and \StHStress{} HGS plans, and none failed under any of
+the five models (\StStressFails{} failures); under incidents and the stronger peak they
+averaged \StOIncServ\% and \StOPeakServ\% reliability. Robustness has a price: where
+both screens selected a plan, the stress-screened OR-Tools plan used \StOFleet{} more
+vehicles and \StODist\% more distance (HGS: \StHFleet{} and \StHDist\%), and a plan
+was certified on \StOStress{} of \StOInst{} instances instead of \StOSingle{} (HGS:
+\StHStress{} of \StHInst{} instead of \StHSingle).
+
+\input{tab_stress}
+
+\subsection{Comparison with robust optimization}
+
+A budgeted robust model plans against worst-case travel times on a limited number of
+trips. Without a reachability correction it failed on \RobNoPlanBoxSix{} of
+\RobInstances{} development instances at its most protective setting, for the same
+reason as the uncapped procedure. With an analogous correction and the same screen,
+the robust plans were more reliable than both screened procedures in study 3 part A
+(by \PaROne{} and \PaRTwo{} points; Table~\ref{tab:primaries}), but used \PaRThree{}
+more vehicles per instance than the HGS procedure, and when limited to no more
+vehicles than the comparison plan their advantage was no longer detectable. The
+layer is therefore not the most reliable planner tested; its value is that it works
+with the solver a firm already has, and that it says how reliable the plan is.
+
+\section{Implications for planning systems}\label{sec:implications}
+
+For a firm, the layer sits between the routing solver and dispatch. It needs only the
+ability to tighten internal deadlines and to simulate plans; screening a candidate
+took \TimeScreenTwenty{} to \TimeScreenTwoHundred{}~ms against several seconds to
+generate it. Six rules follow. First, report the certificate with the plan: an
+uncertified plan is a warning that the day is at risk. Second, use the capped
+deadlines; without them large buffers can make the problem infeasible. Third, choose
+the fallback deliberately and flag it as uncertified; the best-screened candidate was
+the confirmed improvement, and on the Amazon routes the padded plan was safer than the
+unbuffered one. Fourth, certify candidates in a fixed order from the largest buffer
+down and use the cheapest certified plan (Proposition~\ref{prop:order}); this certified
+\FoFixed{} of \FoInst{} instances against \FoProc{} for the screened plan, at no
+measurable cost. Fifth, certify against delay models at least as harsh as reality,
+for example a fitted model together with incidents and a stronger peak
+(Propositions~\ref{prop:transfer} and~\ref{prop:multi}), and accept the extra vehicles.
+Sixth, fit the delay model to measured trips, such as GPS tracks, not to the gaps in
+dispatch logs, which record the couriers' choices (Appendix~\ref{sec:real-ops}); a
+certificate resting on history alone needs at least \LfDaysZero{} distinct days
+(Proposition~\ref{prop:days}).
+
+\section{Limitations}\label{sec:limitations}
+
+\emph{Threats to validity.} The main threat is the delay model: certificates failed
+for \WrIncFailed{} of \WrIncCert{} plans under random incidents and \WrPeakFailed{} of
+\WrIncCert{} under a stronger peak (Table~\ref{tab:wrong}), and the stress screen removes
+this only at the cost in Table~\ref{tab:stress}. Without models that bound its real
+delays, a firm should not read a certificate as a statement about real days.
+
+The main studies use synthetic instances and an assumed delay model. The benchmark
+and Amazon experiments suggest that the findings are not specific to the generator
+or to the assumed model, but they are not a field validation: the Amazon windows
+are assumed, and the fitted delays come from New York taxis rather than from the
+cities where the routes were driven. The certificate is relative to the simulated
+model, as Section~\ref{sec:wrong} shows. All analyses beyond the eight primary
+hypotheses are exploratory. The original OR-Tools procedure's advantage depended on
+the objective weights, ranging from \WgLowMean{} to \WgHighMean{} points, with
+intervals reaching zero for equal weights in one run and for a larger driver-time
+weight (Appendix~\ref{app:weights}); the capped HGS procedure was far less sensitive,
+beating padding by \HwEqPad{} [\HwEqPadLo, \HwEqPadHi] points even with equal weights.
+Vehicles always leave at their planned times, and breakdowns and same-day
+re-planning are not modelled. The layer has not been run on a real fleet; given what
+the LaDe data showed (Appendix~\ref{sec:real-ops}), a controlled pilot, with plans fixed
+in the morning and arrival times recorded, is the test that remains. Finally, OR-Tools with a 5-second limit missed
+feasible plans on some Amazon routes, and the scaling solves that the weighted
+objective needs failed on \AmzHNotRun{} of \AmzHRoutes{} routes, so the screen could not
+run there; with HGS the reliability gain on real routes was clear under two of the
+three delay models, and under the mildest one padding was already reliable.
+
+\section{Conclusion}\label{sec:conclusion}
+
+A firm can add a reliability guarantee to the routing solver it already uses. Asking
+the solver for a few plans with capped internal buffers, screening them by
+simulation and certifying the chosen plan on independent days gave more reliable
+service than fixed padding at any level on the synthetic instances, and certificates
+held on fresh days without exception. Testing candidates in a fixed order certifies
+the cheapest qualifying plan at no cost to the guarantee. The guarantee is about the
+delay model: it carries over to real delays no worse than modelled, and certifying
+against a small set of pessimistic models removed every failure we observed, at a
+real price in certified instances and vehicles. The models should be fitted to a
+firm's own measured trips, and a pilot on a real fleet, with its real windows, is the
+natural next step.
+
+\ifanonymous\else
+\section*{Acknowledgements}
+The author thanks the researchers who answered methodological questions by e-mail
+during the project.
+\fi
+
+\section*{Author contributions (CRediT)}
+\ifanonymous The author\else Suhan Ali\fi: conceptualization, methodology, software,
+validation, formal analysis, investigation, data curation, visualization, writing --
+original draft, writing -- review and editing.
+
+\section*{Use of generative AI}
+Claude (Anthropic; mainly Claude Opus 5.5, with earlier Claude models during 2026)
+and DeepSeek (DeepSeek V4.1 Flash 1017) were used to write and debug the
+simulation and analysis code, to review that code, to run and check the statistical
+analyses, to search the literature, and to draft and revise the text of this
+manuscript, including its wording. They were used under their providers' terms of
+use. Independently of these tools, the author re-ran the archived analysis scripts and
+confirmed that they regenerate the reported tables from the archived records. The research question, the study design and the confirmatory protocols were
+the author's. Every experiment was run from the archived code, every reported
+number is regenerated from the archived records, and the author takes full
+responsibility for the content.
+
+\section*{Disclosure of interest}
+The author reports there are no competing interests to declare.
+
+\section*{Funding}
+This research received no external funding.
+
+\section*{Data availability statement}
+\ifanonymous
+All code, instances, records and analysis scripts are openly available in a public
+archive \citep{ali2026archive}; the identifier is withheld for review.
+\else
+All code, instances, records and analysis scripts are openly available
+\citep{ali2026archive}. The Amazon route sample is redistributed under its
+CC~BY-NC~4.0 licence; the New York taxi records are public and are not copied.
+\fi
+
+\bibliographystyle{plainnat}
+\bibliography{\refsfile}
+
+\appendix
+\setcounter{table}{0}
+\renewcommand{\thetable}{\thesection\arabic{table}}
+\section{Objective weights}\label{app:weights}
+
+The weights in~\eqref{eq:objective} are the normalized principal eigenvector of the
+pairwise comparison matrix below, read as ``the row criterion is this many times as
+important as the column criterion'' on Saaty's 1--9 scale; its consistency ratio is
+0.025. The matrix was first written for an earlier set of criteria in which the third
+was total distance, and its third row and column were not re-elicited when that
+criterion became driver time. The weights were fixed in the preregistered protocols, so
+re-eliciting them now would change the confirmatory tests after the fact. Instead,
+Table~\ref{tab:weights} reports equal weights as a documented alternative for both
+procedures.
+
+\begin{center}
+\small
+\input{tab_ahp}
+\end{center}
+
+Table~\ref{tab:weights} reports the original procedure under other weight vectors,
+fixed before each run. Changing the order of distance and slack, or putting most of
+the weight on distance, changed the advantage over 20\% padding little. Moving
+weight to vehicles or driver time reduced it: those weights favour candidates with
+fewer vehicles or less waiting, which leaves less time to absorb delays. With equal
+weights the interval included zero in one run but not in the other, and with a
+larger weight on driver time it included zero. The screen and
+the certificate do not use the weights, so every certificate in the paper holds
+whatever the weights; only the reliability of the selected plan depends on them.
+The first two blocks use the original OR-Tools procedure. The capped HGS procedure
+(last block), rerun on \HwEqN{} development instances with the two vectors that hurt
+the original procedure most, stayed well ahead of 20\% padding: by \HwEqPad{}
+[\HwEqPadLo, \HwEqPadHi] points with equal weights and \HwDurPad{} [\HwDurPadLo,
+\HwDurPadHi] with the larger weight on driver time, against \HwEqOrigPad{}
+[\HwEqOrigPadLo, \HwEqOrigPadHi] with the AHP weights, so the conclusions about the
+capped procedure do not rest on the matrix. Against the original weights, equal weights changed its reliability by \HwEqOrig{}
+[\HwEqOrigLo, \HwEqOrigHi] points and its vehicles by \HwEqFleet{} per instance
+(\texttt{code/hgs\_weights.py}). Planning
+the capped buffers for distance alone was as reliable as the weighted procedure
+(Table~\ref{tab:ablation}), so with the capped procedure the gain does not depend on
+the weights.
+
+\input{tab_weights}
+
+\section{OR-Tools on the Amazon routes}\label{app:amazon-ortools}
+\setcounter{table}{0}
+
 On the Amazon routes (Table~\ref{tab:amazon}), the capped procedure was more
 reliable than 20\% padding under every delay model: by \AmzCapDiff{}
 [\AmzCapDiffLo, \AmzCapDiffHi] points under the assumed model, \AmzDCapDiff{}
@@ -806,80 +1030,8 @@ OR-Tools the real-route comparison is therefore clouded by the search.
 
 \input{tab_amazon}
 
-The HGS solver removes that problem, so it gives the fairer comparison
-(Table~\ref{tab:amazonhgs}). It was run on all \AmzHRoutes{} sampled routes, the 40
-above and the 20 spares, and found a 20\% padded plan on every route. On
-\AmzHNotRun{} routes the short OR-Tools solves that set the objective's scaling ranges
-failed, so the screen could not run and the procedure returned its fallback, the
-padded plan. On the \AmzHBoth{} routes where the screen ran, the capped HGS procedure
-was \AmzHBothDiff{} [\AmzHBothDiffLo, \AmzHBothDiffHi] points more reliable than
-padding under the assumed model and \AmzHTBothDiff{} [\AmzHTBothDiffLo,
-\AmzHTBothDiffHi] points more reliable with all fitted variation, with practically the
-same number of vehicles. With the milder fitted day-to-day variation padding was
-slightly ahead (screening minus padding \AmzHDBothDiff{} [\AmzHDBothDiffLo,
-\AmzHDBothDiffHi] points): delays were small enough that \AmzHDCertPad{} of
-\AmzHPadPlans{} padded plans were certified, which leaves little for screening to add. Over all
-routes, counting the fallback, the differences were \AmzHFbDiff, \AmzHDFbDiff{} and
-\AmzHTFbDiff{} points. The certificate behaved as on the synthetic instances: none of
-the certified plans failed on fresh days. The real-route evidence is therefore
-consistent with the synthetic studies: screening helps when delays are large
-enough to matter, and when they are not, padding is already reliable and the
-certificate says so.
-
-\input{tab_amazon_hgs}
-
-\subsection{When the delay model is wrong}\label{sec:wrong}
-
-A firm screens with the delay model it has, and real delays differ. The top of
-Table~\ref{tab:wrong} takes the Amazon plans chosen under the assumed model and
-judges them, on fresh days, under the models fitted to New York traffic. They
-stayed ahead of padding at the same 5-second budget, by \WrDCapPad{} [\WrDCapPadLo,
-\WrDCapPadHi] and \WrTCapPad{} [\WrTCapPadLo, \WrTCapPadHi] points for the capped
-procedure, a margin that a longer search for padding would reduce
-(Section~\ref{sec:amazon-results}). Screening
-with the right model instead added only \WrDGain{} [\WrDGainLo, \WrDGainHi] and
-\WrTGain{} [\WrTGainLo, \WrTGainHi] points. Every certificate granted under the
-assumed model still held under both fitted models (\WrDCapKept{} of \WrDCapCert{}
-for the capped procedure and \WrDScKept{} of \WrDScCert{} for screened
-conservative).
-
-This is the favourable direction, because the assumed model is harsher than New
-York traffic in the morning. The bottom of the table shows the other direction, on
-the synthetic instances, with delay models chosen before the analysis. Certificates
-survived heavy-tailed delays (\WrTailKept{} of \WrTailCert) and mostly survived more
-noise in the peaks (\WrNoiseKept{} of \WrNoiseCert). They often failed when 3\% of
-trips suffered an incident that doubled their time (\WrIncKept{} of \WrIncCert{}
-kept) and when the morning peak was stronger than planned (\WrPeakKept{} of
-\WrPeakCert{} kept), although the certified plans still averaged \WrIncServ\% and
-\WrPeakServ\% reliability under those models, against \WrIncPad\% and \WrPeakPad\% for 20\%
-padding over all \WrIncPadN{} synthetic instances. The certificate is therefore exactly as good as the delay model's
-pessimism: it carries over to milder or differently shaped delays, but not to delays
-that are systematically worse than modelled, as
-Proposition~\ref{prop:transfer} leads one to expect.
-
-\input{tab_wrong}
-
-Proposition~\ref{prop:multi} offers a remedy, tested in Table~\ref{tab:stress} with
-the same five delay models. Here the ordinary certificate is granted on the
-5000-day banks of the misspecification analysis, which certifies
-\StOSingle{} OR-Tools plans; on fresh days \StOSingleIncFail{} of them failed under
-random incidents and \StOSinglePeakFail{} under the stronger peak. Requiring the
-plans the ordinary screen selected to be certified under all five models keeps only
-\StOSingleAll{} of \StOInst{}. The \emph{stress screen}, which admits a candidate only
-if it passes under all five models and then certifies it under all five, certified
-\StOStress{} OR-Tools plans and \StHStress{} HGS plans, and none of them failed its
-certificate on fresh days under any of the five models (\StStressFails{} failures in
-total). Under random incidents and the stronger peak these plans averaged
-\StOIncServ\% and \StOPeakServ\% reliability. Robustness has a price: on the
-\StOBoth{} instances where both screens selected a plan, the stress-screened OR-Tools
-plan used \StOFleet{} more vehicles and \StODist\% more distance (HGS: \StHFleet{}
-vehicles and \StHDist\%), and the stress screen certified a plan on \StOStress{} of
-\StOInst{} instances instead of \StOSingle{} (HGS: \StHStress{} of \StHInst{} instead of
-\StHSingle).
-
-\input{tab_stress}
-
-\subsection{Evidence from real operations}\label{sec:real-ops}
+\section{What data a certificate can rest on: real pickup operations}\label{sec:real-ops}
+\setcounter{table}{0}
 
 Because the Amazon windows are assumed, we also examined real pickup operations with
 real two-hour windows and, for one month, couriers' GPS tracks: the LaDe data of the
@@ -910,165 +1062,5 @@ days of tracks, Proposition~\ref{prop:days} rules out a certificate without a de
 model: at 95\% it needs at least \LfDaysZero{} days.
 
 \input{tab_lade}
-
-\subsection{Comparison with robust optimization}
-
-A budgeted robust model plans against worst-case travel times on a limited number of
-trips. Without a reachability correction it failed on \RobNoPlanBoxSix{} of
-\RobInstances{} development instances at its most protective setting, for the same
-reason as the uncapped procedure. With an analogous correction and the same screen,
-the robust plans were more reliable than both screened procedures in study 3 part A
-(by \PaROne{} and \PaRTwo{} points; Table~\ref{tab:primaries}), but used \PaRThree{}
-more vehicles per instance than the HGS procedure, and when limited to no more
-vehicles than the comparison plan their advantage was no longer detectable. The
-layer is therefore not the most reliable planner tested; its value is that it works
-with the solver a firm already has, and that it says how reliable the plan is.
-
-\section{Implications for planning systems}\label{sec:implications}
-
-For a firm, the layer sits between the routing solver and dispatch. It needs no
-change to the solver, only the ability to tighten internal deadlines and to
-simulate plans, and screening a candidate took \TimeScreenTwenty{} to
-\TimeScreenTwoHundred{}~ms against several seconds to generate it. Six practical
-rules follow from the results. First, report the certificate, not only the plan: a
-certified plan comes with a guarantee that padding cannot give, and an uncertified
-one is a warning that the day is at risk. Second, use the capped deadlines;
-without them large buffers can make the problem infeasible for reasons that have
-nothing to do with the fleet. Third, choose the fallback deliberately. The
-best-screened candidate was the confirmed improvement in the synthetic studies, and
-on the Amazon routes falling back to the padded plan was safer than the unbuffered
-one; in either case the plan returned is not certified and should be flagged.
-Fourth, certify candidates in a fixed order from the largest buffer down and use the
-cheapest certified plan (Proposition~\ref{prop:order}); this certified \FoFixed{} of
-\FoInst{} instances against \FoProc{} for the screened plan, at no measurable cost.
-Fifth, certify against delay models that are at least as harsh as reality. A
-certificate carries over to milder delays (Proposition~\ref{prop:transfer}) but not
-to harsher ones, so a firm should screen and certify against a small set of
-models, for example its fitted model together with incidents and a stronger peak
-(Proposition~\ref{prop:multi}), and accept the extra vehicles this costs. Sixth, fit
-the delay model to measured trips, such as GPS tracks, not to the gaps in the dispatch
-log, which record the couriers' choices (Section~\ref{sec:real-ops}); and if the
-certificate is to rest on history alone, count distinct days, of which a 95\%
-certificate needs at least \LfDaysZero{} (Proposition~\ref{prop:days}).
-
-\section{Limitations}\label{sec:limitations}
-
-The main studies use synthetic instances and an assumed delay model. The benchmark
-and Amazon experiments suggest that the findings are not specific to the generator
-or to the assumed model, but they are not a field validation: the Amazon windows
-are assumed, and the fitted delays come from New York taxis rather than from the
-cities where the routes were driven. The certificate is relative to the simulated
-model, as Section~\ref{sec:wrong} shows. All analyses beyond the eight primary
-hypotheses are exploratory. The original OR-Tools procedure's advantage depended on
-the objective weights, ranging from \WgLowMean{} to \WgHighMean{} points, with
-intervals reaching zero for equal weights in one run and for a larger driver-time
-weight (Appendix~\ref{app:weights}); the capped HGS procedure was far less sensitive,
-beating padding by \HwEqPad{} [\HwEqPadLo, \HwEqPadHi] points even with equal weights.
-Vehicles always leave at their planned times, and breakdowns and same-day
-re-planning are not modelled. The layer has not been run on a real fleet; given what
-the LaDe data showed (Section~\ref{sec:real-ops}), a controlled pilot, with plans fixed
-in the morning and arrival times recorded, is the test that remains. Finally, OR-Tools with a 5-second limit missed
-feasible plans on some Amazon routes, and the scaling solves that the weighted
-objective needs failed on \AmzHNotRun{} of \AmzHRoutes{} routes, so the screen could not
-run there; with HGS the reliability gain on real routes was clear under two of the
-three delay models, and under the mildest one padding was already reliable.
-
-\section{Conclusion}\label{sec:conclusion}
-
-A firm can add a reliability guarantee to the routing solver it already uses. Asking
-the solver for a few plans with capped internal buffers, screening them by
-simulation and certifying the chosen plan on independent days gave more reliable
-service than fixed padding at any level on the synthetic instances, reached high
-reliability on twice as many instances with fewer vehicles, and produced certificates
-that held on fresh days without exception in our studies. Testing the candidates in a
-fixed order lets a firm certify the cheapest qualifying plan at no cost to the
-guarantee. The guarantee is about the delay model, but it
-carries over to any real delays no worse than modelled. Certifying against a small
-set of pessimistic models removed every failure we observed, at a real price: about
-half of the OR-Tools instances, rather than four in five, received a certificate, and the
-certified plans used \StOFleet{} more vehicles. The models should be estimated from the firm's
-own trips. Testing the layer on a fleet's own travel-time records, with its real
-delivery windows, is the natural next step.
-
-\ifanonymous\else
-\section*{Acknowledgements}
-The author thanks the researchers who answered methodological questions by e-mail
-during the project.
-\fi
-
-\section*{Author contributions (CRediT)}
-\ifanonymous The author\else Suhan Ali\fi: conceptualization, methodology, software,
-validation, formal analysis, investigation, data curation, visualization, writing --
-original draft, writing -- review and editing.
-
-\section*{Use of generative AI}
-Claude (Anthropic; mainly Claude Opus 5.5, with earlier Claude models during 2026)
-and DeepSeek (DeepSeek V4.1 Flash 1017) were used to write and debug the
-simulation and analysis code, to review that code, to run and check the statistical
-analyses, to search the literature, and to draft and revise the text of this
-manuscript, including its wording. They were used under their providers' terms of
-use. The research question, the study design and the confirmatory protocols were
-the author's. Every experiment was run from the archived code, every reported
-number is regenerated from the archived records, and the author takes full
-responsibility for the content.
-
-\section*{Disclosure of interest}
-The author reports there are no competing interests to declare.
-
-\section*{Funding}
-This research received no external funding.
-
-\section*{Data availability statement}
-\ifanonymous
-All code, instances, records and analysis scripts are openly available in a public
-archive \citep{ali2026archive}; the identifier is withheld for review.
-\else
-All code, instances, records and analysis scripts are openly available
-\citep{ali2026archive}. The Amazon route sample is redistributed under its
-CC~BY-NC~4.0 licence; the New York taxi records are public and are not copied.
-\fi
-
-\bibliographystyle{plainnat}
-\bibliography{\refsfile}
-
-\appendix
-\setcounter{table}{0}
-\renewcommand{\thetable}{A\arabic{table}}
-\section{Objective weights}\label{app:weights}
-
-The weights in~\eqref{eq:objective} are the normalized principal eigenvector of the
-pairwise comparison matrix below, read as ``the row criterion is this many times as
-important as the column criterion'' on Saaty's 1--9 scale; its consistency ratio is
-0.025. The matrix was first written for an earlier set of criteria in which the third
-was total distance, and its third row and column were not re-elicited when that
-criterion became driver time.
-
-\begin{center}
-\small
-\input{tab_ahp}
-\end{center}
-
-Table~\ref{tab:weights} reports the original procedure under other weight vectors,
-fixed before each run. Changing the order of distance and slack, or putting most of
-the weight on distance, changed the advantage over 20\% padding little. Moving
-weight to vehicles or driver time reduced it: those weights favour candidates with
-fewer vehicles or less waiting, which leaves less time to absorb delays. With equal
-weights the interval included zero in one run but not in the other, and with a
-larger weight on driver time it included zero. The screen and
-the certificate do not use the weights, so every certificate in the paper holds
-whatever the weights; only the reliability of the selected plan depends on them.
-These runs use the original OR-Tools procedure. The capped HGS procedure, rerun on
-\HwEqN{} development instances with the two vectors that hurt the original procedure
-most, stayed well ahead of 20\% padding: by \HwEqPad{} [\HwEqPadLo, \HwEqPadHi]
-points with equal weights and \HwDurPad{} [\HwDurPadLo, \HwDurPadHi] with the larger
-weight on driver time, against \HwEqOrigPad{} [\HwEqOrigPadLo, \HwEqOrigPadHi] with the
-original weights. Against the original weights, equal weights changed its reliability by \HwEqOrig{}
-[\HwEqOrigLo, \HwEqOrigHi] points and its vehicles by \HwEqFleet{} per instance
-(\texttt{code/hgs\_weights.py}). Planning
-the capped buffers for distance alone was as reliable as the weighted procedure
-(Table~\ref{tab:ablation}), so with the capped procedure the gain does not depend on
-the weights.
-
-\input{tab_weights}
 
 \end{document}
